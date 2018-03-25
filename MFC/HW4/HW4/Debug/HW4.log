@@ -1,0 +1,12 @@
+﻿  stdafx.cpp
+  Shape.cpp
+d:\homework\windows\hw exam\hw4\hw4\shape.cpp(22): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+d:\homework\windows\hw exam\hw4\hw4\shape.cpp(32): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+  MainFrm.cpp
+  HW4.cpp
+  ChildView.cpp
+d:\homework\windows\hw exam\hw4\hw4\childview.cpp(153): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+d:\homework\windows\hw exam\hw4\hw4\childview.cpp(163): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+  Generating Code...
+  HW4.vcxproj -> D:\HomeWork\Windows\HW EXAM\HW4\Debug\HW4.exe
+  HW4.vcxproj -> D:\HomeWork\Windows\HW EXAM\HW4\Debug\HW4.pdb (Partial PDB)

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_b71f0194c2a354589b64d33422ee9831" kind="dir">
+    <compoundname>snake</compoundname>
+    <innerfile refid="_node_8cpp">Node.cpp</innerfile>
+    <innerfile refid="_node_8h">Node.h</innerfile>
+    <innerfile refid="_node_manager_8cpp">NodeManager.cpp</innerfile>
+    <innerfile refid="_node_manager_8h">NodeManager.h</innerfile>
+    <innerfile refid="_source_8cpp">Source.cpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="D:/Temp/C++/Visual Studio 2017/snake/snake/"/>
+  </compounddef>
+</doxygen>

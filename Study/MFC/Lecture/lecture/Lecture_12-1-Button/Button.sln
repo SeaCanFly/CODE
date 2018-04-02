@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Button", "Button\Button.vcxproj", "{8790013E-A626-4C50-93F9-F7D26BF3C340}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8790013E-A626-4C50-93F9-F7D26BF3C340}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8790013E-A626-4C50-93F9-F7D26BF3C340}.Debug|Win32.Build.0 = Debug|Win32
+		{8790013E-A626-4C50-93F9-F7D26BF3C340}.Release|Win32.ActiveCfg = Release|Win32
+		{8790013E-A626-4C50-93F9-F7D26BF3C340}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

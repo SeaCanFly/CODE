@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="_node_8cpp" kind="file">
+    <compoundname>Node.cpp</compoundname>
+    <includes refid="_node_8h" local="yes">Node.h</includes>
+    <includes refid="_node_manager_8h" local="yes">NodeManager.h</includes>
+    <incdepgraph>
+      <node id="3">
+        <label>NodeManager.h</label>
+        <link refid="_node_manager_8h"/>
+        <childnode refid="1" relation="include">
+        </childnode>
+      </node>
+      <node id="0">
+        <label>snake/Node.cpp</label>
+        <link refid="Node.cpp"/>
+        <childnode refid="1" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>cstring</label>
+      </node>
+      <node id="1">
+        <label>Node.h</label>
+        <link refid="_node_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#include&quot;<ref refid="_node_8h" kindref="compound">Node.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#include&quot;<ref refid="_node_manager_8h" kindref="compound">NodeManager.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3" refid="class_node_1ad7a34779cad45d997bfd6d3d8043c75f" refkind="member"><highlight class="normal"><ref refid="class_node_1ad7a34779cad45d997bfd6d3d8043c75f" kindref="member">Node::Node</ref>()<sp/>:mi_x(-1),<sp/>mi_y(-1),<sp/>mp_next(0),<sp/>mc_shape(</highlight><highlight class="stringliteral">&apos;<sp/>&apos;</highlight><highlight class="normal">),<sp/>mi_direct(0),<sp/>mb_exist(0)<sp/>{}</highlight></codeline>
+<codeline lineno="4" refid="class_node_1a2f2d97efa6eaf26c2f8e8b0cd1573f50" refkind="member"><highlight class="normal"><ref refid="class_node_1ad7a34779cad45d997bfd6d3d8043c75f" kindref="member">Node::Node</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i_x,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i_y)<sp/>:mi_x(i_x),<sp/>mi_y(i_y),<sp/>mb_exist(0),<sp/>mi_direct(0),<sp/>mp_next(0),<sp/>mc_shape(</highlight><highlight class="stringliteral">&apos;*&apos;</highlight><highlight class="normal">)<sp/>{<sp/>}</highlight></codeline>
+<codeline lineno="5" refid="class_node_1ad87db00092d091058b0ec465e0624818" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_node_1ad87db00092d091058b0ec465e0624818" kindref="member">Node::setPosition</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i_x,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i_y)<sp/>{<sp/><ref refid="class_node_1a12d155ef94a9fc0db3b369c5199ba108" kindref="member">mi_x</ref><sp/>=<sp/>i_x;<sp/><ref refid="class_node_1a1744c7d9b37545bb73001399c7f855c4" kindref="member">mi_y</ref><sp/>=<sp/>i_y;<sp/>}</highlight></codeline>
+<codeline lineno="6" refid="class_node_1ab0b23dc41fc08a1dcccb04b09ae06d9d" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_node_1ab0b23dc41fc08a1dcccb04b09ae06d9d" kindref="member">Node::movePosition</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i_mx,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i_my)<sp/>{<sp/><ref refid="class_node_1a12d155ef94a9fc0db3b369c5199ba108" kindref="member">mi_x</ref><sp/>+=<sp/>i_mx;<sp/><ref refid="class_node_1a1744c7d9b37545bb73001399c7f855c4" kindref="member">mi_y</ref><sp/>+=<sp/>i_my;<sp/>}</highlight></codeline>
+<codeline lineno="7" refid="class_node_1ac3b392c215f2ff1b09b0be53de79d50c" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_node_1ac3b392c215f2ff1b09b0be53de79d50c" kindref="member">Node::setShape</ref>(</highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>c_shape)<sp/>{<sp/><ref refid="class_node_1a220147bce290ae75325ecdcb0398e31a" kindref="member">mc_shape</ref><sp/>=<sp/>c_shape;<sp/>}</highlight></codeline>
+<codeline lineno="8" refid="class_node_1ac1fbda4d3c444a43f209dd6af07a5ff4" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_node_1ac1fbda4d3c444a43f209dd6af07a5ff4" kindref="member">Node::setDirect</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i_direct)<sp/>{<sp/><ref refid="class_node_1a4b95180cfc98d523321b61842d1a01d8" kindref="member">mi_direct</ref><sp/>=<sp/>i_direct;<sp/>}</highlight></codeline>
+<codeline lineno="9" refid="class_node_1ab4a0973f82e40fb00538cffe3b6a887f" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_node_1ab4a0973f82e40fb00538cffe3b6a887f" kindref="member">Node::setExist</ref>(</highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>b_exist)<sp/>{<sp/><ref refid="class_node_1a4f077b746d9431f5a7143c3467244fc8" kindref="member">mb_exist</ref><sp/>=<sp/>b_exist;<sp/>}</highlight></codeline>
+<codeline lineno="10" refid="class_node_1a29c81ecb26563f7c247ea4f7fd035a1d" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_node_1a29c81ecb26563f7c247ea4f7fd035a1d" kindref="member">Node::setSpeed</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i_speed)<sp/>{<sp/><ref refid="class_node_1af9af46a882c51d11ae29cba4892302d6" kindref="member">mi_speed</ref><sp/>=<sp/>i_speed;<sp/>}</highlight></codeline>
+<codeline lineno="11" refid="class_node_1abd8c63f1d35fdce89239a045caf23d3d" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="class_node_1abd8c63f1d35fdce89239a045caf23d3d" kindref="member">Node::getSpeed</ref>()<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="class_node_1af9af46a882c51d11ae29cba4892302d6" kindref="member">mi_speed</ref>;<sp/>}</highlight></codeline>
+<codeline lineno="12" refid="class_node_1aaa0bb57c10aa1b1e64d0f21e6142257c" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_node_1aaa0bb57c10aa1b1e64d0f21e6142257c" kindref="member">Node::getExist</ref>()<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="class_node_1a4f077b746d9431f5a7143c3467244fc8" kindref="member">mb_exist</ref>;<sp/>}</highlight></codeline>
+<codeline lineno="13" refid="class_node_1a4de5bd34f40d854f7cae8f9ce94ca6f1" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/><ref refid="class_node_1a4de5bd34f40d854f7cae8f9ce94ca6f1" kindref="member">Node::getShape</ref>()<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="class_node_1a220147bce290ae75325ecdcb0398e31a" kindref="member">mc_shape</ref>;<sp/>}</highlight></codeline>
+<codeline lineno="14" refid="class_node_1a325a2c26bf75caab66d4674e4d405734" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="class_node_1a325a2c26bf75caab66d4674e4d405734" kindref="member">Node::getDirect</ref>()<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="class_node_1a4b95180cfc98d523321b61842d1a01d8" kindref="member">mi_direct</ref>;<sp/>}</highlight></codeline>
+<codeline lineno="15" refid="class_node_1a6c026e5d8c28591c6e2bd08c68619fd1" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="class_node_1a6c026e5d8c28591c6e2bd08c68619fd1" kindref="member">Node::getX</ref>()<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="class_node_1a12d155ef94a9fc0db3b369c5199ba108" kindref="member">mi_x</ref>;<sp/>}</highlight></codeline>
+<codeline lineno="16" refid="class_node_1abab48a3f494994d4f456897f3372d3ae" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="class_node_1abab48a3f494994d4f456897f3372d3ae" kindref="member">Node::getY</ref>()<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="class_node_1a1744c7d9b37545bb73001399c7f855c4" kindref="member">mi_y</ref>;<sp/>}</highlight></codeline>
+<codeline lineno="17" refid="class_node_1aba0f72cd14a2d1532ca5c8281c2be9c8" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_node_1aba0f72cd14a2d1532ca5c8281c2be9c8" kindref="member">Node::setPNext</ref>(<ref refid="class_node_manager" kindref="compound">NodeManager</ref>*<sp/>p_next)<sp/>{<sp/><ref refid="class_node_1aed92691e64427085e41b0bd58860aa37" kindref="member">mp_next</ref><sp/>=<sp/>p_next;<sp/>}</highlight></codeline>
+<codeline lineno="18" refid="class_node_1af7b5e28ec7663054e08fcce98ca2272a" refkind="member"><highlight class="normal"><ref refid="class_node_manager" kindref="compound">NodeManager</ref>*<sp/><ref refid="class_node_1af7b5e28ec7663054e08fcce98ca2272a" kindref="member">Node::getPNext</ref>()<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="class_node_1aed92691e64427085e41b0bd58860aa37" kindref="member">mp_next</ref>;<sp/>}</highlight></codeline>
+<codeline lineno="19" refid="class_node_1acdd8a534d4f9cd113c6b7e17cd7f81bd" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_node_1acdd8a534d4f9cd113c6b7e17cd7f81bd" kindref="member">Node::getCheck</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i_x,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i_y)</highlight></codeline>
+<codeline lineno="20"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<ref refid="class_node_1a12d155ef94a9fc0db3b369c5199ba108" kindref="member">mi_x</ref><sp/>==<sp/>i_x&amp;&amp;<ref refid="class_node_1a1744c7d9b37545bb73001399c7f855c4" kindref="member">mi_y</ref><sp/>==<sp/>i_y)</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>1;</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>0;</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="29"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="30" refid="class_node_1add9e86af3c4c50f8cc3a94701aec919a" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_node_1add9e86af3c4c50f8cc3a94701aec919a" kindref="member">Node::addNode</ref>(<ref refid="class_node_manager" kindref="compound">NodeManager</ref>&amp;<sp/>food)</highlight></codeline>
+<codeline lineno="31"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_node_manager" kindref="compound">NodeManager</ref>*<sp/>temp<sp/>=<sp/><ref refid="class_node_1aed92691e64427085e41b0bd58860aa37" kindref="member">mp_next</ref>;</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/>food.<ref refid="class_node_manager_1aaeb2394741ae4e4e88bf1c263fc32d9b" kindref="member">getNode</ref>()-&gt;<ref refid="class_node_1ac3b392c215f2ff1b09b0be53de79d50c" kindref="member">setShape</ref>(</highlight><highlight class="charliteral">&apos;*&apos;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/>food.<ref refid="class_node_manager_1aaeb2394741ae4e4e88bf1c263fc32d9b" kindref="member">getNode</ref>()-&gt;<ref refid="class_node_1ab4a0973f82e40fb00538cffe3b6a887f" kindref="member">setExist</ref>(1);</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_node_manager" kindref="compound">NodeManager</ref><sp/>nt<sp/>=<sp/>food;</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/>food.<ref refid="class_node_manager_1aaeb2394741ae4e4e88bf1c263fc32d9b" kindref="member">getNode</ref>()-&gt;<ref refid="class_node_1ad87db00092d091058b0ec465e0624818" kindref="member">setPosition</ref>(<ref refid="class_node_1a12d155ef94a9fc0db3b369c5199ba108" kindref="member">mi_x</ref>,<sp/><ref refid="class_node_1a1744c7d9b37545bb73001399c7f855c4" kindref="member">mi_y</ref>);</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/>food.<ref refid="class_node_manager_1aaeb2394741ae4e4e88bf1c263fc32d9b" kindref="member">getNode</ref>()-&gt;<ref refid="class_node_1aba0f72cd14a2d1532ca5c8281c2be9c8" kindref="member">setPNext</ref>(temp);</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_node_1aed92691e64427085e41b0bd58860aa37" kindref="member">mp_next</ref><sp/>=<sp/>&amp;food;</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_node_1a12d155ef94a9fc0db3b369c5199ba108" kindref="member">mi_x</ref><sp/>=<sp/>nt.<ref refid="class_node_manager_1aaeb2394741ae4e4e88bf1c263fc32d9b" kindref="member">getNode</ref>()-&gt;<ref refid="class_node_1a6c026e5d8c28591c6e2bd08c68619fd1" kindref="member">getX</ref>();</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_node_1a1744c7d9b37545bb73001399c7f855c4" kindref="member">mi_y</ref><sp/>=<sp/>nt.<ref refid="class_node_manager_1aaeb2394741ae4e4e88bf1c263fc32d9b" kindref="member">getNode</ref>()-&gt;<ref refid="class_node_1abab48a3f494994d4f456897f3372d3ae" kindref="member">getY</ref>();</highlight></codeline>
+<codeline lineno="41"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="D:/Temp/C++/Visual Studio 2017/snake/snake/Node.cpp"/>
+  </compounddef>
+</doxygen>

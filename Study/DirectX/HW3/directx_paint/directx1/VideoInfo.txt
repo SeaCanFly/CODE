@@ -1,0 +1,2 @@
+NVIDIA GeForce GTX 1060 6GB
+Video Memory Size:3072

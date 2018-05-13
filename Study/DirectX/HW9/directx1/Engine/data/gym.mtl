@@ -1,0 +1,75 @@
+# 
+# 
+
+newmtl BLACK_PLSTC_REF
+	Ns 53.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0039 0.0039 0.0039
+	Kd 0.0078 0.0078 0.0078
+	Ks 1.0000 1.0000 1.0000
+	Ke 0.0000 0.0000 0.0000
+map_Ka Engine/data/black.png
+newmtl WHITE_PLSTC
+	Ns 53.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0353 0.0353 0.0353
+	Kd 0.8980 0.8980 0.8980
+	Ks 1.0000 1.0000 1.0000
+	Ke 0.0000 0.0000 0.0000
+map_Ka Engine/data/0.dds
+newmtl SILVER
+	Ns 70.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0000 0.0000 0.0000
+	Kd 0.4980 0.4471 0.4039
+	Ks 0.9000 0.9000 0.9000
+	Ke 0.0000 0.0000 0.0000
+map_Ka Engine/data/metal brushed.png
+newmtl RED_PLSTC_REF
+	Ns 53.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0745 0.0000 0.0000
+	Kd 0.8392 0.0902 0.0902
+	Ks 1.0000 1.0000 1.0000
+	Ke 0.0000 0.0000 0.0000
+map_Ka Engine/data/red.jpg
+newmtl BLACK_PLSTC_BMP
+	Ns 53.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0039 0.0039 0.0039
+	Kd 0.0078 0.0078 0.0078
+	Ks 1.0000 1.0000 1.0000
+	Ke 0.0000 0.0000 0.0000
+map_Ka Engine/data/1.dds
+newmtl BLACK_PLSTC
+	Ns 53.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0039 0.0039 0.0039
+	Kd 0.0078 0.0078 0.0078
+	Ks 1.0000 1.0000 1.0000
+	Ke 0.0000 0.0000 0.0000
+map_Ka Engine/data/black.png

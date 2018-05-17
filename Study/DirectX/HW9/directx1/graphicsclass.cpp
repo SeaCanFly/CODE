@@ -306,7 +306,8 @@ bool GraphicsClass::Frame(float rotX, float rotY, float rotZ,float ws,float ad,f
 	m_Camera->SetMove(ws, ad,qe);
 	m_Camera->SetRotation(rotX, rotY, rotZ);
 	// Update the rotation variable each frame.
-	rotation += (float)D3DX_PI * 0.0005f;
+	rotation += (float)D3DX_PI *0.001f*frametime;
+	//rotation += rotation*frametime;
 	if (rotation > 360.0f)
 	{
 		rotation -= 360.0f;

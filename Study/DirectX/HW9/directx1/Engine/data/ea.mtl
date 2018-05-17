@@ -10,6 +10,6 @@ Ke 0.055119 0.055119 0.055119
 Ni 1.000000
 d 1.000000
 illum 2
-map_Ka ./Engine/data/fd.png
-map_Kd ./Engine/data/fd.png
-map_Bump ./Engine/data/fd.png
+map_Ka Engine/data/fd.png
+#map_Kd Engine/data/fd.png
+#map_Bump Engine/data/fd.png

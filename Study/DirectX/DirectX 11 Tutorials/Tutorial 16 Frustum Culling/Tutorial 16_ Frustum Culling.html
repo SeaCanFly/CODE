@@ -1,0 +1,1643 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut16.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 16: Frustum Culling</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 16: Frustum Culling
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Frustum Culling_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The three dimensional viewing area on the screen where everything is drawn to is called the viewing frustum.  
+Everything that is inside the frustum will be rendered to the screen by the video card.
+Everything that is outside of the frustum the video card will examine and then discard during the rendering process.
+</font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+However the process of depending on the video card to cull for us can be expensive if we have large scenes.
+For example say we have a scene with 2000+ models that are 5,000 polygons each but only 10-20 are viewable at any given time.
+The video card has to examine every single triangle in all 2000 models to remove 1990 models from the scene just so we can draw 10 models.
+As you can see this is very inefficient.
+</font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+How frustum culling solves our problem is that we can instead determine before rendering if a model is in our frustum or not.
+This saves us sending all the triangles to the video card and allows us to just send the triangles that need to be drawn.
+How we do this is that we put either a cube, a rectangle, or a sphere around each model and just calculate if that cube, rectangle, or sphere is viewable.
+The math to do that is usually only a couple lines of code which then removes the need to possibly test several thousand triangles.
+</font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To demonstrate how this works we will first create a scene with 25 randomly placed spheres.
+We will then rotate the camera manually to test culling of the spheres that are out of our view using the left and right arrow keys.
+We will also use a counter and display the number of spheres that are being drawn and not culled for confirmation.
+We will use code from several of the previous tutorials to create the scene.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frame work has mostly classes from several of the previous tutorials.  We do have three new classes called FrustumClass, PositionClass, and ModelListClass.
+FrustumClass will encapsulate the frustum culling ability this tutorial is focused on.  
+ModelListClass will contain a list of the position and color information of the 25 spheres that will be randomly generated each time we run the program.
+PositionClass will handle the viewing rotation of the camera based on if the user is pressing the left or right arrow key.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Frustum Culling_files/pic0044.gif" width="730" height="306"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Frustumclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The header file for the FrustumClass is fairly simple. 
+The class doesn't require any initialization or shutdown. 
+Each frame the ConstructFrustum function is called after the camera has first been rendered. 
+The ConstructFrustum function uses the private m_planes to calculate and store the six planes of the view frustum based on the updated viewing location. 
+From there we can call any of the four check functions to seen if either a point, cube, sphere, or rectangle are inside the viewing frustum or not.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: frustumclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _FRUSTUMCLASS_H_
+#define _FRUSTUMCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: FrustumClass
+////////////////////////////////////////////////////////////////////////////////
+class FrustumClass
+{
+public:
+	FrustumClass();
+	FrustumClass(const FrustumClass&amp;);
+	~FrustumClass();
+
+	void ConstructFrustum(float, D3DXMATRIX, D3DXMATRIX);
+
+	bool CheckPoint(float, float, float);
+	bool CheckCube(float, float, float, float);
+	bool CheckSphere(float, float, float, float);
+	bool CheckRectangle(float, float, float, float, float, float);
+
+private:
+	D3DXPLANE m_planes[6];
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Frustumclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: frustumclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "frustumclass.h"
+
+
+FrustumClass::FrustumClass()
+{
+}
+
+
+FrustumClass::FrustumClass(const FrustumClass&amp; other)
+{
+}
+
+
+FrustumClass::~FrustumClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+ConstructFrustum is called every frame by the GraphicsClass. 
+It passes in the the depth of the screen, the projection matrix, and the view matrix. 
+We then use these input variables to calculate the matrix of the view frustum at that frame. 
+With the new frustum matrix we then calculate the six planes that form the view frustum.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void FrustumClass::ConstructFrustum(float screenDepth, D3DXMATRIX projectionMatrix, D3DXMATRIX viewMatrix)
+{
+	float zMinimum, r;
+	D3DXMATRIX matrix;
+
+	
+	// Calculate the minimum Z distance in the frustum.
+	zMinimum = -projectionMatrix._43 / projectionMatrix._33;
+	r = screenDepth / (screenDepth - zMinimum);
+	projectionMatrix._33 = r;
+	projectionMatrix._43 = -r * zMinimum;
+
+	// Create the frustum matrix from the view matrix and updated projection matrix.
+	D3DXMatrixMultiply(&amp;matrix, &amp;viewMatrix, &amp;projectionMatrix);
+
+	// Calculate near plane of frustum.
+	m_planes[0].a = matrix._14 + matrix._13;
+	m_planes[0].b = matrix._24 + matrix._23;
+	m_planes[0].c = matrix._34 + matrix._33;
+	m_planes[0].d = matrix._44 + matrix._43;
+	D3DXPlaneNormalize(&amp;m_planes[0], &amp;m_planes[0]);
+
+	// Calculate far plane of frustum.
+	m_planes[1].a = matrix._14 - matrix._13; 
+	m_planes[1].b = matrix._24 - matrix._23;
+	m_planes[1].c = matrix._34 - matrix._33;
+	m_planes[1].d = matrix._44 - matrix._43;
+	D3DXPlaneNormalize(&amp;m_planes[1], &amp;m_planes[1]);
+
+	// Calculate left plane of frustum.
+	m_planes[2].a = matrix._14 + matrix._11; 
+	m_planes[2].b = matrix._24 + matrix._21;
+	m_planes[2].c = matrix._34 + matrix._31;
+	m_planes[2].d = matrix._44 + matrix._41;
+	D3DXPlaneNormalize(&amp;m_planes[2], &amp;m_planes[2]);
+
+	// Calculate right plane of frustum.
+	m_planes[3].a = matrix._14 - matrix._11; 
+	m_planes[3].b = matrix._24 - matrix._21;
+	m_planes[3].c = matrix._34 - matrix._31;
+	m_planes[3].d = matrix._44 - matrix._41;
+	D3DXPlaneNormalize(&amp;m_planes[3], &amp;m_planes[3]);
+
+	// Calculate top plane of frustum.
+	m_planes[4].a = matrix._14 - matrix._12; 
+	m_planes[4].b = matrix._24 - matrix._22;
+	m_planes[4].c = matrix._34 - matrix._32;
+	m_planes[4].d = matrix._44 - matrix._42;
+	D3DXPlaneNormalize(&amp;m_planes[4], &amp;m_planes[4]);
+
+	// Calculate bottom plane of frustum.
+	m_planes[5].a = matrix._14 + matrix._12;
+	m_planes[5].b = matrix._24 + matrix._22;
+	m_planes[5].c = matrix._34 + matrix._32;
+	m_planes[5].d = matrix._44 + matrix._42;
+	D3DXPlaneNormalize(&amp;m_planes[5], &amp;m_planes[5]);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+CheckPoint checks if a single point is inside the viewing frustum.
+This is the most general of the four checking algorithms but can be very efficient if used correctly in the right situation over the other checking methods.
+It takes the point and checks to see if it is inside all six planes.
+If the point is inside all six then it returns true, otherwise it returns false if not.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool FrustumClass::CheckPoint(float x, float y, float z)
+{
+	int i;
+
+
+	// Check if the point is inside all six planes of the view frustum.
+	for(i=0; i&lt;6; i++) 
+	{
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3(x, y, z)) &lt; 0.0f)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+CheckCube checks if any of the eight corner points of the cube are inside the viewing frustum.
+It only requires as input the center point of the cube and the radius, it uses those to calculate the 8 corner points of the cube.
+It then checks if any one of the corner points are inside all 6 planes of the viewing frustum.
+If it does find a point inside all six planes of the viewing frustum it returns true, otherwise it returns false.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool FrustumClass::CheckCube(float xCenter, float yCenter, float zCenter, float radius)
+{
+	int i;
+
+
+	// Check if any one point of the cube is in the view frustum.
+	for(i=0; i&lt;6; i++) 
+	{
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter - radius), (yCenter - radius), (zCenter - radius))) &gt;= 0.0f)
+		{
+			continue;
+		}
+		
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter + radius), (yCenter - radius), (zCenter - radius))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter - radius), (yCenter + radius), (zCenter - radius))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter + radius), (yCenter + radius), (zCenter - radius))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter - radius), (yCenter - radius), (zCenter + radius))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter + radius), (yCenter - radius), (zCenter + radius))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter - radius), (yCenter + radius), (zCenter + radius))) &gt;= 0.0f)
+		{
+			continue;
+		}
+		
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter + radius), (yCenter + radius), (zCenter + radius))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+CheckSphere checks if the radius of the sphere from the center point is inside all six planes of the viewing frustum.
+If it is outside any of them then the sphere cannot be seen and the function will return false.
+If it is inside all six the function returns true that the sphere can be seen.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool FrustumClass::CheckSphere(float xCenter, float yCenter, float zCenter, float radius)
+{
+	int i;
+
+
+	// Check if the radius of the sphere is inside the view frustum.
+	for(i=0; i&lt;6; i++) 
+	{
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3(xCenter, yCenter, zCenter)) &lt; -radius)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+CheckRectangle works the same as CheckCube except that that it takes as input the x radius, y radius, and z radius of the rectangle 
+instead of just a single radius of a cube.
+It can then calculate the 8 corner points of the rectangle and do the frustum checks similar to the CheckCube function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool FrustumClass::CheckRectangle(float xCenter, float yCenter, float zCenter, float xSize, float ySize, float zSize)
+{
+	int i;
+
+
+	// Check if any of the 6 planes of the rectangle are inside the view frustum.
+	for(i=0; i&lt;6; i++)
+	{
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter - xSize), (yCenter - ySize), (zCenter - zSize))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter + xSize), (yCenter - ySize), (zCenter - zSize))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter - xSize), (yCenter + ySize), (zCenter - zSize))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter - xSize), (yCenter - ySize), (zCenter + zSize))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter + xSize), (yCenter + ySize), (zCenter - zSize))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter + xSize), (yCenter - ySize), (zCenter + zSize))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter - xSize), (yCenter + ySize), (zCenter + zSize))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		if(D3DXPlaneDotCoord(&amp;m_planes[i], &amp;D3DXVECTOR3((xCenter + xSize), (yCenter + ySize), (zCenter + zSize))) &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Modellistclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+ModelListClass is a new class for maintaining information about all the models in the scene.
+For this tutorial it only maintains the size and color of the sphere models since we only have one model type.
+This class can be expanded to maintain all the different types of models in the scene and indexes to their ModelClass but I am keeping this tutorial simple for now.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: modellistclass.h
+///////////////////////////////////////////////////////////////////////////////
+#ifndef _MODELLISTCLASS_H_
+#define _MODELLISTCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3dx10math.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Class name: ModelListClass
+///////////////////////////////////////////////////////////////////////////////
+class ModelListClass
+{
+private:
+	struct ModelInfoType
+	{
+		D3DXVECTOR4 color;
+		float positionX, positionY, positionZ;
+	};
+
+public:
+	ModelListClass();
+	ModelListClass(const ModelListClass&amp;);
+	~ModelListClass();
+
+	bool Initialize(int);
+	void Shutdown();
+
+	int GetModelCount();
+	void GetData(int, float&amp;, float&amp;, float&amp;, D3DXVECTOR4&amp;);
+
+private:
+	int m_modelCount;
+	ModelInfoType* m_ModelInfoList;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Modellistclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: modellistclass.cpp
+///////////////////////////////////////////////////////////////////////////////
+#include "modellistclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor initializes the model information list to null.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">ModelListClass::ModelListClass()
+{
+	m_ModelInfoList = 0;
+}
+
+
+ModelListClass::ModelListClass(const ModelListClass&amp; other)
+{
+}
+
+
+ModelListClass::~ModelListClass()
+{
+}
+
+
+bool ModelListClass::Initialize(int numModels)
+{
+	int i;
+	float red, green, blue;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First store the number of models that will be used and then create the list array of them using the ModelInfoType structure.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Store the number of models.
+	m_modelCount = numModels;
+
+	// Create a list array of the model information.
+	m_ModelInfoList = new ModelInfoType[m_modelCount];
+	if(!m_ModelInfoList)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Seed the random number generator with the current time and then randomly generate the position of color of the models and store them in the list array.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Seed the random generator with the current time.
+	srand((unsigned int)time(NULL));
+
+	// Go through all the models and randomly generate the model color and position.
+	for(i=0; i&lt;m_modelCount; i++)
+	{
+		// Generate a random color for the model.
+		red = (float)rand() / RAND_MAX;
+		green = (float)rand() / RAND_MAX;
+		blue = (float)rand() / RAND_MAX;
+
+		m_ModelInfoList[i].color = D3DXVECTOR4(red, green, blue, 1.0f);
+
+		// Generate a random position in front of the viewer for the mode.
+		m_ModelInfoList[i].positionX = (((float)rand()-(float)rand())/RAND_MAX) * 10.0f;
+		m_ModelInfoList[i].positionY = (((float)rand()-(float)rand())/RAND_MAX) * 10.0f;
+		m_ModelInfoList[i].positionZ = ((((float)rand()-(float)rand())/RAND_MAX) * 10.0f) + 5.0f;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function releases the model information list array.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void ModelListClass::Shutdown()
+{
+	// Release the model information list.
+	if(m_ModelInfoList)
+	{
+		delete [] m_ModelInfoList;
+		m_ModelInfoList = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetModelCount returns the number of models that this class maintains information about.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">int ModelListClass::GetModelCount()
+{
+	return m_modelCount;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GetData function extracts the position and color of a sphere at the given input index location.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void ModelListClass::GetData(int index, float&amp; positionX, float&amp; positionY, float&amp; positionZ, D3DXVECTOR4&amp; color)
+{
+	positionX = m_ModelInfoList[index].positionX;
+	positionY = m_ModelInfoList[index].positionY;
+	positionZ = m_ModelInfoList[index].positionZ;
+
+	color = m_ModelInfoList[index].color;
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GraphicsClass for this tutorial includes a number of class we have used in the previous tutorials.
+It also includes the frustumclass.h and modellistclass.h header which are new.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "textclass.h"
+#include "modelclass.h"
+#include "lightshaderclass.h"
+#include "lightclass.h"
+#include "modellistclass.h"
+#include "frustumclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame(float);
+	bool Render();
+
+private:
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Two of the new private class objects are the m_Frustum and m_ModelList.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	TextClass* m_Text;
+	ModelClass* m_Model;
+	LightShaderClass* m_LightShader;
+	LightClass* m_Light;
+	ModelListClass* m_ModelList;
+	FrustumClass* m_Frustum;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will just cover the functions that have changed since the previous tutorials.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor initializes the private member variables to null.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_Text = 0;
+	m_Model = 0;
+	m_LightShader = 0;
+	m_Light = 0;
+	m_ModelList = 0;
+	m_Frustum = 0;
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+	D3DXMATRIX baseViewMatrix;
+
+		
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Initialize a base view matrix with the camera for 2D user interface rendering.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -1.0f);
+	m_Camera-&gt;Render();
+	m_Camera-&gt;GetViewMatrix(baseViewMatrix);
+
+	// Create the text object.
+	m_Text = new TextClass;
+	if(!m_Text)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	result = m_Text-&gt;Initialize(m_D3D-&gt;GetDevice(), m_D3D-&gt;GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the model object.
+	m_Model = new ModelClass;
+	if(!m_Model)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We load a sphere model instead of a cube model for this tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the model object.
+	result = m_Model-&gt;Initialize(m_D3D-&gt;GetDevice(), L"../Engine/data/seafloor.dds", "../Engine/data/sphere.txt");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light shader object.
+	m_LightShader = new LightShaderClass;
+	if(!m_LightShader)
+	{
+		return false;
+	}
+
+	// Initialize the light shader object.
+	result = m_LightShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetDirection(0.0f, 0.0f, 1.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we create the new ModelListClass object and have it create 25 randomly placed/colored sphere models.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the model list object.
+	m_ModelList = new ModelListClass;
+	if(!m_ModelList)
+	{
+		return false;
+	}
+
+	// Initialize the model list object.
+	result = m_ModelList-&gt;Initialize(25);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model list object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we create the new FrustumClass object.
+It doesn't need any initialization since that is done every frame using the ConstructFrustum function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the frustum object.
+	m_Frustum = new FrustumClass;
+	if(!m_Frustum)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We release the new FrustumClass and ModelListClass objects here in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the frustum object.
+	if(m_Frustum)
+	{
+		delete m_Frustum;
+		m_Frustum = 0;
+	}
+
+	// Release the model list object.
+	if(m_ModelList)
+	{
+		m_ModelList-&gt;Shutdown();
+		delete m_ModelList;
+		m_ModelList = 0;
+	}
+
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the light shader object.
+	if(m_LightShader)
+	{
+		m_LightShader-&gt;Shutdown();
+		delete m_LightShader;
+		m_LightShader = 0;
+	}
+
+	// Release the model object.
+	if(m_Model)
+	{
+		m_Model-&gt;Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
+	// Release the text object.
+	if(m_Text)
+	{
+		m_Text-&gt;Shutdown();
+		delete m_Text;
+		m_Text = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the Direct3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Frame function now takes in the rotation of the camera from the SystemClass that calls it.
+The position and rotation of the camera are then set so the view matrix can be properly updated in the Render function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::Frame(float rotationY)
+{
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+
+	// Set the rotation of the camera.
+	m_Camera-&gt;SetRotation(0.0f, rotationY, 0.0f);
+
+	return true;
+}
+
+
+bool GraphicsClass::Render()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
+	int modelCount, renderCount, index;
+	float positionX, positionY, positionZ, radius;
+	D3DXVECTOR4 color;
+	bool renderModel, result;
+
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, projection, and ortho matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+	m_D3D-&gt;GetOrthoMatrix(orthoMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The major change to the Render function is that we now construct the viewing frustum each frame based on the updated viewing matrix.
+This construction has to occur each time the view matrix changes or the frustum culling checks we do will not be correct.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Construct the frustum.
+	m_Frustum-&gt;ConstructFrustum(SCREEN_DEPTH, projectionMatrix, viewMatrix);
+
+	// Get the number of models that will be rendered.
+	modelCount = m_ModelList-&gt;GetModelCount();
+
+	// Initialize the count of models that have been rendered.
+	renderCount = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now loop through all the models in the ModelListClass object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Go through all the models and render them only if they can be seen by the camera view.
+	for(index=0; index&lt;modelCount; index++)
+	{
+		// Get the position and color of the sphere model at this index.
+		m_ModelList-&gt;GetData(index, positionX, positionY, positionZ, color);
+
+		// Set the radius of the sphere to 1.0 since this is already known.
+		radius = 1.0f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we use the new FrustumClass object.
+We check if the sphere is viewable in the viewing frustum.
+If it can be seen we render it, if it cannot be seen we skip it and check the next one.
+This is where we will gain all the speed by using frustum culling.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">		// Check if the sphere model is in the view frustum.
+		renderModel = m_Frustum-&gt;CheckSphere(positionX, positionY, positionZ, radius);
+
+		// If it can be seen then render it, if not skip this model and check the next sphere.
+		if(renderModel)
+		{
+			// Move the model to the location it should be rendered at.
+			D3DXMatrixTranslation(&amp;worldMatrix, positionX, positionY, positionZ); 
+
+			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+			m_Model-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+			// Render the model using the light shader.
+			m_LightShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+					      m_Model-&gt;GetTexture(), m_Light-&gt;GetDirection(), color);
+
+			// Reset to the original world matrix.
+			m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+			// Since this model was rendered then increase the count for this frame.
+			renderCount++;
+		}
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We use the slightly modified TextClass to display how many spheres were actually rendered.  
+We can also infer for this number that the spheres that were not rendered were instead culled using the new FrustumClass object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the number of models that was actually rendered this frame.
+	result = m_Text-&gt;SetRenderCount(renderCount, m_D3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Turn on the alpha blending before rendering the text.
+	m_D3D-&gt;TurnOnAlphaBlending();
+
+	// Render the text string of the render count.
+	m_Text-&gt;Render(m_D3D-&gt;GetDeviceContext(), worldMatrix, orthoMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn off alpha blending after rendering the text.
+	m_D3D-&gt;TurnOffAlphaBlending();
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Positionclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To allow for camera movement by using the left and right arrow key in this tutorial we create a new class to calculate and maintain the position of the viewer.
+This class will only handle turning left and right for now but can be expanded to maintain all different movement changes.
+The movement also includes acceleration and deceleration to create a smooth camera effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: positionclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _POSITIONCLASS_H_
+#define _POSITIONCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: PositionClass
+////////////////////////////////////////////////////////////////////////////////
+class PositionClass
+{
+public:
+	PositionClass();
+	PositionClass(const PositionClass&amp;);
+	~PositionClass();
+
+	void SetFrameTime(float);
+	void GetRotation(float&amp;);
+
+	void TurnLeft(bool);
+	void TurnRight(bool);
+
+private:
+	float m_frameTime;
+	float m_rotationY;
+	float m_leftTurnSpeed, m_rightTurnSpeed;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Positionclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: positionclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "positionclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor initializes the private member variables to zero to start with.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">PositionClass::PositionClass()
+{
+	m_frameTime = 0.0f;
+	m_rotationY = 0.0f;
+	m_leftTurnSpeed  = 0.0f;
+	m_rightTurnSpeed = 0.0f;
+}
+
+
+PositionClass::PositionClass(const PositionClass&amp; other)
+{
+}
+
+
+PositionClass::~PositionClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetFrameTime function is used to set the frame speed in this class.
+PositionClass will use that frame time speed to calculate how fast the viewer should be moving and rotating.
+This function should always be called at the beginning of each frame before using this class to move the viewing position.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::SetFrameTime(float time)
+{
+	m_frameTime = time;
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetRotation returns the Y-axis rotation of the viewer.
+This is the only helper function we need for this tutorial but could be expanded to get more information about the location of the viewer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::GetRotation(float&amp; y)
+{
+	y = m_rotationY;
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The movement functions both work the same. 
+Both functions are called each frame. 
+The keydown input variable to each function indicates if the user is pressing the left key or the right key. 
+If they are pressing the key then each frame the speed will accelerate until it hits a maximum. 
+This way the camera speeds up similar to the acceleration in a vehicle creating the effect of smooth movement and high responsiveness. 
+Likewise if the user releases the key and the keydown variable is false it will then smoothly slow down each frame until the speed hits zero. 
+The speed is calculated against the frame time to ensure the movement speed remains the same regardless of the frame rate. 
+Each function then uses some basic math to calculate the new position of the camera. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::TurnLeft(bool keydown)
+{
+	// If the key is pressed increase the speed at which the camera turns left.  If not slow down the turn speed.
+	if(keydown)
+	{
+		m_leftTurnSpeed += m_frameTime * 0.01f;
+
+		if(m_leftTurnSpeed &gt; (m_frameTime * 0.15f))
+		{
+			m_leftTurnSpeed = m_frameTime * 0.15f;
+		}
+	}
+	else
+	{
+		m_leftTurnSpeed -= m_frameTime* 0.005f;
+
+		if(m_leftTurnSpeed &lt; 0.0f)
+		{
+			m_leftTurnSpeed = 0.0f;
+		}
+	}
+
+	// Update the rotation using the turning speed.
+	m_rotationY -= m_leftTurnSpeed;
+	if(m_rotationY &lt; 0.0f)
+	{
+		m_rotationY += 360.0f;
+	}
+
+	return;
+}
+
+
+void PositionClass::TurnRight(bool keydown)
+{
+	// If the key is pressed increase the speed at which the camera turns right.  If not slow down the turn speed.
+	if(keydown)
+	{
+		m_rightTurnSpeed += m_frameTime * 0.01f;
+
+		if(m_rightTurnSpeed &gt; (m_frameTime * 0.15f))
+		{
+			m_rightTurnSpeed = m_frameTime * 0.15f;
+		}
+	}
+	else
+	{
+		m_rightTurnSpeed -= m_frameTime* 0.005f;
+
+		if(m_rightTurnSpeed &lt; 0.0f)
+		{
+			m_rightTurnSpeed = 0.0f;
+		}
+	}
+
+	// Update the rotation using the turning speed.
+	m_rotationY += m_rightTurnSpeed;
+	if(m_rotationY &gt; 360.0f)
+	{
+		m_rotationY -= 360.0f;
+	}
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Systemclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SystemClass has been modified to use the new PostionClass.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: systemclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SYSTEMCLASS_H_
+#define _SYSTEMCLASS_H_
+
+
+///////////////////////////////
+// PRE-PROCESSING DIRECTIVES //
+///////////////////////////////
+#define WIN32_LEAN_AND_MEAN
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;windows.h&gt;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "inputclass.h"
+#include "graphicsclass.h"
+#include "timerclass.h"
+#include "positionclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: SystemClass
+////////////////////////////////////////////////////////////////////////////////
+class SystemClass
+{
+public:
+	SystemClass();
+	SystemClass(const SystemClass&amp;);
+	~SystemClass();
+
+	bool Initialize();
+	void Shutdown();
+	void Run();
+
+	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
+
+private:
+	bool Frame();
+	void InitializeWindows(int&amp;, int&amp;);
+	void ShutdownWindows();
+
+private:
+	LPCWSTR m_applicationName;
+	HINSTANCE m_hinstance;
+	HWND m_hwnd;
+
+	InputClass* m_Input;
+	GraphicsClass* m_Graphics;
+	TimerClass* m_Timer;
+	PositionClass* m_Position;
+};
+
+
+/////////////////////////
+// FUNCTION PROTOTYPES //
+/////////////////////////
+static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+
+/////////////
+// GLOBALS //
+/////////////
+static SystemClass* ApplicationHandle = 0;
+
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Systemclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will cover just the functions that have changed in this class since the previous tutorials.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: systemclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "systemclass.h"
+
+
+SystemClass::SystemClass()
+{
+	m_Input = 0;
+	m_Graphics = 0;
+	m_Timer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new PositionClass object is initialized to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_Position = 0;
+}
+
+
+bool SystemClass::Initialize()
+{
+	int screenWidth, screenHeight;
+	bool result;
+
+
+	// Initialize the width and height of the screen to zero before sending the variables into the function.
+	screenWidth = 0;
+	screenHeight = 0;
+
+	// Initialize the windows api.
+	InitializeWindows(screenWidth, screenHeight);
+
+	// Create the input object.  This object will be used to handle reading the keyboard input from the user.
+	m_Input = new InputClass;
+	if(!m_Input)
+	{
+		return false;
+	}
+
+	// Initialize the input object.
+	result = m_Input-&gt;Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(m_hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the graphics object.  This object will handle rendering all the graphics for this application.
+	m_Graphics = new GraphicsClass;
+	if(!m_Graphics)
+	{
+		return false;
+	}
+
+	// Initialize the graphics object.
+	result = m_Graphics-&gt;Initialize(screenWidth, screenHeight, m_hwnd);
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Create the timer object.
+	m_Timer = new TimerClass;
+	if(!m_Timer)
+	{
+		return false;
+	}
+
+	// Initialize the timer object.
+	result = m_Timer-&gt;Initialize();
+	if(!result)
+	{
+		MessageBox(m_hwnd, L"Could not initialize the Timer object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create the new PositionClass object here.  It doesn't require any initialization.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the position object.
+	m_Position = new PositionClass;
+	if(!m_Position)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void SystemClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PositionClass object is released here in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the position object.
+	if(m_Position)
+	{
+		delete m_Position;
+		m_Position = 0;
+	}
+
+	// Release the timer object.
+	if(m_Timer)
+	{
+		delete m_Timer;
+		m_Timer = 0;
+	}
+
+	// Release the graphics object.
+	if(m_Graphics)
+	{
+		m_Graphics-&gt;Shutdown();
+		delete m_Graphics;
+		m_Graphics = 0;
+	}
+
+	// Release the input object.
+	if(m_Input)
+	{
+		m_Input-&gt;Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+
+	// Shutdown the window.
+	ShutdownWindows();
+	
+	return;
+}
+
+
+bool SystemClass::Frame()
+{
+	bool keyDown, result;
+	float rotationY;
+
+
+	// Update the system stats.
+	m_Timer-&gt;Frame();
+
+	// Do the input frame processing.
+	result = m_Input-&gt;Frame();
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+During each frame the PositionClass object is update with the frame time.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the frame time for calculating the updated position.
+	m_Position-&gt;SetFrameTime(m_Timer-&gt;GetTime());
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+After the frame time update the PositionClass movement functions can be updated with the current state of the keyboard.
+The movement functions will update the position of the camera to the new location for this frame.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Check if the left or right arrow key has been pressed, if so rotate the camera accordingly.
+	keyDown = m_Input-&gt;IsLeftArrowPressed();
+	m_Position-&gt;TurnLeft(keyDown);
+
+	keyDown = m_Input-&gt;IsRightArrowPressed();
+	m_Position-&gt;TurnRight(keyDown);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new rotation of the camera is retrieved and sent to the Graphics::Frame function to update the camera position.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Get the current view point rotation.
+	m_Position-&gt;GetRotation(rotationY);
+
+	// Do the frame processing for the graphics object.
+	result = m_Graphics-&gt;Frame(rotationY);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Finally render the graphics to the screen.
+	result = m_Graphics-&gt;Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now you have seen how to cull objects. 
+The only trick from here is determining whether a cube, rectangle, sphere, or clever use of a point is better for culling your different objects.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Frustum Culling_files/pic0043.gif" width="575" height="562"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile and run the program.  Use the left and right arrow key to move the camera and update the render count in the upper left corner.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Load the cube model instead and change the cull check to CheckCube.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Create some different models and test which of the culling checks works best for them.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2008 Project: <a href="http://www.rastertek.com/dx11tut16.zip">dx11tut16.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src16.zip">dx11src16.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe16.zip">dx11exe16.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Frustum Culling_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 16_ Frustum Culling_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

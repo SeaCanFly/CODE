@@ -1,0 +1,3689 @@
+
+<!-- saved from url=(0038)http://www.rastertek.com/tertut16.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 16: Small Body Water</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 16: Small Body Water
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Small Body Water_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This DirectX 11 terrain tutorial will cover how to implement small body water using HLSL and C++.
+The code in this tutorial builds on the previous terrain tutorials.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To implement small body water (lakes, rivers, ponds, swamps, and anything else that doesn't have big waves) we use a refractive and reflective rendering system.
+We render a refraction (everything under the water) and render a reflection (everything above the water) and then combine the results.
+If you have gone over the water tutorial in the DirectX tutorial section then you will understand these concepts.
+If you haven't read that tutorial then I suggest you review it first before proceeding as we simply expand on it here and add more features.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will begin with a basic terrain scene.  We require terrain for the refraction and something such as sky for the reflection.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Small Body Water_files/pic0258.gif" width="500" height="282"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will also need a normal map for the water ripple effect.
+A gaussian blurred height map and the Nvidia normal map filter for Photoshop can create something like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Small Body Water_files/pic0263.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We then create a single quad with a radius large enough to cover the area of the water.
+We will be tiling the normal map texture over the quad so we don't need it subdivided.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next we will render the scene using the reflection shader but use an inverted clip plane so we are rendering everything underneath the water to create a refraction.
+This is all rendered to a render to texture so we can then apply it to the water quad using projective texturing based on the view point of the camera.
+We also perturb the refraction texture sampling by the water normal map to give us the ripple effect.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+As well when we tile the normal map over the water quad we do it two separate times using different texture coordinates.
+For example we may tile it ten times over the water and then tile it again but just five times.
+We then combine the two separately tiled normal map results to give an animated look to the ripples instead of just a single rotating texture.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And finally we add a tint color to the refraction so that it looks like colored water instead of purely clear water with ripples.
+The following image is what the water refraction ends up looking like:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Small Body Water_files/pic0259.gif" width="500" height="282"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Note that a lot of engines will stop at that point.
+It is very expensive to render the scene to texture since we basically are rendering the scene twice.  This cuts the fps in half whenever water needs to be drawn!
+There aren't really a lot of techniques other than to not render to texture when the water isn't visible that can speed this up unfortunately.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+However we are going to proceed to make the effect look better.
+We will now render the scene yet again using the reflection shader but using a clip plane that renders everything above the water to give us a reflection of our scene.
+We render the reflection to a render to texture object and then project it onto the water quad from the view point of the camera.
+We also perturb the sampling of the render to texture by the water normal map.
+Rendering just the reflection looks like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Small Body Water_files/pic0260.gif" width="500" height="282"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With the refraction, reflection, and the regular 3D scene we have now ended up drawing the scene three times per frame.
+This cuts your fps down to one third of the original speed.
+Some optimizations are that you can render a reflection twice a second instead of every frame, but it depends on the maximum speed that you will ever move at over the water.
+Some engines also use just a single texture of a sky that never changes.
+There are different things you can do but it depends on how important the reflection is to the scene.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With both the refraction and the reflection rendered to textures we can now combine them.
+One of the nice ways to combine the two textures is to use what is known as the Fresnel factor.
+This is the effect that as you get closer to the water it becomes more transparent (refraction is rendered more),
+and as you get further away the reflection becomes stronger and it is no longer as easy to see into the water (reflection is rendered more).
+In this tutorial I have created a simple fresnel factor that is based only on height.
+So the higher up you are the water is more reflective, and the closer you get to the water it becomes more refractive.
+Some engines will use a far more sophisticated frensel calculation and take into account the distance from the water, the depth of the water at each pixel, and so forth.
+It just depends how realistic you want to make the effect look.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The combined result with the fresnel factor looks like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Small Body Water_files/pic0261.gif" width="500" height="282"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+As you can see the reflection added a lot of color to the result as well as the reflected clouds and pieces of the terrain.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The final addition to the water effect is adding specular reflection for where the directional sun light reflects off the water.
+We will calculate the specular against the dual tiled water normal map so that the specular comes off just the animated water ripples.
+Doing so gives us the final resulting scene:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Small Body Water_files/pic0262.gif" width="500" height="282"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Once again this is a fairly expensive effect, you may want to just stop at the refraction point.  But if you can spare the extra cycles then the full effect is nice.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To begin the code section we will start by looking at the modified CameraClass.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Cameraclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The CameraClass has been modified so that it can now generate reflection view matrices.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: cameraclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _CAMERACLASS_H_
+#define _CAMERACLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: CameraClass
+////////////////////////////////////////////////////////////////////////////////
+class CameraClass
+{
+public:
+	CameraClass();
+	CameraClass(const CameraClass&amp;);
+	~CameraClass();
+
+	void SetPosition(float, float, float);
+	void SetRotation(float, float, float);
+
+	D3DXVECTOR3 GetPosition();
+	D3DXVECTOR3 GetRotation();
+
+	void Render();
+	void GetViewMatrix(D3DXMATRIX&amp;);
+
+	void GenerateBaseViewMatrix();
+	void GetBaseViewMatrix(D3DXMATRIX&amp;);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have added functions to generate and retrieve the reflection view matrix.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	void RenderReflection(float);
+	void GetReflectionViewMatrix(D3DXMATRIX&amp;);</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	float m_positionX, m_positionY, m_positionZ;
+	float m_rotationX, m_rotationY, m_rotationZ;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There is also an additional matrix for the reflection view.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	D3DXMATRIX m_viewMatrix, m_baseViewMatrix, m_reflectionViewMatrix;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Cameraclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: cameraclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "cameraclass.h"
+
+
+CameraClass::CameraClass()
+{
+	m_positionX = 0.0f;
+	m_positionY = 0.0f;
+	m_positionZ = 0.0f;
+
+	m_rotationX = 0.0f;
+	m_rotationY = 0.0f;
+	m_rotationZ = 0.0f;
+}
+
+
+CameraClass::CameraClass(const CameraClass&amp; other)
+{
+}
+
+
+CameraClass::~CameraClass()
+{
+}
+
+
+void CameraClass::SetPosition(float x, float y, float z)
+{
+	m_positionX = x;
+	m_positionY = y;
+	m_positionZ = z;
+	return;
+}
+
+
+void CameraClass::SetRotation(float x, float y, float z)
+{
+	m_rotationX = x;
+	m_rotationY = y;
+	m_rotationZ = z;
+	return;
+}
+
+
+D3DXVECTOR3 CameraClass::GetPosition()
+{
+	return D3DXVECTOR3(m_positionX, m_positionY, m_positionZ);
+}
+
+
+D3DXVECTOR3 CameraClass::GetRotation()
+{
+	return D3DXVECTOR3(m_rotationX, m_rotationY, m_rotationZ);
+}
+
+
+void CameraClass::Render()
+{
+	D3DXVECTOR3 up, position, lookAt;
+	float yaw, pitch, roll;
+	D3DXMATRIX rotationMatrix;
+
+
+	// Setup the vector that points upwards.
+	up.x = 0.0f;
+	up.y = 1.0f;
+	up.z = 0.0f;
+
+	// Setup the position of the camera in the world.
+	position.x = m_positionX;
+	position.y = m_positionY;
+	position.z = m_positionZ;
+
+	// Setup where the camera is looking by default.
+	lookAt.x = 0.0f;
+	lookAt.y = 0.0f;
+	lookAt.z = 1.0f;
+
+	// Set the yaw (Y axis), pitch (X axis), and roll (Z axis) rotations in radians.
+	pitch = m_rotationX * 0.0174532925f;
+	yaw   = m_rotationY * 0.0174532925f;
+	roll  = m_rotationZ * 0.0174532925f;
+
+	// Create the rotation matrix from the yaw, pitch, and roll values.
+	D3DXMatrixRotationYawPitchRoll(&amp;rotationMatrix, yaw, pitch, roll);
+
+	// Transform the lookAt and up vector by the rotation matrix so the view is correctly rotated at the origin.
+	D3DXVec3TransformCoord(&amp;lookAt, &amp;lookAt, &amp;rotationMatrix);
+	D3DXVec3TransformCoord(&amp;up, &amp;up, &amp;rotationMatrix);
+
+	// Translate the rotated camera position to the location of the viewer.
+	lookAt = position + lookAt;
+
+	// Finally create the view matrix from the three updated vectors.
+	D3DXMatrixLookAtLH(&amp;m_viewMatrix, &amp;position, &amp;lookAt, &amp;up);
+
+	return;
+}
+
+
+void CameraClass::GetViewMatrix(D3DXMATRIX&amp; viewMatrix)
+{
+	viewMatrix = m_viewMatrix;
+	return;
+}
+
+
+void CameraClass::GenerateBaseViewMatrix()
+{
+	D3DXVECTOR3 up, position, lookAt;
+	float yaw, pitch, roll;
+	D3DXMATRIX rotationMatrix;
+
+
+	// Setup the vector that points upwards.
+	up.x = 0.0f;
+	up.y = 1.0f;
+	up.z = 0.0f;
+
+	// Setup the position of the camera in the world.
+	position.x = m_positionX;
+	position.y = m_positionY;
+	position.z = m_positionZ;
+
+	// Setup where the camera is looking by default.
+	lookAt.x = 0.0f;
+	lookAt.y = 0.0f;
+	lookAt.z = 1.0f;
+
+	// Set the yaw (Y axis), pitch (X axis), and roll (Z axis) rotations in radians.
+	pitch = m_rotationX * 0.0174532925f;
+	yaw   = m_rotationY * 0.0174532925f;
+	roll  = m_rotationZ * 0.0174532925f;
+
+	// Create the rotation matrix from the yaw, pitch, and roll values.
+	D3DXMatrixRotationYawPitchRoll(&amp;rotationMatrix, yaw, pitch, roll);
+
+	// Transform the lookAt and up vector by the rotation matrix so the view is correctly rotated at the origin.
+	D3DXVec3TransformCoord(&amp;lookAt, &amp;lookAt, &amp;rotationMatrix);
+	D3DXVec3TransformCoord(&amp;up, &amp;up, &amp;rotationMatrix);
+
+	// Translate the rotated camera position to the location of the viewer.
+	lookAt = position + lookAt;
+
+	// Finally create the view matrix from the three updated vectors.
+	D3DXMatrixLookAtLH(&amp;m_baseViewMatrix, &amp;position, &amp;lookAt, &amp;up);
+
+	return;
+}
+
+
+void CameraClass::GetBaseViewMatrix(D3DXMATRIX&amp; viewMatrix)
+{
+	viewMatrix = m_baseViewMatrix;
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This is the new function that is used for generating the reflection view matrix.
+The only difference between the regular view matrix and the reflection one is that we invert the Y position based on the height of the plane,
+and we also invert the pitch.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">void CameraClass::RenderReflection(float height)
+{
+	D3DXVECTOR3 up, position, lookAt;
+	float yaw, pitch, roll;
+	D3DXMATRIX rotationMatrix;
+
+
+	// Setup the vector that points upwards.
+	up.x = 0.0f;
+	up.y = 1.0f;
+	up.z = 0.0f;
+
+	// Setup the position of the camera in the world.  For planar reflection invert the Y position of the camera.
+	position.x = m_positionX;
+	position.y = -m_positionY + (height * 2.0f);
+	position.z = m_positionZ;
+
+	// Setup where the camera is looking by default.
+	lookAt.x = 0.0f;
+	lookAt.y = 0.0f;
+	lookAt.z = 1.0f;
+
+	// Set the yaw (Y axis), pitch (X axis), and roll (Z axis) rotations in radians.  Invert the X rotation for reflection.
+	pitch = -m_rotationX * 0.0174532925f;
+	yaw   = m_rotationY * 0.0174532925f;
+	roll  = m_rotationZ * 0.0174532925f;
+
+	// Create the rotation matrix from the yaw, pitch, and roll values.
+	D3DXMatrixRotationYawPitchRoll(&amp;rotationMatrix, yaw, pitch, roll);
+
+	// Transform the lookAt and up vector by the rotation matrix so the view is correctly rotated at the origin.
+	D3DXVec3TransformCoord(&amp;lookAt, &amp;lookAt, &amp;rotationMatrix);
+	D3DXVec3TransformCoord(&amp;up, &amp;up, &amp;rotationMatrix);
+
+	// Translate the rotated camera position to the location of the viewer.
+	lookAt = position + lookAt;
+
+	// Finally create the reflection view matrix from the three updated vectors.
+	D3DXMatrixLookAtLH(&amp;m_reflectionViewMatrix, &amp;position, &amp;lookAt, &amp;up);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There is also a new function to retrieve the reflection view matrix.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">void CameraClass::GetReflectionViewMatrix(D3DXMATRIX&amp; viewMatrix)
+{
+	viewMatrix = m_reflectionViewMatrix;
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Reflection.vs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The reflection HLSL shaders are just the terrain HLSL shaders with a clip plane added, otherwise they are identical.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: reflection.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};</font><font face="arial" color="#aaaaff" size="2">
+
+cbuffer ClipPlaneBuffer
+{
+    float4 clipPlane;
+};</font><font face="arial" color="#aaffaa" size="2">
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float3 binormal : BINORMAL;
+    float4 color : COLOR;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float3 binormal : BINORMAL;
+    float4 color : COLOR;</font><font face="arial" color="#aaaaff" size="2">
+    float clip : SV_ClipDistance0;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType ReflectionVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+    
+    // Calculate the normal vector against the world matrix only and then normalize the final value.
+    output.normal = mul(input.normal, (float3x3)worldMatrix);
+    output.normal = normalize(output.normal);
+
+    // Calculate the tangent vector against the world matrix only and then normalize the final value.
+    output.tangent = mul(input.tangent, (float3x3)worldMatrix);
+    output.tangent = normalize(output.tangent);
+
+    // Calculate the binormal vector against the world matrix only and then normalize the final value.
+    output.binormal = mul(input.binormal, (float3x3)worldMatrix);
+    output.binormal = normalize(output.binormal);
+
+    // Send the color map color into the pixel shader.	
+    output.color = input.color;</font><font face="arial" color="#aaaaff" size="2">
+
+    // Set the clipping plane.
+    output.clip = dot(mul(input.position, worldMatrix), clipPlane);</font><font face="arial" color="#aaffaa" size="2">
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Reflection.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: reflection.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////
+// TEXTURES //
+//////////////
+Texture2D colorTexture : register(t0);
+Texture2D normalTexture : register(t1);
+
+
+//////////////
+// SAMPLERS //
+//////////////
+SamplerState SampleType;
+
+
+//////////////////////
+// CONSTANT BUFFERS //
+//////////////////////
+cbuffer LightBuffer
+{
+    float4 lightDiffuseColor;
+    float3 lightDirection;
+    float colorTextureBrightness;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float3 binormal : BINORMAL;
+    float4 color : COLOR;</font><font face="arial" color="#aaaaff" size="2">
+    float clip : SV_ClipDistance0;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 ReflectionPixelShader(PixelInputType input) : SV_TARGET
+{
+    float3 lightDir;
+    float4 textureColor;
+    float4 bumpMap;
+    float3 bumpNormal;
+    float lightIntensity;
+    float4 color;
+
+
+    // Invert the light direction for calculations.
+    lightDir = -lightDirection;
+
+    // Sample the color texture.
+    textureColor = colorTexture.Sample(SampleType, input.tex);
+
+    // Combine the color map value into the texture color.
+    textureColor = saturate(input.color * textureColor * colorTextureBrightness);
+
+    // Calculate the bump map using the normal map.
+    bumpMap = normalTexture.Sample(SampleType, input.tex);
+    bumpMap = (bumpMap * 2.0f) - 1.0f;
+    bumpNormal = input.normal + bumpMap.x * input.tangent + bumpMap.y * input.binormal;
+    bumpNormal = normalize(bumpNormal);
+    lightIntensity = saturate(dot(bumpNormal, lightDir));
+    
+    // Calculate the first bump mapped pixel color.
+    color = saturate(lightDiffuseColor * lightIntensity);
+    color = color * textureColor;
+
+    return color;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Reflectionshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ReflectionShaderClass is also the same as the TerrainShaderClass except that it has clip plane related settings.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: reflectionshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _REFLECTIONSHADERCLASS_H_
+#define _REFLECTIONSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ReflectionShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class ReflectionShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};</font><font face="arial" color="#aaaaff" size="2">
+
+	struct ClipPlaneBufferType
+	{
+		D3DXVECTOR4 clipPlane;
+	};</font><font face="arial" color="#aaffaa" size="2">
+
+	struct LightBufferType
+	{
+		D3DXVECTOR4 lightDiffuseColor;
+		D3DXVECTOR3 lightDirection;
+		float colorTextureBrightness;
+	};
+
+public:
+	ReflectionShaderClass();
+	ReflectionShaderClass(const ReflectionShaderClass&amp;);
+	~ReflectionShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();</font><font face="arial" color="#aaaaff" size="2">
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, D3DXVECTOR4, 
+		    D3DXVECTOR3, float, D3DXVECTOR4);</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);</font><font face="arial" color="#aaaaff" size="2">
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, D3DXVECTOR4, 
+				 D3DXVECTOR3, float, D3DXVECTOR4);</font><font face="arial" color="#aaffaa" size="2">
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleState;
+	ID3D11Buffer* m_matrixBuffer;</font><font face="arial" color="#aaaaff" size="2">
+	ID3D11Buffer* m_clipPlaneBuffer;</font><font face="arial" color="#aaffaa" size="2">
+	ID3D11Buffer* m_lightBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Reflectionshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: reflectionshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "reflectionshaderclass.h"
+
+
+ReflectionShaderClass::ReflectionShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleState = 0;
+	m_matrixBuffer = 0;</font><font face="arial" color="#aaaaff" size="2">
+	m_clipPlaneBuffer = 0;</font><font face="arial" color="#aaffaa" size="2">
+	m_lightBuffer = 0;
+}
+
+
+ReflectionShaderClass::ReflectionShaderClass(const ReflectionShaderClass&amp; other)
+{
+}
+
+
+ReflectionShaderClass::~ReflectionShaderClass()
+{
+}
+
+
+bool ReflectionShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+
+
+	// Initialize the vertex and pixel shaders.</font><font face="arial" color="#aaaaff" size="2">
+	result = InitializeShader(device, hwnd, L"../Engine/reflection.vs", L"../Engine/reflection.ps");</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ReflectionShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+bool ReflectionShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+				   D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* colorTexture, ID3D11ShaderResourceView* normalTexture, 
+				   D3DXVECTOR4 lightDiffuseColor, D3DXVECTOR3 lightDirection, float colorTextureBrightness, D3DXVECTOR4 clipPlane)</font><font face="arial" color="#aaffaa" size="2">
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.</font><font face="arial" color="#aaaaff" size="2">
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, colorTexture, normalTexture, lightDiffuseColor, 
+				     lightDirection, colorTextureBrightness, clipPlane);</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool ReflectionShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[6];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;</font><font face="arial" color="#aaaaff" size="2">
+	D3D11_BUFFER_DESC clipPlaneBufferDesc;</font><font face="arial" color="#aaffaa" size="2">
+	D3D11_BUFFER_DESC lightBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+
+	// Compile the vertex shader code.</font><font face="arial" color="#aaaaff" size="2">
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "ReflectionVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);</font><font face="arial" color="#aaffaa" size="2">
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Compile the pixel shader code.</font><font face="arial" color="#aaaaff" size="2">
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "ReflectionPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);</font><font face="arial" color="#aaffaa" size="2">
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	polygonLayout[2].SemanticName = "NORMAL";
+	polygonLayout[2].SemanticIndex = 0;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[2].InputSlot = 0;
+	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[2].InstanceDataStepRate = 0;
+
+	polygonLayout[3].SemanticName = "TANGENT";
+	polygonLayout[3].SemanticIndex = 0;
+	polygonLayout[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[3].InputSlot = 0;
+	polygonLayout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[3].InstanceDataStepRate = 0;
+
+	polygonLayout[4].SemanticName = "BINORMAL";
+	polygonLayout[4].SemanticIndex = 0;
+	polygonLayout[4].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[4].InputSlot = 0;
+	polygonLayout[4].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[4].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[4].InstanceDataStepRate = 0;
+
+	polygonLayout[5].SemanticName = "COLOR";
+	polygonLayout[5].SemanticIndex = 0;
+	polygonLayout[5].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygonLayout[5].InputSlot = 0;
+	polygonLayout[5].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[5].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[5].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}</font><font face="arial" color="#aaaaff" size="2">
+
+	// Setup the description of the clip plane dynamic constant buffer that is in the vertex shader.
+	clipPlaneBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	clipPlaneBufferDesc.ByteWidth = sizeof(ClipPlaneBufferType);
+	clipPlaneBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	clipPlaneBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	clipPlaneBufferDesc.MiscFlags = 0;
+	clipPlaneBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;clipPlaneBufferDesc, NULL, &amp;m_clipPlaneBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the pixel shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;lightBufferDesc, NULL, &amp;m_lightBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ReflectionShaderClass::ShutdownShader()
+{
+	// Release the light constant buffer.
+	if(m_lightBuffer)
+	{
+		m_lightBuffer-&gt;Release();
+		m_lightBuffer = 0;
+	}</font><font face="arial" color="#aaaaff" size="2">
+
+	// Release the clip plane constant buffer.
+	if(m_clipPlaneBuffer)
+	{
+		m_clipPlaneBuffer-&gt;Release();
+		m_clipPlaneBuffer = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void ReflectionShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+bool ReflectionShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+						D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* colorTexture, 
+						ID3D11ShaderResourceView* normalTexture, D3DXVECTOR4 lightDiffuseColor, D3DXVECTOR3 lightDirection, 
+						float colorTextureBrightness, D3DXVECTOR4 clipPlane)</font><font face="arial" color="#aaffaa" size="2">
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	unsigned int bufferNumber;
+	MatrixBufferType* dataPtr;</font><font face="arial" color="#aaaaff" size="2">
+	ClipPlaneBufferType* dataPtr1;</font><font face="arial" color="#aaffaa" size="2">
+	LightBufferType* dataPtr2;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);</font><font face="arial" color="#aaaaff" size="2">
+	
+	// Lock the clip plane constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_clipPlaneBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the clip plane constant buffer.
+	dataPtr1 = (ClipPlaneBufferType*)mappedResource.pData;
+
+	// Copy the clip plane into the clip plane constant buffer.
+	dataPtr1-&gt;clipPlane = clipPlane;
+
+	// Unlock the buffer.
+	deviceContext-&gt;Unmap(m_clipPlaneBuffer, 0);
+
+	// Set the position of the clip plane constant buffer in the vertex shader.
+	bufferNumber = 1;
+
+	// Now set the clip plane constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_clipPlaneBuffer);</font><font face="arial" color="#aaffaa" size="2">
+	
+	// Lock the light constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (LightBufferType*)mappedResource.pData;
+
+	// Copy the lighting variables into the constant buffer.
+	dataPtr2-&gt;lightDiffuseColor = lightDiffuseColor;
+	dataPtr2-&gt;lightDirection = lightDirection;
+	dataPtr2-&gt;colorTextureBrightness = colorTextureBrightness;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_lightBuffer, 0);
+
+	// Set the position of the light constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_lightBuffer);
+
+	// Set the texture resources in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;colorTexture);
+	deviceContext-&gt;PSSetShaderResources(1, 1, &amp;normalTexture);
+
+	return true;
+}
+
+
+void ReflectionShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Waterclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+WaterClass is a new class that is used to hold the geometry for the water quad and the shader related settings and files.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: waterclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _WATERCLASS_H_
+#define _WATERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "textureclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: WaterClass
+////////////////////////////////////////////////////////////////////////////////
+class WaterClass
+{
+private:
+	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
+	};
+
+public:
+	WaterClass();
+	WaterClass(const WaterClass&amp;);
+	~WaterClass();
+
+	bool Initialize(ID3D11Device*, WCHAR*, float, float);
+	void Shutdown();
+	void Frame();
+	void Render(ID3D11DeviceContext*);
+
+	int GetIndexCount();
+	ID3D11ShaderResourceView* GetTexture();
+	
+	float GetWaterHeight();
+	D3DXVECTOR2 GetNormalMapTiling();
+	float GetWaterTranslation();
+	float GetReflectRefractScale();
+	D3DXVECTOR4 GetRefractionTint();
+	float GetSpecularShininess();
+
+private:
+	bool InitializeBuffers(ID3D11Device*, float);
+	void ShutdownBuffers();
+	void RenderBuffers(ID3D11DeviceContext*);
+
+	bool LoadTexture(ID3D11Device*, WCHAR*);
+	void ReleaseTexture();
+
+private:
+	float m_waterHeight;
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+	int m_vertexCount, m_indexCount;
+	TextureClass* m_Texture;
+	D3DXVECTOR2 m_normalMapTiling;
+	float m_waterTranslation;
+	float m_reflectRefractScale;
+	D3DXVECTOR4 m_refractionTint;
+	float m_specularShininess;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Waterclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: waterclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "waterclass.h"
+
+
+WaterClass::WaterClass()
+{
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+	m_Texture = 0;
+}
+
+
+WaterClass::WaterClass(const WaterClass&amp; other)
+{
+}
+
+
+WaterClass::~WaterClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function takes as inputs the DX11 device, the file name of the water normal map, the height of the water, and the radius of the water.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool WaterClass::Initialize(ID3D11Device* device, WCHAR* textureFilename, float waterHeight, float waterRadius)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First we store the water height.  After that we create the geometry for the water quad and then load the normal map for the water.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Store the water height.
+	m_waterHeight = waterHeight;
+
+	// Initialize the vertex and index buffer that hold the geometry for the triangle.
+	result = InitializeBuffers(device, waterRadius);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Load the texture for this model.
+	result = LoadTexture(device, textureFilename);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next we set all the shader related settings.
+These should actually be input parameters but I have placed them here for now so that they are straight forward for editing as you learn how each of them affects the shader effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the tiling for the water normal maps.
+	m_normalMapTiling.x = 0.01f;  // Tile ten times over the quad.
+	m_normalMapTiling.y = 0.02f;  // Tile five times over the quad.
+
+	// Initialize the water translation to zero.
+	m_waterTranslation = 0.0f;
+
+	// Set the scaling value for the water normal map.
+	m_reflectRefractScale = 0.03f;
+
+	// Set the tint of the refraction.
+	m_refractionTint = D3DXVECTOR4(0.0f, 0.8f, 1.0f, 1.0f);
+
+	// Set the specular shininess.
+	m_specularShininess = 200.0f;
+
+	return true;
+}
+
+
+void WaterClass::Shutdown()
+{
+	// Release the model texture.
+	ReleaseTexture();
+
+	// Release the vertex and index buffers.
+	ShutdownBuffers();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Each frame we will animate the rotation of the water normal map to simulate moving water ripples.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void WaterClass::Frame()
+{
+	// Update the position of the water to simulate motion.
+	m_waterTranslation += 0.003f;
+	if(m_waterTranslation &gt; 1.0f)
+	{
+		m_waterTranslation -= 1.0f;
+	}
+
+	return;
+}
+
+
+void WaterClass::Render(ID3D11DeviceContext* deviceContext)
+{
+	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	RenderBuffers(deviceContext);
+
+	return;
+}
+
+
+int WaterClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+
+
+ID3D11ShaderResourceView* WaterClass::GetTexture()
+{
+	return m_Texture-&gt;GetTexture();
+}
+
+
+float WaterClass::GetWaterHeight()
+{
+	return m_waterHeight;
+}
+
+
+D3DXVECTOR2 WaterClass::GetNormalMapTiling()
+{
+	return m_normalMapTiling;
+}
+
+
+float WaterClass::GetWaterTranslation()
+{
+	return m_waterTranslation;
+}
+
+
+float WaterClass::GetReflectRefractScale()
+{
+	return m_reflectRefractScale;
+}
+
+
+D3DXVECTOR4 WaterClass::GetRefractionTint()
+{
+	return m_refractionTint;
+}
+
+
+float WaterClass::GetSpecularShininess()
+{
+	return m_specularShininess;
+}
+
+
+bool WaterClass::InitializeBuffers(ID3D11Device* device, float waterRadius)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+
+	
+	// Set the number of vertices in the vertex array.
+	m_vertexCount = 6;
+
+	// Set the number of indices in the index array.
+	m_indexCount = 6;
+
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We manually create a quad here.
+It doesn't need to be a high poly object since we are going to tile the water normal map over the surface of the quad.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Load the vertex array with data.
+	vertices[0].position = D3DXVECTOR3(-waterRadius, 0.0f, waterRadius);  // Top left.
+	vertices[0].texture = D3DXVECTOR2(0.0f, 0.0f);
+
+	vertices[1].position = D3DXVECTOR3(waterRadius, 0.0f, waterRadius);  // Top right.
+	vertices[1].texture = D3DXVECTOR2(1.0f, 0.0f);
+	
+	vertices[2].position = D3DXVECTOR3(-waterRadius, 0.0f, -waterRadius);  // Bottom left.
+	vertices[2].texture = D3DXVECTOR2(0.0f, 1.0f);
+
+	vertices[3].position = D3DXVECTOR3(-waterRadius, 0.0f, -waterRadius);  // Bottom left.
+	vertices[3].texture = D3DXVECTOR2(0.0f, 1.0f);
+
+	vertices[4].position = D3DXVECTOR3(waterRadius, 0.0f, waterRadius);  // Top right.
+	vertices[4].texture = D3DXVECTOR2(1.0f, 0.0f);
+
+	vertices[5].position = D3DXVECTOR3(waterRadius, 0.0f, -waterRadius);  // Bottom right.
+	vertices[5].texture = D3DXVECTOR2(1.0f, 1.0f);
+
+	// Load the index array with data.
+	indices[0] = 0;
+	indices[1] = 1;
+	indices[2] = 2;
+	indices[3] = 3;
+	indices[4] = 4;
+	indices[5] = 5;
+
+	// Set up the description of the vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now finally create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+
+
+void WaterClass::ShutdownBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+
+
+void WaterClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType); 
+	offset = 0;
+    
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The texture that is loaded here is the normal map for the water.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool WaterClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
+{
+	bool result;
+
+
+	// Create the texture object.
+	m_Texture = new TextureClass;
+	if(!m_Texture)
+	{
+		return false;
+	}
+
+	// Initialize the texture object.
+	result = m_Texture-&gt;Initialize(device, filename);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void WaterClass::ReleaseTexture()
+{
+	// Release the texture object.
+	if(m_Texture)
+	{
+		m_Texture-&gt;Shutdown();
+		delete m_Texture;
+		m_Texture = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Water.vs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The HLSL water shaders here are very similar to the one in the DirectX tutorials section.
+All we have done is add some additional effects.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: water.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+    matrix reflectionMatrix;
+};
+
+cbuffer CamNormBuffer
+{
+    float3 cameraPosition;
+    float padding1;
+    float2 normalMapTiling;
+    float2 padding2;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float4 reflectionPosition : TEXCOORD0;
+    float4 refractionPosition : TEXCOORD1;
+    float3 viewDirection : TEXCOORD2;
+    float2 tex1 : TEXCOORD3;
+    float2 tex2 : TEXCOORD4;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType WaterVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    matrix reflectProjectWorld;
+    matrix viewProjectWorld;
+    float4 worldPosition;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Calculate the vertex position as usual.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Calculate the refraction and reflection view matrices the same as before also.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Create the reflection projection world matrix.
+    reflectProjectWorld = mul(reflectionMatrix, projectionMatrix);
+    reflectProjectWorld = mul(worldMatrix, reflectProjectWorld);
+
+    // Calculate the input position against the reflectProjectWorld matrix.
+    output.reflectionPosition = mul(input.position, reflectProjectWorld);
+
+    // Create the view projection world matrix for refraction.
+    viewProjectWorld = mul(viewMatrix, projectionMatrix);
+    viewProjectWorld = mul(worldMatrix, viewProjectWorld);
+   
+    // Calculate the input position against the viewProjectWorld matrix.
+    output.refractionPosition = mul(input.position, viewProjectWorld);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Calculate the camera's view direction for fresnel and specular calculations.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Calculate the position of the vertex in the world.
+    worldPosition = mul(input.position, worldMatrix);
+
+    // Determine the viewing direction based on the position of the camera and the position of the vertex in the world.
+    output.viewDirection = cameraPosition.xyz - worldPosition.xyz;
+
+    // Normalize the viewing direction vector.
+    output.viewDirection = normalize(output.viewDirection);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Calculate two different tiling texture coordinates for the water normal map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Create two different texture sample coordinates for tiling the water normal map over the water quad multiple times.
+    output.tex1 = input.tex / normalMapTiling.x;
+    output.tex2 = input.tex / normalMapTiling.y;
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Water.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: water.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+SamplerState SampleType;
+Texture2D refractionTexture : register(t0);
+Texture2D reflectionTexture : register(t1);
+Texture2D normalTexture : register(t2);
+
+cbuffer WaterBuffer
+{
+    float4 refractionTint;
+    float3 lightDirection;
+    float waterTranslation;
+    float reflectRefractScale;
+    float specularShininess;
+    float2 padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float4 reflectionPosition : TEXCOORD0;
+    float4 refractionPosition : TEXCOORD1;
+    float3 viewDirection : TEXCOORD2;
+    float2 tex1 : TEXCOORD3;
+    float2 tex2 : TEXCOORD4;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 WaterPixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 normalMap1;
+    float4 normalMap2;
+    float3 normal1;
+    float3 normal2;
+    float3 normal;
+    float2 refractTexCoord;
+    float2 reflectTexCoord;
+    float4 reflectionColor;
+    float4 refractionColor;
+    float3 heightView;
+    float r;
+    float fresnelFactor;
+    float4 color;
+    float3 reflection;
+    float specular;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Translate the two texture coordinates by the water translation amount.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Move the position the water normal is sampled from to simulate moving water.	
+    input.tex1.y += waterTranslation;
+    input.tex2.y += waterTranslation;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Sample the water normal map two times using the two different texture sampling coordinates.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Sample the normal from the normal map texture using the two different tiled and translated coordinates.
+    normalMap1 = normalTexture.Sample(SampleType, input.tex1);
+    normalMap2 = normalTexture.Sample(SampleType, input.tex2);
+	
+    // Expand the range of the normal from (0,1) to (-1,+1).
+    normal1 = (normalMap1.rgb * 2.0f) - 1.0f;
+    normal2 = (normalMap2.rgb * 2.0f) - 1.0f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now combine the two normal map results to get an animated water ripple effect instead of just a single rotated normal map ripple.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Combine the normals to add the normal maps together.
+    normal = normalize(normal1 + normal2);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Calculate the sampling coordinates for the refraction and reflection and then sample the textures as we did previously.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Calculate the projected refraction texture coordinates.
+    refractTexCoord.x = input.refractionPosition.x / input.refractionPosition.w / 2.0f + 0.5f;
+    refractTexCoord.y = -input.refractionPosition.y / input.refractionPosition.w / 2.0f + 0.5f;
+	
+    // Calculate the projected reflection texture coordinates.
+    reflectTexCoord.x = input.reflectionPosition.x / input.reflectionPosition.w / 2.0f + 0.5f;
+    reflectTexCoord.y = -input.reflectionPosition.y / input.reflectionPosition.w / 2.0f + 0.5f;
+		
+    // Re-position the texture coordinate sampling position by the scaled normal map value to simulate the rippling wave effect.
+    reflectTexCoord = reflectTexCoord + (normal.xy * reflectRefractScale);
+    refractTexCoord = refractTexCoord + (normal.xy * reflectRefractScale);
+	
+    // Sample the texture pixels from the textures using the updated texture coordinates.
+    reflectionColor = reflectionTexture.Sample(SampleType, reflectTexCoord);
+    refractionColor = refractionTexture.Sample(SampleType, refractTexCoord);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Add a water color tint to the refraction.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Combine the tint with the refraction color.
+    refractionColor = saturate(refractionColor * refractionTint);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create just a height based vector for the fresnel calculation.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Get a modified viewing direction of the camera that only takes into account height.
+    heightView.x = input.viewDirection.y;
+    heightView.y = input.viewDirection.y;
+    heightView.z = input.viewDirection.y;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Calculate the fresnel factor and then combine the refraction and reflection values based on the fresnel factor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Now calculate the fresnel term based solely on height.
+    r = (1.2f - 1.0f) / (1.2f + 1.0f);
+    fresnelFactor = max(0.0f, min(1.0f, r + (1.0f - r) * pow(1.0f - dot(normal, heightView), 2)));
+
+    // Combine the reflection and refraction results for the final color using the fresnel factor.
+    color = lerp(reflectionColor, refractionColor, fresnelFactor);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Finally do a specular light calculation using the water normals and add it to the final color result to get the specular effect on just the water ripples.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Calculate the reflection vector using the normal and the direction of the light.
+    reflection = -reflect(normalize(lightDirection), normal);
+	
+    // Calculate the specular light based on the reflection and the camera position.
+    specular = dot(normalize(reflection), normalize(input.viewDirection));
+
+    // Check to make sure the specular was positive so we aren't adding black spots to the water.
+    if(specular &gt; 0.0f)
+    {
+        // Increase the specular light by the shininess value.
+        specular = pow(specular, specularShininess);
+
+        // Add the specular to the final color.
+        color = saturate(color + specular);
+    }
+
+    return color;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Watershaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The WaterShaderClass is the same as it was in the DirectX water tutorial except that it contains variables for the new settings such as specular, texture tiling, and refraction tint.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: watershaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _WATERSHADERCLASS_H_
+#define _WATERSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: WaterShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class WaterShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+		D3DXMATRIX reflection;
+	};
+
+	struct CamNormBufferType
+	{
+		D3DXVECTOR3 cameraPosition;
+		float padding1;
+		D3DXVECTOR2 normalMapTiling;
+		D3DXVECTOR2 padding2;
+	};
+
+	struct WaterBufferType
+	{
+		D3DXVECTOR4 refractionTint;
+		D3DXVECTOR3 lightDirection;
+		float waterTranslation;
+		float reflectRefractScale;
+		float specularShininess;
+		D3DXVECTOR2 padding;
+	};
+
+public:
+	WaterShaderClass();
+	WaterShaderClass(const WaterShaderClass&amp;);
+	~WaterShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, 
+		    ID3D11ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR2, float, float, D3DXVECTOR4, D3DXVECTOR3, float);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, 
+				 ID3D11ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR2, float, float, D3DXVECTOR4, D3DXVECTOR3, float);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleState;
+	ID3D11Buffer* m_matrixBuffer;
+	ID3D11Buffer* m_camNormBuffer;
+	ID3D11Buffer* m_waterBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Watershaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: watershaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "watershaderclass.h"
+
+
+WaterShaderClass::WaterShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleState = 0;
+	m_matrixBuffer = 0;
+	m_camNormBuffer = 0;
+	m_waterBuffer = 0;
+}
+
+
+WaterShaderClass::WaterShaderClass(const WaterShaderClass&amp; other)
+{
+}
+
+
+WaterShaderClass::~WaterShaderClass()
+{
+}
+
+
+bool WaterShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+
+
+	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/water.vs", L"../Engine/water.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void WaterShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+
+
+bool WaterShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+			      D3DXMATRIX projectionMatrix, D3DXMATRIX reflectionMatrix, ID3D11ShaderResourceView* refractionTexture, 
+			      ID3D11ShaderResourceView* reflectionTexture, ID3D11ShaderResourceView* normalTexture, D3DXVECTOR3 cameraPosition, 
+			      D3DXVECTOR2 normalMapTiling, float waterTranslation, float reflectRefractScale, D3DXVECTOR4 refractionTint, 
+			      D3DXVECTOR3 lightDirection, float specularShininess)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, reflectionMatrix, refractionTexture, reflectionTexture, 
+				     normalTexture, cameraPosition, normalMapTiling, waterTranslation, reflectRefractScale, refractionTint, lightDirection, 
+				     specularShininess);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool WaterShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC camNormBufferDesc;
+	D3D11_BUFFER_DESC waterBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+
+	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "WaterVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "WaterPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the matrix dynamic constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the matrix constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the camera and normal tiling dynamic constant buffer that is in the vertex shader.
+	camNormBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	camNormBufferDesc.ByteWidth = sizeof(CamNormBufferType);
+	camNormBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	camNormBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	camNormBufferDesc.MiscFlags = 0;
+	camNormBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;camNormBufferDesc, NULL, &amp;m_camNormBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the water dynamic constant buffer that is in the pixel shader.
+	waterBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	waterBufferDesc.ByteWidth = sizeof(WaterBufferType);
+	waterBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	waterBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	waterBufferDesc.MiscFlags = 0;
+	waterBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the pixel shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;waterBufferDesc, NULL, &amp;m_waterBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void WaterShaderClass::ShutdownShader()
+{
+	// Release the water constant buffer.
+	if(m_waterBuffer)
+	{
+		m_waterBuffer-&gt;Release();
+		m_waterBuffer = 0;
+	}
+
+	// Release the camera and normal tiling constant buffer.
+	if(m_camNormBuffer)
+	{
+		m_camNormBuffer-&gt;Release();
+		m_camNormBuffer = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void WaterShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+
+
+bool WaterShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix,
+					   D3DXMATRIX reflectionMatrix, ID3D11ShaderResourceView* refractionTexture, 
+					   ID3D11ShaderResourceView* reflectionTexture, ID3D11ShaderResourceView* normalTexture, 
+					   D3DXVECTOR3 cameraPosition, D3DXVECTOR2 normalMapTiling, float waterTranslation, float reflectRefractScale, 
+					   D3DXVECTOR4 refractionTint, D3DXVECTOR3 lightDirection, float specularShininess)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	unsigned int bufferNumber;
+	MatrixBufferType* dataPtr;
+	CamNormBufferType* dataPtr2;
+	WaterBufferType* dataPtr3;
+
+
+	// Transpose all the input matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+	D3DXMatrixTranspose(&amp;reflectionMatrix, &amp;reflectionMatrix);
+
+	// Lock the matrix constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+	dataPtr-&gt;reflection = reflectionMatrix;
+
+	// Unlock the matrix constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the matrix constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the matrix constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+
+	// Lock the camera and normal tiling constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_camNormBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (CamNormBufferType*)mappedResource.pData;
+
+	// Copy the data into the constant buffer.
+	dataPtr2-&gt;cameraPosition = cameraPosition;
+	dataPtr2-&gt;padding1 = 0.0f;
+	dataPtr2-&gt;normalMapTiling = normalMapTiling;
+	dataPtr2-&gt;padding2 = D3DXVECTOR2(0.0f, 0.0f);
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_camNormBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 1;
+
+	// Set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_camNormBuffer);
+
+	// Set the texture resources in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;refractionTexture);
+	deviceContext-&gt;PSSetShaderResources(1, 1, &amp;reflectionTexture);
+	deviceContext-&gt;PSSetShaderResources(2, 1, &amp;normalTexture);
+
+	// Lock the water constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_waterBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr3 = (WaterBufferType*)mappedResource.pData;
+
+	// Copy the water data into the constant buffer.
+	dataPtr3-&gt;waterTranslation = waterTranslation;
+	dataPtr3-&gt;reflectRefractScale = reflectRefractScale;
+	dataPtr3-&gt;refractionTint = refractionTint;
+	dataPtr3-&gt;lightDirection = lightDirection;
+	dataPtr3-&gt;specularShininess = specularShininess;
+	dataPtr3-&gt;padding = D3DXVECTOR2(0.0f, 0.0f);
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_waterBuffer, 0);
+
+	// Set the position of the water constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Finally set the water constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_waterBuffer);
+
+	return true;
+}
+
+
+void WaterShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangles.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _APPLICATIONCLASS_H_
+#define _APPLICATIONCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "inputclass.h"
+#include "d3dclass.h"
+#include "timerclass.h"
+#include "positionclass.h"
+#include "cameraclass.h"
+#include "lightclass.h"
+#include "terrainclass.h"
+#include "terrainshaderclass.h"
+#include "skydomeclass.h"
+#include "skydomeshaderclass.h"
+#include "skyplaneclass.h"
+#include "skyplaneshaderclass.h"
+#include "fpsclass.h"
+#include "cpuclass.h"
+#include "fontshaderclass.h"
+#include "textclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Add headers for the render to texture, reflection shader, water, and water shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">#include "rendertextureclass.h"
+#include "reflectionshaderclass.h"
+#include "waterclass.h"
+#include "watershaderclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ApplicationClass
+////////////////////////////////////////////////////////////////////////////////
+class ApplicationClass
+{
+public:
+	ApplicationClass();
+	ApplicationClass(const ApplicationClass&amp;);
+	~ApplicationClass();
+
+	bool Initialize(HINSTANCE, HWND, int, int);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool HandleMovementInput(float);
+	void RenderRefractionToTexture();
+	void RenderReflectionToTexture();
+	bool Render();
+
+private:
+	InputClass* m_Input;
+	D3DClass* m_Direct3D;
+	TimerClass* m_Timer;
+	PositionClass* m_Position;
+	CameraClass* m_Camera;
+	LightClass* m_Light;
+	TerrainClass* m_Terrain;
+	TerrainShaderClass* m_TerrainShader;
+	SkyDomeClass* m_SkyDome;
+	SkyDomeShaderClass* m_SkyDomeShader;
+	SkyPlaneClass *m_SkyPlane;
+	SkyPlaneShaderClass* m_SkyPlaneShader;
+	FpsClass* m_Fps;
+	CpuClass* m_Cpu;
+	FontShaderClass* m_FontShader;
+	TextClass* m_Text;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There are new objects for the water related rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	RenderTextureClass *m_RefractionTexture, *m_ReflectionTexture;
+	ReflectionShaderClass* m_ReflectionShader;
+	WaterClass* m_Water;
+	WaterShaderClass* m_WaterShader;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "applicationclass.h"
+
+
+ApplicationClass::ApplicationClass()
+{
+	m_Input = 0;
+	m_Direct3D = 0;
+	m_Timer = 0;
+	m_Position = 0;
+	m_Camera = 0;
+	m_Light = 0;
+	m_Terrain = 0;
+	m_TerrainShader = 0;
+	m_SkyDome = 0;
+	m_SkyDomeShader = 0;
+	m_SkyPlane = 0;
+	m_SkyPlaneShader = 0;
+	m_Fps = 0;
+	m_Cpu = 0;
+	m_FontShader = 0;
+	m_Text = 0;
+	m_RefractionTexture = 0;
+	m_ReflectionTexture = 0;
+	m_ReflectionShader = 0;
+	m_Water = 0;
+	m_WaterShader = 0;
+}
+
+
+ApplicationClass::ApplicationClass(const ApplicationClass&amp; other)
+{
+}
+
+
+ApplicationClass::~ApplicationClass()
+{
+}
+
+
+bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+{
+	bool result;
+	D3DXMATRIX baseViewMatrix;
+	char videoCard[128];
+	int videoMemory;
+
+	
+	// Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
+	m_Input = new InputClass;
+	if(!m_Input)
+	{
+		return false;
+	}
+
+	// Initialize the input object.
+	result = m_Input-&gt;Initialize(hinstance, hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the Direct3D object.
+	m_Direct3D = new D3DClass;
+	if(!m_Direct3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_Direct3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize DirectX 11.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Retrieve the video card information.
+	m_Direct3D-&gt;GetVideoCardInfo(videoCard, videoMemory);
+
+	// Create the timer object.
+	m_Timer = new TimerClass;
+	if(!m_Timer)
+	{
+		return false;
+	}
+
+	// Initialize the timer object.
+	result = m_Timer-&gt;Initialize();
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the timer object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the position object.
+	m_Position = new PositionClass;
+	if(!m_Position)
+	{
+		return false;
+	}
+
+	// Set the initial position and rotation of the viewer.
+	m_Position-&gt;SetPosition(280.379f, 24.5225f, 367.018f);
+	m_Position-&gt;SetRotation(19.6834f, 222.013f, 0.0f);
+	
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Initialize a base view matrix with the camera for 2D user interface rendering.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	m_Camera-&gt;GenerateBaseViewMatrix();
+	m_Camera-&gt;GetBaseViewMatrix(baseViewMatrix);
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetDirection(0.5f, -0.75f, 0.25f);
+	
+	// Create the terrain object.
+	m_Terrain = new TerrainClass;
+	if(!m_Terrain)
+	{
+		return false;
+	}
+
+	// Initialize the terrain object.
+	result = m_Terrain-&gt;Initialize(m_Direct3D-&gt;GetDevice(), "../Engine/data/hm.bmp", "../Engine/data/cm.bmp", 20.0f, L"../Engine/data/dirt.dds", 
+				       L"../Engine/data/normal.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the terrain shader object.
+	m_TerrainShader = new TerrainShaderClass;
+	if(!m_TerrainShader)
+	{
+		return false;
+	}
+
+	// Initialize the terrain shader object.
+	result = m_TerrainShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the sky dome object.
+	m_SkyDome = new SkyDomeClass;
+	if(!m_SkyDome)
+	{
+		return false;
+	}
+
+	// Initialize the sky dome object.
+	result = m_SkyDome-&gt;Initialize(m_Direct3D-&gt;GetDevice());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sky dome object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the sky dome shader object.
+	m_SkyDomeShader = new SkyDomeShaderClass;
+	if(!m_SkyDomeShader)
+	{
+		return false;
+	}
+
+	// Initialize the sky dome shader object.
+	result = m_SkyDomeShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sky dome shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the sky plane object.
+	m_SkyPlane = new SkyPlaneClass;
+	if(!m_SkyPlane)
+	{
+		return false;
+	}
+
+	// Initialize the sky plane object.
+	result = m_SkyPlane-&gt;Initialize(m_Direct3D-&gt;GetDevice(), L"../Engine/data/cloud001.dds", L"../Engine/data/perturb001.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sky plane object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the sky plane shader object.
+	m_SkyPlaneShader = new SkyPlaneShaderClass;
+	if(!m_SkyPlaneShader)
+	{
+		return false;
+	}
+
+	// Initialize the sky plane shader object.
+	result = m_SkyPlaneShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sky plane shader object.", L"Error", MB_OK);
+		return false;
+	}
+	
+	// Create the fps object.
+	m_Fps = new FpsClass;
+	if(!m_Fps)
+	{
+		return false;
+	}
+
+	// Initialize the fps object.
+	m_Fps-&gt;Initialize();
+
+	// Create the cpu object.
+	m_Cpu = new CpuClass;
+	if(!m_Cpu)
+	{
+		return false;
+	}
+
+	// Initialize the cpu object.
+	m_Cpu-&gt;Initialize();
+
+	// Create the font shader object.
+	m_FontShader = new FontShaderClass;
+	if(!m_FontShader)
+	{
+		return false;
+	}
+
+	// Initialize the font shader object.
+	result = m_FontShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the font shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the text object.
+	m_Text = new TextClass;
+	if(!m_Text)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	result = m_Text-&gt;Initialize(m_Direct3D-&gt;GetDevice(), m_Direct3D-&gt;GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Set the video card information in the text object.
+	result = m_Text-&gt;SetVideoCardInfo(videoCard, videoMemory, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not set video card info in the text object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Setup render to textures for the refraction and reflection of the scene.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the refraction render to texture object.
+	m_RefractionTexture = new RenderTextureClass;
+	if(!m_RefractionTexture)
+	{
+		return false;
+	}
+
+	// Initialize the refraction render to texture object.
+	result = m_RefractionTexture-&gt;Initialize(m_Direct3D-&gt;GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the refraction render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the reflection render to texture object.
+	m_ReflectionTexture = new RenderTextureClass;
+	if(!m_ReflectionTexture)
+	{
+		return false;
+	}
+
+	// Initialize the reflection render to texture object.
+	result = m_ReflectionTexture-&gt;Initialize(m_Direct3D-&gt;GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the reflection render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create the reflection shader for rendering the refraction and the reflection.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the reflection shader object.
+	m_ReflectionShader = new ReflectionShaderClass;
+	if(!m_ReflectionShader)
+	{
+		return false;
+	}
+
+	// Initialize the reflection shader object.
+	result = m_ReflectionShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the reflection shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Setup the WaterClass and WaterShaderClass objects.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the water object.
+	m_Water = new WaterClass;
+	if(!m_Water)
+	{
+		return false;
+	}
+
+	// Initialize the water object.
+	result = m_Water-&gt;Initialize(m_Direct3D-&gt;GetDevice(), L"../Engine/data/waternormal.dds", 3.75f, 110.0f);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the water object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the water shader object.
+	m_WaterShader = new WaterShaderClass;
+	if(!m_WaterShader)
+	{
+		return false;
+	}
+
+	// Initialize the water shader object.
+	result = m_WaterShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the water shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+
+void ApplicationClass::Shutdown()
+{
+	// Release the water shader object.
+	if(m_WaterShader)
+	{
+		m_WaterShader-&gt;Shutdown();
+		delete m_WaterShader;
+		m_WaterShader = 0;
+	}
+
+	// Release the water object.
+	if(m_Water)
+	{
+		m_Water-&gt;Shutdown();
+		delete m_Water;
+		m_Water = 0;
+	}
+
+	// Release the reflection shader object.
+	if(m_ReflectionShader)
+	{
+		m_ReflectionShader-&gt;Shutdown();
+		delete m_ReflectionShader;
+		m_ReflectionShader = 0;
+	}
+
+	// Release the reflection render to texture object.
+	if(m_ReflectionTexture)
+	{
+		m_ReflectionTexture-&gt;Shutdown();
+		delete m_ReflectionTexture;
+		m_ReflectionTexture = 0;
+	}
+
+	// Release the refraction render to texture object.
+	if(m_RefractionTexture)
+	{
+		m_RefractionTexture-&gt;Shutdown();
+		delete m_RefractionTexture;
+		m_RefractionTexture = 0;
+	}
+
+	// Release the text object.
+	if(m_Text)
+	{
+		m_Text-&gt;Shutdown();
+		delete m_Text;
+		m_Text = 0;
+	}
+
+	// Release the font shader object.
+	if(m_FontShader)
+	{
+		m_FontShader-&gt;Shutdown();
+		delete m_FontShader;
+		m_FontShader = 0;
+	}
+
+	// Release the cpu object.
+	if(m_Cpu)
+	{
+		m_Cpu-&gt;Shutdown();
+		delete m_Cpu;
+		m_Cpu = 0;
+	}
+
+	// Release the fps object.
+	if(m_Fps)
+	{
+		delete m_Fps;
+		m_Fps = 0;
+	}
+		
+	// Release the sky plane shader object.
+	if(m_SkyPlaneShader)
+	{
+		m_SkyPlaneShader-&gt;Shutdown();
+		delete m_SkyPlaneShader;
+		m_SkyPlaneShader = 0;
+	}
+
+	// Release the sky plane object.
+	if(m_SkyPlane)
+	{
+		m_SkyPlane-&gt;Shutdown();
+		delete m_SkyPlane;
+		m_SkyPlane = 0;
+	}
+
+	// Release the sky dome shader object.
+	if(m_SkyDomeShader)
+	{
+		m_SkyDomeShader-&gt;Shutdown();
+		delete m_SkyDomeShader;
+		m_SkyDomeShader = 0;
+	}
+
+	// Release the sky dome object.
+	if(m_SkyDome)
+	{
+		m_SkyDome-&gt;Shutdown();
+		delete m_SkyDome;
+		m_SkyDome = 0;
+	}
+
+	// Release the terrain shader object.
+	if(m_TerrainShader)
+	{
+		m_TerrainShader-&gt;Shutdown();
+		delete m_TerrainShader;
+		m_TerrainShader = 0;
+	}
+	
+	// Release the terrain object.
+	if(m_Terrain)
+	{
+		m_Terrain-&gt;Shutdown();
+		delete m_Terrain;
+		m_Terrain = 0;
+	}
+	
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+	
+	// Release the position object.
+	if(m_Position)
+	{
+		delete m_Position;
+		m_Position = 0;
+	}
+
+	// Release the timer object.
+	if(m_Timer)
+	{
+		delete m_Timer;
+		m_Timer = 0;
+	}
+
+	// Release the Direct3D object.
+	if(m_Direct3D)
+	{
+		m_Direct3D-&gt;Shutdown();
+		delete m_Direct3D;
+		m_Direct3D = 0;
+	}
+
+	// Release the input object.
+	if(m_Input)
+	{
+		m_Input-&gt;Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+
+	return;
+}
+
+
+bool ApplicationClass::Frame()
+{
+	bool result;
+
+
+	// Update the system stats.
+	m_Timer-&gt;Frame();
+	m_Fps-&gt;Frame();
+	m_Cpu-&gt;Frame();
+
+	// Read the user input.
+	result = m_Input-&gt;Frame();
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Check if the user pressed escape and wants to exit the application.
+	if(m_Input-&gt;IsEscapePressed() == true)
+	{
+		return false;
+	}
+
+	// Do the frame input processing.
+	result = HandleMovementInput(m_Timer-&gt;GetTime());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Update the FPS value in the text object.
+	result = m_Text-&gt;SetFps(m_Fps-&gt;GetFps(), m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Update the CPU usage value in the text object.
+	result = m_Text-&gt;SetCpu(m_Cpu-&gt;GetCpuPercentage(), m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The WaterClass object requires frame processing to translate the water normal map sampling.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Do the water frame processing.
+	m_Water-&gt;Frame();
+
+	// Do the sky plane frame processing.
+	m_SkyPlane-&gt;Frame();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There are three render steps.
+First render the refraction of the scene to a texture.
+Next render the reflection of the scene to a texture.
+And then finally render the entire scene using the refraction and reflection textures.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Render the refraction of the scene to a texture.
+	RenderRefractionToTexture();
+
+	// Render the reflection of the scene to a texture.
+	RenderReflectionToTexture();
+
+	// Render the graphics.
+	result = Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return result;
+}
+
+
+bool ApplicationClass::HandleMovementInput(float frameTime)
+{
+	bool keyDown, result;
+	float posX, posY, posZ, rotX, rotY, rotZ;
+
+
+	// Set the frame time for calculating the updated position.
+	m_Position-&gt;SetFrameTime(frameTime);
+
+	// Handle the input.
+	keyDown = m_Input-&gt;IsLeftPressed();
+	m_Position-&gt;TurnLeft(keyDown);
+
+	keyDown = m_Input-&gt;IsRightPressed();
+	m_Position-&gt;TurnRight(keyDown);
+
+	keyDown = m_Input-&gt;IsUpPressed();
+	m_Position-&gt;MoveForward(keyDown);
+
+	keyDown = m_Input-&gt;IsDownPressed();
+	m_Position-&gt;MoveBackward(keyDown);
+
+	keyDown = m_Input-&gt;IsAPressed();
+	m_Position-&gt;MoveUpward(keyDown);
+
+	keyDown = m_Input-&gt;IsZPressed();
+	m_Position-&gt;MoveDownward(keyDown);
+
+	keyDown = m_Input-&gt;IsPgUpPressed();
+	m_Position-&gt;LookUpward(keyDown);
+
+	keyDown = m_Input-&gt;IsPgDownPressed();
+	m_Position-&gt;LookDownward(keyDown);
+	
+	// Get the view point position/rotation.
+	m_Position-&gt;GetPosition(posX, posY, posZ);
+	m_Position-&gt;GetRotation(rotX, rotY, rotZ);
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(posX, posY, posZ);
+	m_Camera-&gt;SetRotation(rotX, rotY, rotZ);
+
+	// Update the position values in the text object.
+	result = m_Text-&gt;SetCameraPosition(posX, posY, posZ, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Update the rotation values in the text object.
+	result = m_Text-&gt;SetCameraRotation(rotX, rotY, rotZ, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we render the refraction of the scene to a render to texture object.
+Note we only need to render the terrain as nothing else is below the water other than terrain.
+We use the clipping plane and then render a refraction of everything under the water using the reflection shader.
+Note also that we have to offset the sampling of the refraction otherwise we get black spots along the sides of the refraction from sampling outside of the texture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void ApplicationClass::RenderRefractionToTexture()
+{
+	D3DXVECTOR4 clipPlane;
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+
+
+	// Setup a clipping plane based on the height of the water to clip everything above it to create a refraction.
+	clipPlane = D3DXVECTOR4(0.0f, -1.0f, 0.0f, m_Water-&gt;GetWaterHeight() + 0.1f);
+
+	// Set the render target to be the refraction render to texture.
+	m_RefractionTexture-&gt;SetRenderTarget(m_Direct3D-&gt;GetDeviceContext());
+
+	// Clear the refraction render to texture.
+	m_RefractionTexture-&gt;ClearRenderTarget(m_Direct3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the matrices from the camera and d3d objects.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_Direct3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Render the terrain using the reflection shader and the refraction clip plane to produce the refraction effect.
+	m_Terrain-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+	m_ReflectionShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+				   m_Terrain-&gt;GetColorTexture(), m_Terrain-&gt;GetNormalTexture(), m_Light-&gt;GetDiffuseColor(), m_Light-&gt;GetDirection(), 2.0f, 
+				   clipPlane);
+	
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_Direct3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_Direct3D-&gt;ResetViewport();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we render the reflection of the scene to a texture.
+We render everything above the water to a texture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void ApplicationClass::RenderReflectionToTexture()
+{
+	D3DXVECTOR4 clipPlane;
+	D3DXMATRIX reflectionViewMatrix, worldMatrix, projectionMatrix;
+	D3DXVECTOR3 cameraPosition;
+
+
+	// Setup a clipping plane based on the height of the water to clip everything below it.
+	clipPlane = D3DXVECTOR4(0.0f, 1.0f, 0.0f, -m_Water-&gt;GetWaterHeight());
+	
+	// Set the render target to be the reflection render to texture.
+	m_ReflectionTexture-&gt;SetRenderTarget(m_Direct3D-&gt;GetDeviceContext());
+
+	// Clear the reflection render to texture.
+	m_ReflectionTexture-&gt;ClearRenderTarget(m_Direct3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Use the camera to render the reflection and create a reflection view matrix.
+	m_Camera-&gt;RenderReflection(m_Water-&gt;GetWaterHeight());
+
+	// Get the camera reflection view matrix instead of the normal view matrix.
+	m_Camera-&gt;GetReflectionViewMatrix(reflectionViewMatrix);
+
+	// Get the world and projection matrices from the d3d object.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Direct3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Get the position of the camera.
+	cameraPosition = m_Camera-&gt;GetPosition();
+
+	// Invert the Y coordinate of the camera around the water plane height for the reflected camera position.
+	cameraPosition.y = -cameraPosition.y + (m_Water-&gt;GetWaterHeight() * 2.0f);
+
+	// Translate the sky dome and sky plane to be centered around the reflected camera position.
+	D3DXMatrixTranslation(&amp;worldMatrix, cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+	// Turn off back face culling and the Z buffer.
+	m_Direct3D-&gt;TurnOffCulling();
+	m_Direct3D-&gt;TurnZBufferOff();
+
+	// Render the sky dome using the reflection view matrix.
+	m_SkyDome-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+	m_SkyDomeShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_SkyDome-&gt;GetIndexCount(), worldMatrix, reflectionViewMatrix, projectionMatrix, 
+				m_SkyDome-&gt;GetApexColor(), m_SkyDome-&gt;GetCenterColor());
+
+	// Enable back face culling.
+	m_Direct3D-&gt;TurnOnCulling();
+
+	// Enable additive blending so the clouds blend with the sky dome color.
+	m_Direct3D-&gt;EnableSecondBlendState();
+
+	// Render the sky plane using the sky plane shader.
+	m_SkyPlane-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+	m_SkyPlaneShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_SkyPlane-&gt;GetIndexCount(), worldMatrix, reflectionViewMatrix, projectionMatrix, 
+				 m_SkyPlane-&gt;GetCloudTexture(), m_SkyPlane-&gt;GetPerturbTexture(), m_SkyPlane-&gt;GetTranslation(), m_SkyPlane-&gt;GetScale(), 
+				 m_SkyPlane-&gt;GetBrightness());
+
+	// Turn off blending and enable the Z buffer again.
+	m_Direct3D-&gt;TurnOffAlphaBlending();
+	m_Direct3D-&gt;TurnZBufferOn();
+
+	// Reset the world matrix.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Render the terrain using the reflection view matrix and reflection clip plane.
+	m_Terrain-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+	m_ReflectionShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetIndexCount(), worldMatrix, reflectionViewMatrix, projectionMatrix, 
+				   m_Terrain-&gt;GetColorTexture(), m_Terrain-&gt;GetNormalTexture(), m_Light-&gt;GetDiffuseColor(), m_Light-&gt;GetDirection(), 2.0f, 
+				   clipPlane);
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_Direct3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_Direct3D-&gt;ResetViewport();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now we render the scene to the back buffer.
+Everything is rendered as normal except for the water which uses the refraction and reflection render to texture objects as well as the other water related shader parameters.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool ApplicationClass::Render()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix, baseViewMatrix, reflectionViewMatrix;
+	bool result;
+	D3DXVECTOR3 cameraPosition;
+
+
+	// Clear the scene.
+	m_Direct3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Generate the reflection matrix based on the camera's position and the height of the water.
+	m_Camera-&gt;RenderReflection(m_Water-&gt;GetWaterHeight());
+
+	// Get the world, view, projection, ortho, and base view matrices from the camera and Direct3D objects.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_Direct3D-&gt;GetProjectionMatrix(projectionMatrix);
+	m_Direct3D-&gt;GetOrthoMatrix(orthoMatrix);
+	m_Camera-&gt;GetBaseViewMatrix(baseViewMatrix);
+	m_Camera-&gt;GetReflectionViewMatrix(reflectionViewMatrix);
+
+	// Get the position of the camera.
+	cameraPosition = m_Camera-&gt;GetPosition();
+
+	// Translate the sky dome to be centered around the camera position.
+	D3DXMatrixTranslation(&amp;worldMatrix, cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+	// Turn off back face culling and the Z buffer.
+	m_Direct3D-&gt;TurnOffCulling();
+	m_Direct3D-&gt;TurnZBufferOff();
+
+	// Render the sky dome using the sky dome shader.
+	m_SkyDome-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+	m_SkyDomeShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_SkyDome-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+				m_SkyDome-&gt;GetApexColor(), m_SkyDome-&gt;GetCenterColor());
+
+	// Turn back face culling back on.
+	m_Direct3D-&gt;TurnOnCulling();
+
+	// Enable additive blending so the clouds blend with the sky dome color.
+	m_Direct3D-&gt;EnableSecondBlendState();
+
+	// Render the sky plane using the sky plane shader.
+	m_SkyPlane-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+	m_SkyPlaneShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_SkyPlane-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+				 m_SkyPlane-&gt;GetCloudTexture(), m_SkyPlane-&gt;GetPerturbTexture(), m_SkyPlane-&gt;GetTranslation(), m_SkyPlane-&gt;GetScale(), 
+				 m_SkyPlane-&gt;GetBrightness());
+
+	// Turn off blending.
+	m_Direct3D-&gt;TurnOffAlphaBlending();
+
+	// Turn the Z buffer back on.
+	m_Direct3D-&gt;TurnZBufferOn();
+
+	// Reset the world matrix.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Render the terrain using the terrain shader.
+	m_Terrain-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+	result = m_TerrainShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+					 m_Terrain-&gt;GetColorTexture(), m_Terrain-&gt;GetNormalTexture(), m_Light-&gt;GetDiffuseColor(), m_Light-&gt;GetDirection(), 
+					 2.0f);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Translate to the location of the water and render it.
+	D3DXMatrixTranslation(&amp;worldMatrix, 240.0f, m_Water-&gt;GetWaterHeight(), 250.0f);
+	m_Water-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+	m_WaterShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_Water-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, reflectionViewMatrix, 
+			      m_RefractionTexture-&gt;GetShaderResourceView(), m_ReflectionTexture-&gt;GetShaderResourceView(), m_Water-&gt;GetTexture(), 
+			      m_Camera-&gt;GetPosition(), m_Water-&gt;GetNormalMapTiling(), m_Water-&gt;GetWaterTranslation(), m_Water-&gt;GetReflectRefractScale(),
+			      m_Water-&gt;GetRefractionTint(), m_Light-&gt;GetDirection(), m_Water-&gt;GetSpecularShininess());
+
+	// Reset the world matrix.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_Direct3D-&gt;TurnZBufferOff();
+
+	// Turn on the alpha blending before rendering the text.
+	m_Direct3D-&gt;TurnOnAlphaBlending();
+
+	// Render the text user interface elements.
+	result = m_Text-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_FontShader, worldMatrix, orthoMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn off alpha blending after rendering the text.
+	m_Direct3D-&gt;TurnOffAlphaBlending();
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D-&gt;TurnZBufferOn();
+
+	// Present the rendered scene to the screen.
+	m_Direct3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We can now render a fairly realistic water effect for small body water that doesn't require any large waves.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Small Body Water_files/pic0262.gif" width="500" height="282"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Compile and run the program.  Move around using the arrow keys, A, Z, and PgUp and PgDn.  Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Modify the shader input values (such as the refraction tint) to see how they change the water effect.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Modify the water shader to see each piece of the effect output by itself.  For example return only the refraction color, and then return only the reflection color.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Optimize the reflection portion using one of the methods described (such as updating the reflection once a second only).
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Combine this tutorial with the Glass and Ice DirectX tutorial.  Render a snowy terrain and change the water to be ice instead.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/tersrc16.zip">tersrc16.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/terexe16.zip">terexe16.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 16_ Small Body Water_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutterr.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 16_ Small Body Water_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

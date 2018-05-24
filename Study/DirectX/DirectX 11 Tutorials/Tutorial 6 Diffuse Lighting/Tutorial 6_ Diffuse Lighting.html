@@ -1,0 +1,1756 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut06.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 6: Diffuse Lighting</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 6: Diffuse Lighting
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 6_ Diffuse Lighting_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In this tutorial I will cover how to light 3D objects using diffuse lighting and DirectX 11.
+We will start with the code from the previous tutorial and modify it.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The type of diffuse lighting we will be implementing is called directional lighting.
+Directional lighting is similar to how the Sun illuminates the Earth.
+It is a light source that is a great distance away and based on the direction it is sending light you can determine the amount of light on any object.
+However unlike ambient lighting (another lighting model we will cover soon) it will not light up surfaces it does not directly touch.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I picked directional lighting to start with because it is very easy to debug visually.
+Also since it only requires a direction the formula is simpler than the other types of diffuse lighting such as spot lights and point lights.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The implementation of diffuse lighting in DirectX 11 is done with both vertex and pixel shaders.
+Diffuse lighting requires just the direction and a normal vector for any polygons that we want to light.
+The direction is a single vector that you define, and you can calculate the normal for any polygon by using the three vertices that compose the polygon.
+In this tutorial we will also implement the color of the diffuse light in the lighting equation.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For this tutorial we will create a new class called LightClass which will represent the light sources in the scenes.
+LightClass won't actually do anything other than hold the direction and color of the light.
+We will also remove the TextureShaderClass and replace it with LightShaderClass which handles the light shading on the model.
+With the addition of the new classes the frame work now looks like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 6_ Diffuse Lighting_files/pic0017.gif" width="445" height="199"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will start the code section by looking at the HLSL light shader.  
+You will notice that the light shader is just an updated version of the texture shader from the previous tutorial. 
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Light.vs</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: light.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Both structures now have a 3 float normal vector. 
+The normal vector is used for calculating the amount of light by using the angle between the direction of the normal and the direction of the light.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType LightVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The normal vector for this vertex is calculated in world space and then normalized before being sent as input into the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Calculate the normal vector against the world matrix only.
+    output.normal = mul(input.normal, (float3x3)worldMatrix);
+	
+    // Normalize the normal vector.
+    output.normal = normalize(output.normal);
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Light.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: light.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+Texture2D shaderTexture;
+SamplerState SampleType;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have two new global variables inside the LightBuffer that hold the diffuse color and the direction of the light. 
+These two variables will be set from values in the new LightClass object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer LightBuffer
+{
+    float4 diffuseColor;
+    float3 lightDirection;
+    float padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 LightPixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 textureColor;
+    float3 lightDir;
+    float lightIntensity;
+    float4 color;
+
+
+    // Sample the pixel color from the texture using the sampler at this texture coordinate location.
+    textureColor = shaderTexture.Sample(SampleType, input.tex);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This is where the lighting equation that was discussed earlier is now implemented. 
+The light intensity value is calculated as the dot product between the normal vector of triangle and the light direction vector.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Invert the light direction for calculations.
+    lightDir = -lightDirection;
+
+    // Calculate the amount of light on this pixel.
+    lightIntensity = saturate(dot(input.normal, lightDir));
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And finally the diffuse value of the light is combined with the texture pixel value to produce the color result.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Determine the final amount of diffuse color based on the diffuse color combined with the light intensity.
+    color = saturate(diffuseColor * lightIntensity);
+
+    // Multiply the texture pixel and the final diffuse color to get the final pixel color result.
+    color = color * textureColor;
+
+    return color;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Lightshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new LightShaderClass is just the TextureShaderClass from the previous tutorials re-written slightly to incorporate lighting.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: lightshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _LIGHTSHADERCLASS_H_
+#define _LIGHTSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: LightShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class LightShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new LightBufferType structure will be used for holding lighting information. 
+This typedef is the same as the new typedef in the pixel shader. 
+Do note that I add a extra float for size padding to ensure the structure is a multiple of 16. 
+Since the structure without an extra float is only 28 bytes CreateBuffer would have failed if we used a sizeof(LightBufferType) because it requires sizes 
+that are a multiple of 16 to succeed. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct LightBufferType
+	{
+		D3DXVECTOR4 diffuseColor;
+		D3DXVECTOR3 lightDirection;
+		float padding;  // Added extra padding so structure is a multiple of 16 for CreateBuffer function requirements.
+	};
+
+public:
+	LightShaderClass();
+	LightShaderClass(const LightShaderClass&amp;);
+	~LightShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleState;
+	ID3D11Buffer* m_matrixBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There is a new private constant buffer for the light information (color and direction). 
+The light buffer will be used by this class to set the global light variables inside the HLSL pixel shader. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11Buffer* m_lightBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Lightshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: lightshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "lightshaderclass.h"
+
+
+LightShaderClass::LightShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleState = 0;
+	m_matrixBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the light constant buffer to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_lightBuffer = 0;
+}
+
+
+LightShaderClass::LightShaderClass(const LightShaderClass&amp; other)
+{
+}
+
+
+LightShaderClass::~LightShaderClass()
+{
+}
+
+
+bool LightShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new light.vs and light.ps HLSL shader files are used as input to initialize the light shader. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/light.vs", L"../Engine/light.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void LightShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function now takes in the light direction and light diffuse color as inputs. 
+These variables are then sent into the SetShaderParameters function and finally set inside the shader itself. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool LightShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+			      D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, D3DXVECTOR3 lightDirection, D3DXVECTOR4 diffuseColor)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, diffuseColor);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool LightShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The polygonLayout variable has been changed to have three elements instead of two. 
+This is so that it can accommodate a normal vector in the layout.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We also add a new description variable for the light constant buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	D3D11_BUFFER_DESC lightBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load in the new light vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "LightVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load in the new light pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "LightPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	// This setup needs to match the VertexType stucture in the ModelClass and in the shader.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+One of the major changes to the shader initialization is here in the polygonLayout. 
+We add a third element for the normal vector that will be used for lighting. 
+The semantic name is NORMAL and the format is the regular DXGI_FORMAT_R32G32B32_FLOAT which handles 3 floats for the x, y, and z of the normal vector. 
+The layout will now match the expected input to the HLSL vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	polygonLayout[2].SemanticName = "NORMAL";
+	polygonLayout[2].SemanticIndex = 0;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[2].InputSlot = 0;
+	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[2].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we setup the light constant buffer description which will handle the diffuse light color and light direction. 
+Pay attention to the size of the constant buffers, if they are not multiples of 16 you need to pad extra space on to the end of 
+them or the CreateBuffer function will fail. 
+In this case the constant buffer is 28 bytes with 4 bytes padding to make it 32. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;lightBufferDesc, NULL, &amp;m_lightBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void LightShaderClass::ShutdownShader()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new light constant buffer is released in the ShutdownShader function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the light constant buffer.
+	if(m_lightBuffer)
+	{
+		m_lightBuffer-&gt;Release();
+		m_lightBuffer = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetShaderParameters function now takes in lightDirection and diffuseColor as inputs.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+					   D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, D3DXVECTOR3 lightDirection, 
+					   D3DXVECTOR4 diffuseColor)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	unsigned int bufferNumber;
+	MatrixBufferType* dataPtr;
+	LightBufferType* dataPtr2;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+
+	// Set shader texture resource in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;texture);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The light constant buffer is setup the same way as the matrix constant buffer.
+We first lock the buffer and get a pointer to it.
+After that we set the diffuse color and light direction using that pointer.
+Once the data is set we unlock the buffer and then set it in the pixel shader.
+Note that we use the PSSetConstantBuffers function instead of VSSetConstantBuffers since this is a pixel shader buffer we are setting.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Lock the light constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (LightBufferType*)mappedResource.pData;
+
+	// Copy the lighting variables into the constant buffer.
+	dataPtr2-&gt;diffuseColor = diffuseColor;
+	dataPtr2-&gt;lightDirection = lightDirection;
+	dataPtr2-&gt;padding = 0.0f;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_lightBuffer, 0);
+
+	// Set the position of the light constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_lightBuffer);
+
+	return true;
+}
+
+
+void LightShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Modelclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ModelClass has been slightly modified to handle lighting components.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: modelclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _MODELCLASS_H_
+#define _MODELCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "textureclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ModelClass
+////////////////////////////////////////////////////////////////////////////////
+class ModelClass
+{
+private:
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The VertexType structure now has a normal vector to accommodate lighting.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;</font><font face="arial" color="#aaaaff" size="2">
+		D3DXVECTOR3 normal;</font><font face="arial" color="#aaffaa" size="2">
+	};
+
+public:
+	ModelClass();
+	ModelClass(const ModelClass&amp;);
+	~ModelClass();
+
+	bool Initialize(ID3D11Device*, WCHAR*);
+	void Shutdown();
+	void Render(ID3D11DeviceContext*);
+
+	int GetIndexCount();
+	ID3D11ShaderResourceView* GetTexture();
+
+
+private:
+	bool InitializeBuffers(ID3D11Device*);
+	void ShutdownBuffers();
+	void RenderBuffers(ID3D11DeviceContext*);
+
+	bool LoadTexture(ID3D11Device*, WCHAR*);
+	void ReleaseTexture();
+
+private:
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+	int m_vertexCount, m_indexCount;
+	TextureClass* m_Texture;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Modelclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: modelclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "modelclass.h"
+
+
+ModelClass::ModelClass()
+{
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+	m_Texture = 0;
+}
+
+
+ModelClass::ModelClass(const ModelClass&amp; other)
+{
+}
+
+
+ModelClass::~ModelClass()
+{
+}
+
+
+bool ModelClass::Initialize(ID3D11Device* device, WCHAR* textureFilename)
+{
+	bool result;
+
+
+	// Initialize the vertex and index buffers.
+	result = InitializeBuffers(device);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Load the texture for this model.
+	result = LoadTexture(device, textureFilename);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ModelClass::Shutdown()
+{
+	// Release the model texture.
+	ReleaseTexture();
+
+	// Shutdown the vertex and index buffers.
+	ShutdownBuffers();
+
+	return;
+}
+
+
+void ModelClass::Render(ID3D11DeviceContext* deviceContext)
+{
+	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	RenderBuffers(deviceContext);
+
+	return;
+}
+
+
+int ModelClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+
+
+ID3D11ShaderResourceView* ModelClass::GetTexture()
+{
+	return m_Texture-&gt;GetTexture();
+}
+
+
+bool ModelClass::InitializeBuffers(ID3D11Device* device)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+
+
+	// Set the number of vertices in the vertex array.
+	m_vertexCount = 3;
+
+	// Set the number of indices in the index array.
+	m_indexCount = 3;
+
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The only change to the InitializeBuffers function is here in the vertex setup. 
+Each vertex now has normals associated with it for lighting calculations. 
+The normal is a line that is perpendicular to the face of the polygon so that the exact direction the face is pointing can be calculated. 
+For simplicity purposes I set the normal for each vertex along the Z axis by setting each Z component to -1.0f which makes the normal point towards the viewer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Load the vertex array with data.
+	vertices[0].position = D3DXVECTOR3(-1.0f, -1.0f, 0.0f);  // Bottom left.
+	vertices[0].texture = D3DXVECTOR2(0.0f, 1.0f);</font><font face="arial" color="#aaaaff" size="2">
+	vertices[0].normal = D3DXVECTOR3(0.0f, 0.0f, -1.0f);</font><font face="arial" color="#aaffaa" size="2">
+
+	vertices[1].position = D3DXVECTOR3(0.0f, 1.0f, 0.0f);  // Top middle.
+	vertices[1].texture = D3DXVECTOR2(0.5f, 0.0f);</font><font face="arial" color="#aaaaff" size="2">
+	vertices[1].normal = D3DXVECTOR3(0.0f, 0.0f, -1.0f);</font><font face="arial" color="#aaffaa" size="2">
+
+	vertices[2].position = D3DXVECTOR3(1.0f, -1.0f, 0.0f);  // Bottom right.
+	vertices[2].texture = D3DXVECTOR2(1.0f, 1.0f);</font><font face="arial" color="#aaaaff" size="2">
+	vertices[2].normal = D3DXVECTOR3(0.0f, 0.0f, -1.0f);</font><font face="arial" color="#aaffaa" size="2">
+
+	// Load the index array with data.
+	indices[0] = 0;  // Bottom left.
+	indices[1] = 1;  // Top middle.
+	indices[2] = 2;  // Bottom right.
+
+	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+
+
+void ModelClass::ShutdownBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+
+
+void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType); 
+	offset = 0;
+    
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	return;
+}
+
+
+bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
+{
+	bool result;
+
+
+	// Create the texture object.
+	m_Texture = new TextureClass;
+	if(!m_Texture)
+	{
+		return false;
+	}
+
+	// Initialize the texture object.
+	result = m_Texture-&gt;Initialize(device, filename);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ModelClass::ReleaseTexture()
+{
+	// Release the texture object.
+	if(m_Texture)
+	{
+		m_Texture-&gt;Shutdown();
+		delete m_Texture;
+		m_Texture = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Lightclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now we will look at the new light class which is very simple. 
+Its purpose is only to maintain the direction and color of lights. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: lightclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _LIGHTCLASS_H_
+#define _LIGHTCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: LightClass
+////////////////////////////////////////////////////////////////////////////////
+class LightClass
+{
+public:
+	LightClass();
+	LightClass(const LightClass&amp;);
+	~LightClass();
+
+	void SetDiffuseColor(float, float, float, float);
+	void SetDirection(float, float, float);
+
+	D3DXVECTOR4 GetDiffuseColor();
+	D3DXVECTOR3 GetDirection();
+
+private:
+	D3DXVECTOR4 m_diffuseColor;
+	D3DXVECTOR3 m_direction;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Lightclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: lightclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "lightclass.h"
+
+
+LightClass::LightClass()
+{
+}
+
+
+LightClass::LightClass(const LightClass&amp; other)
+{
+}
+
+
+LightClass::~LightClass()
+{
+}
+
+
+void LightClass::SetDiffuseColor(float red, float green, float blue, float alpha)
+{
+	m_diffuseColor = D3DXVECTOR4(red, green, blue, alpha);
+	return;
+}
+
+
+void LightClass::SetDirection(float x, float y, float z)
+{
+	m_direction = D3DXVECTOR3(x, y, z);
+	return;
+}
+
+
+D3DXVECTOR4 LightClass::GetDiffuseColor()
+{
+	return m_diffuseColor;
+}
+
+
+D3DXVECTOR3 LightClass::GetDirection()
+{
+	return m_direction;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GraphicsClass now has two new includes for the LightShaderClass and the LightClass.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">#include "lightshaderclass.h"
+#include "lightclass.h"</font><font face="arial" color="#aaffaa" size="2">
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+
+private:
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Render now takes a float value as input.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	bool Render(float);</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	ModelClass* m_Model;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There are two new private variables for the light shader and the light object.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	LightShaderClass* m_LightShader;
+	LightClass* m_Light;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_Model = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The light shader and light object are set to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_LightShader = 0;
+	m_Light = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	
+	// Create the model object.
+	m_Model = new ModelClass;
+	if(!m_Model)
+	{
+		return false;
+	}
+
+	// Initialize the model object.
+	result = m_Model-&gt;Initialize(m_D3D-&gt;GetDevice(), L"../Engine/data/seafloor.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new light shader object is created and initialized here.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the light shader object.
+	m_LightShader = new LightShaderClass;
+	if(!m_LightShader)
+	{
+		return false;
+	}
+
+	// Initialize the light shader object.
+	result = m_LightShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new light object is created here.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The color of the light is set to purple and the light direction is set to point down the positive Z axis.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Initialize the light object.
+	m_Light-&gt;SetDiffuseColor(1.0f, 0.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetDirection(0.0f, 0.0f, 1.0f);</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function releases the new light and light shader objects.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the light shader object.
+	if(m_LightShader)
+	{
+		m_LightShader-&gt;Shutdown();
+		delete m_LightShader;
+		m_LightShader = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the model object.
+	if(m_Model)
+	{
+		m_Model-&gt;Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame()
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We add a new static variable to hold an updated rotation value each frame that will be passed into the Render function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	static float rotation = 0.0f;
+
+
+	// Update the rotation variable each frame.
+	rotation += (float)D3DX_PI * 0.01f;
+	if(rotation &gt; 360.0f)
+	{
+		rotation -= 360.0f;
+	}</font><font face="arial" color="#aaffaa" size="2">
+	
+	// Render the graphics scene.</font><font face="arial" color="#aaaaff" size="2">
+	result = Render(rotation);</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool GraphicsClass::Render(float rotation)
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we rotate the world matrix by the rotation value so that when we render the triangle using this 
+updated world matrix it will spin the triangle by the rotation amount.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Rotate the world matrix by the rotation value so that the triangle will spin.
+	D3DXMatrixRotationY(&amp;worldMatrix, rotation);</font><font face="arial" color="#aaffaa" size="2">
+
+	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model-&gt;Render(m_D3D-&gt;GetDeviceContext());
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The light shader is called here to render the triangle. 
+The new light object is used to send the diffuse light color and light direction into the Render function so that the shader has access to those values.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Render the model using the light shader.
+	result = m_LightShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+				       m_Model-&gt;GetTexture(), m_Light-&gt;GetDirection(), m_Light-&gt;GetDiffuseColor());
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With a few changes to the code we were able to implement some basic directional lighting. 
+Make sure you understand how normal vectors work and why they are important to calculating lighting on polygon faces. 
+Note that the back of the spinning triangle will not light up since we have back face culling enabled in our D3DClass.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 6_ Diffuse Lighting_files/pic0018.gif" width="200" height="200"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the project and ensure you get a spinning textured triangle that is being illuminated by a purple light. Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Comment out "color = color * textureColor;" in the pixel shader so that the shaderTexture is no longer used and you should see the lighting effect without
+the texture.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Change the color of the light to green at the m_Light-&gt;SetDiffuseColor line of code in the GraphicsClass. 
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Change the direction of the light to go down the positive and the negative X axis. You might want to change the speed of the rotation also. 
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2010 Project: <a href="http://www.rastertek.com/dx11tut06.zip">dx11tut06.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src06.zip">dx11src06.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe06.zip">dx11exe06.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 6_ Diffuse Lighting_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 6_ Diffuse Lighting_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

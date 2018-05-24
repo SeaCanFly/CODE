@@ -1,0 +1,2602 @@
+
+<!-- saved from url=(0038)http://www.rastertek.com/tertut17.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 17: Terrain Texture Layers</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 17: Terrain Texture Layers
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 17_ Terrain Texture Layers_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This DirectX 11 terrain tutorial will cover the implementation of terrain texture layers.
+The code in this tutorial builds on the previous terrain tutorials.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The pixel shader is an incredibly powerful tool that allows us to have complete control over how our terrain can look on a per-pixel basis.
+With this fine grained pixel control we can employ similar methods such as what Photoshop uses; layers and masks.
+Layers and masks will allow us to paint multiple texture layers over top of each other.
+This is just like how an artist would paint a terrain, layer by layer applying different colored paint each time.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To illustrate this concept we will first draw a base layer of dirt for the terrain resulting in the following image:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 17_ Terrain Texture Layers_files/pic0270.gif" width="500" height="282"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next we will paint a second layer over top of the first one with a different dirt texture that is placed randomly using noise:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 17_ Terrain Texture Layers_files/pic0271.gif" width="500" height="282"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+After that we can manually paint a third layer using a sand texture to create a sandy path over the terrain:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 17_ Terrain Texture Layers_files/pic0272.gif" width="500" height="282"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And finally we can manually paint another fourth layer using a brick texture to create a brick road on top of the sandy path:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 17_ Terrain Texture Layers_files/pic0273.gif" width="500" height="282"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We can continue adding layers until we have achieved the exact look we want for our terrain.
+All of these layers are painted on top of each other using what are called texture masks.
+Texture masks are usually created manually by an artist or they can be generated by using noise algorithms and other rendering techniques.
+For example the first texture mask used to place the second layer of dirt on top of the base layer looks like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 17_ Terrain Texture Layers_files/pic0274.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The white to black values represent the intensity or percentage amount that the new texture pixel should be added on top of the previous pixel.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The second texture mask that was used to paint the sandy path was the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 17_ Terrain Texture Layers_files/pic0275.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And finally the third texture mask that was used to paint the brick road on top of the sandy path was the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 17_ Terrain Texture Layers_files/pic0276.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For the purposes of efficiency we packed them all into a single texture.
+The first layer went to the red channel, the second layer to the green channel, and the third layer to the blue channel.
+It creates the following image when viewed all together:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 17_ Terrain Texture Layers_files/pic0277.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+An overhead view of the resulting terrain looks like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 17_ Terrain Texture Layers_files/pic0278.gif" width="400" height="365"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+When we sample the texture in the pixel shader it is simple to pull out just the red, green, blue, or alpha channel and then use that as the per-pixel texture mask for a specific layer of terrain.
+This is the same idea as the alpha blending tutorial.
+You can pack four texture masks into a single RGBA texture (or even more if you are using a texture atlas).
+For every four layers of terrain you need to send in one RGBA combined texture mask into the pixel shader.
+So if we had 12 terrain layers we would need three RGBA textures to send in all the required texture masks to the pixel shader.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the above image you will also note that the terrain is smaller than the other tutorials.
+To be exact it is using just a 32x32 height map.
+The reason for this is that the entire terrain now needs to be split up into 32x32 sections.
+Each 32x32 section will have its own texture mask.
+The resolution of the texture mask used for this tutorial is 256x256.
+This size covers the 32x32 well enough without using too much texture memory.
+Going smaller sacrifices a lot of detail however.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Splitting the terrain into these sections and assigning each section its own texture mask also incorporates well into the quad tree structure.
+Just the nodes will now be a fixed size (such as 32x32) that correlates to the texture mask.
+Note also that the texture mask textures will require a second set of texture coordinates since we are sampling for the 32x32 section, not per quad.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+On a side note you can use this method to create a color map for this section of the terrain.
+Then for level of detail optimizations you can switch to rendering just the color map for the 32x32 section if this section becomes distant enough from the camera.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To start the code section of the tutorial we will look at the modified terrain HLSL shader.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrain.vs</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrain.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The two input structures now have an additional texture coordinate member for the set of texture coordinates that are used to sample the texture layer masks out of the alpha texture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float3 binormal : BINORMAL;
+    float2 tex2 : TEXCOORD1;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float3 binormal : BINORMAL;
+    float2 tex2 : TEXCOORD1;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType TerrainVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Send in both sets of texture coordinates to the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+    output.tex2 = input.tex2;
+
+    // Calculate the normal vector against the world matrix only and then normalize the final value.
+    output.normal = mul(input.normal, (float3x3)worldMatrix);
+    output.normal = normalize(output.normal);
+
+    // Calculate the tangent vector against the world matrix only and then normalize the final value.
+    output.tangent = mul(input.tangent, (float3x3)worldMatrix);
+    output.tangent = normalize(output.tangent);
+
+    // Calculate the binormal vector against the world matrix only and then normalize the final value.
+    output.binormal = mul(input.binormal, (float3x3)worldMatrix);
+    output.binormal = normalize(output.binormal);
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrain.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrain.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////
+// TEXTURES //
+//////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have four color textures that will be used to render the terrain.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Texture2D colorTexture1 : register(t0);
+Texture2D colorTexture2 : register(t1);
+Texture2D colorTexture3 : register(t2);
+Texture2D colorTexture4 : register(t3);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a single alpha texture which contains the 3 texture layer masks in the red, green, and blue channel.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Texture2D alphaTexture1 : register(t4);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We use two normal maps to improve the look of the terrain textures by applying bump map calculations.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Texture2D normalMap1 : register(t5);
+Texture2D normalMap2 : register(t6);
+
+
+//////////////
+// SAMPLERS //
+//////////////
+SamplerState SampleType;
+
+
+//////////////////////
+// CONSTANT BUFFERS //
+//////////////////////
+cbuffer LightBuffer
+{
+    float3 lightDirection;
+    float padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float3 binormal : BINORMAL;
+    float2 tex2 : TEXCOORD1;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 TerrainPixelShader(PixelInputType input) : SV_TARGET
+{
+    float3 lightDir;
+    float4 bumpMap;
+    float3 bumpNormal;
+    float lightIntensity1;
+    float lightIntensity2;
+    float4 textureColor1;
+    float4 textureColor2;
+    float4 textureColor3;
+    float4 textureColor4;
+    float4 alphaMap1;
+    float4 baseColor;
+    float4 color;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Start by calculating the two bump maps.
+We use the first bump map for the dirt and sand textures since they are fairly similar and can share a single normal map.
+We use the second bump map for the stone path since it is fairly distinct looking and requires its own unique normal map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Invert the light direction for calculations.
+    lightDir = -lightDirection;
+
+    // Calculate the first bump map using the first normal map.
+    bumpMap = normalMap1.Sample(SampleType, input.tex);
+    bumpMap = (bumpMap * 2.0f) - 1.0f;
+    bumpNormal = input.normal + bumpMap.x * input.tangent + bumpMap.y * input.binormal;
+    bumpNormal = normalize(bumpNormal);
+    lightIntensity1 = saturate(dot(bumpNormal, lightDir));
+
+    // Calculate the second bump map using the second normal map.
+    bumpMap = normalMap2.Sample(SampleType, input.tex);
+    bumpMap = (bumpMap * 2.0f) - 1.0f;
+    bumpNormal = input.normal + bumpMap.x * input.tangent + bumpMap.y * input.binormal;
+    bumpNormal = normalize(bumpNormal);
+    lightIntensity2 = saturate(dot(bumpNormal, lightDir));
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now sample the four textures that will be used for rendering the terrain.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Sample the color textures.
+    textureColor1 = colorTexture1.Sample(SampleType, input.tex);
+    textureColor2 = colorTexture2.Sample(SampleType, input.tex);
+    textureColor3 = colorTexture3.Sample(SampleType, input.tex);
+    textureColor4 = colorTexture4.Sample(SampleType, input.tex);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Combine the four textures with their bump maps.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Add the bump maps to their respective textures.
+    textureColor1 = saturate(lightIntensity1 * textureColor1);
+    textureColor2 = saturate(lightIntensity1 * textureColor2);
+    textureColor3 = saturate(lightIntensity1 * textureColor3);
+    textureColor4 = saturate(lightIntensity2 * textureColor4);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now sample the alpha texture which contains the three texture mask layers in the red, green, and blue channel.
+Note that we use the second set of texture coordinates as it maps over the entire 32x32 section and not just the individual quads.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Sample the alpha map using second set of texture coordinates.
+    alphaMap1 = alphaTexture1.Sample(SampleType, input.tex2);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Paint the first layer of terrain.
+In this case it is the dark brown dirt texture.
+This texture must cover 100% of the terrain since it is the base layer and we don't want any black holes in our terrain.
+It also saves us from using up a texture mask layer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Set the base color to the first color texture.
+    baseColor = textureColor1;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Paint the second layer of the terrain on top of the base layer using the second light brown dirt texture and the texture layer mask from the red channel in the alpha map.
+We use the lerp function to do a linear interpolation of the two pixels which gives us the adding (painting on top of) result we are looking for.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Add the second layer using the red channel of the alpha map.
+    color = lerp(baseColor, textureColor2, alphaMap1.r);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now add the third layer on top of the previous result.  We use the sand texture and the texture layer mask from the green channel of the alpha map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Add the third layer using the green channel of the alpha map.
+    color = lerp(color, textureColor3, alphaMap1.g);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Finally add the fourth layer on top of the previous result using the stone texture and the texture layer mask from the blue channel of the alpha map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Add the fourth layer using the blue channel of the alpha map.
+    color = lerp(color, textureColor4, alphaMap1.b);
+	
+    return color;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainshaderclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _TERRAINSHADERCLASS_H_
+#define _TERRAINSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: TerrainShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class TerrainShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+
+	struct LightBufferType
+	{
+		D3DXVECTOR3 lightDirection;
+		float padding;
+	};
+
+public:
+	TerrainShaderClass();
+	TerrainShaderClass(const TerrainShaderClass&amp;);
+	~TerrainShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXVECTOR3, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*,
+		    ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXVECTOR3, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, 
+				 ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleState;
+	ID3D11Buffer* m_matrixBuffer;
+	ID3D11Buffer* m_lightBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "terrainshaderclass.h"
+
+
+TerrainShaderClass::TerrainShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleState = 0;
+	m_matrixBuffer = 0;
+	m_lightBuffer = 0;
+}
+
+
+TerrainShaderClass::TerrainShaderClass(const TerrainShaderClass&amp; other)
+{
+}
+
+
+TerrainShaderClass::~TerrainShaderClass()
+{
+}
+
+
+bool TerrainShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+
+
+	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/terrain.vs", L"../Engine/terrain.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void TerrainShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+
+
+bool TerrainShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, D3DXVECTOR3 lightDirection, 
+				ID3D11ShaderResourceView* colorTexture1, ID3D11ShaderResourceView* colorTexture2, ID3D11ShaderResourceView* colorTexture3, ID3D11ShaderResourceView* colorTexture4,
+				ID3D11ShaderResourceView* alphaTexture1, ID3D11ShaderResourceView* normalMap1, ID3D11ShaderResourceView* normalMap2)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, lightDirection, colorTexture1, colorTexture2, colorTexture3, colorTexture4, alphaTexture1, normalMap1, normalMap2);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool TerrainShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[6];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC lightBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+
+	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "TerrainVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "TerrainPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	polygonLayout[2].SemanticName = "NORMAL";
+	polygonLayout[2].SemanticIndex = 0;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[2].InputSlot = 0;
+	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[2].InstanceDataStepRate = 0;
+
+	polygonLayout[3].SemanticName = "TANGENT";
+	polygonLayout[3].SemanticIndex = 0;
+	polygonLayout[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[3].InputSlot = 0;
+	polygonLayout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[3].InstanceDataStepRate = 0;
+
+	polygonLayout[4].SemanticName = "BINORMAL";
+	polygonLayout[4].SemanticIndex = 0;
+	polygonLayout[4].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[4].InputSlot = 0;
+	polygonLayout[4].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[4].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[4].InstanceDataStepRate = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have added a six member to the polygon layout for the second set of texture coordinates that are used for sampling the texture layer masks from the alpha texture.
+Remember to also set the SemanticIndex to one since this is the second TEXCOORD semantic in this layout.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	polygonLayout[5].SemanticName = "TEXCOORD";
+	polygonLayout[5].SemanticIndex = 1;
+	polygonLayout[5].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[5].InputSlot = 0;
+	polygonLayout[5].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[5].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[5].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the pixel shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;lightBufferDesc, NULL, &amp;m_lightBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void TerrainShaderClass::ShutdownShader()
+{
+	// Release the light constant buffer.
+	if(m_lightBuffer)
+	{
+		m_lightBuffer-&gt;Release();
+		m_lightBuffer = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void TerrainShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+
+
+bool TerrainShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, 
+					     D3DXVECTOR3 lightDirection, ID3D11ShaderResourceView* colorTexture1, ID3D11ShaderResourceView* colorTexture2, ID3D11ShaderResourceView* colorTexture3, 
+					     ID3D11ShaderResourceView* colorTexture4, ID3D11ShaderResourceView* alphaTexture1, ID3D11ShaderResourceView* normalMap1, ID3D11ShaderResourceView* normalMap2)
+{
+	HRESULT result;	
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	unsigned int bufferNumber;
+	MatrixBufferType* dataPtr;
+	LightBufferType* dataPtr2;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+
+	// Lock the light constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (LightBufferType*)mappedResource.pData;
+
+	// Copy the lighting variables into the constant buffer.
+	dataPtr2-&gt;lightDirection = lightDirection;
+	dataPtr2-&gt;padding = 0.0f;;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_lightBuffer, 0);
+
+	// Set the position of the light constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_lightBuffer);
+
+	// Set the texture resources in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;colorTexture1);
+	deviceContext-&gt;PSSetShaderResources(1, 1, &amp;colorTexture2);
+	deviceContext-&gt;PSSetShaderResources(2, 1, &amp;colorTexture3);
+	deviceContext-&gt;PSSetShaderResources(3, 1, &amp;colorTexture4);
+	deviceContext-&gt;PSSetShaderResources(4, 1, &amp;alphaTexture1);
+	deviceContext-&gt;PSSetShaderResources(5, 1, &amp;normalMap1);
+	deviceContext-&gt;PSSetShaderResources(6, 1, &amp;normalMap2);
+
+	return true;
+}
+
+
+void TerrainShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _TERRAINCLASS_H_
+#define _TERRAINCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;stdio.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: TerrainClass
+////////////////////////////////////////////////////////////////////////////////
+class TerrainClass
+{
+private:
+	struct HeightMapType 
+	{ 
+		float x, y, z;
+		float nx, ny, nz;
+	};
+
+	struct VectorType 
+	{ 
+		float x, y, z;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have added a second set of texture coordinates that are used for sampling the texture layer masks from the alpha texture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct ModelType 
+	{ 
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+		float tx, ty, tz;
+		float bx, by, bz;
+		float tu2, tv2;
+	};
+
+	struct TempVertexType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The second set of texture coordinates is also added to the VertexType.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
+		D3DXVECTOR3 normal;
+		D3DXVECTOR3 tangent;
+		D3DXVECTOR3 binormal;
+		D3DXVECTOR2 texture2;
+	};
+	
+public:
+	TerrainClass();
+	TerrainClass(const TerrainClass&amp;);
+	~TerrainClass();
+
+	bool Initialize(ID3D11Device*, char*, float);
+	void Shutdown();
+	void Render(ID3D11DeviceContext*);
+
+	int GetIndexCount();
+
+private:
+	bool LoadHeightMap(char*);
+	void ReduceHeightMap(float);
+	bool CalculateNormals();
+	bool BuildModel();
+	void CalculateModelVectors();
+	void CalculateTangentBinormal(TempVertexType, TempVertexType, TempVertexType, VectorType&amp;, VectorType&amp;);
+	bool InitializeBuffers(ID3D11Device*);
+
+	void ReleaseHeightMap();
+	void ReleaseModel();
+	void ReleaseBuffers();
+
+	void RenderBuffers(ID3D11DeviceContext*);
+
+private:
+	int m_terrainWidth, m_terrainHeight, m_vertexCount, m_indexCount;
+	HeightMapType* m_heightMap;
+	ModelType* m_model;
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "terrainclass.h"
+
+
+TerrainClass::TerrainClass()
+{
+	m_heightMap = 0;
+	m_model = 0;
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+}
+
+
+TerrainClass::TerrainClass(const TerrainClass&amp; other)
+{
+}
+
+
+TerrainClass::~TerrainClass()
+{
+}
+
+
+bool TerrainClass::Initialize(ID3D11Device* device, char* heightMapFilename, float maximumHeight)
+{
+	bool result;
+
+
+	// Load in the height map for the terrain.
+	result = LoadHeightMap(heightMapFilename);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reduce the height of the height map.
+	ReduceHeightMap(maximumHeight);
+
+	// Calculate the normals for the terrain data.
+	result = CalculateNormals();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Construct a 3D model from the height map and normal data.
+	result = BuildModel();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Calculate the normal, tangent, and binormal vectors for the terrain model.
+	CalculateModelVectors();
+
+	// Initialize the vertex and index buffer that hold the geometry for the terrain.
+	result = InitializeBuffers(device);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Release the height map and the model since the data is now loaded into the vertex and index buffers.
+	ReleaseHeightMap();
+	ReleaseModel();
+
+	return true;
+}
+
+
+void TerrainClass::Shutdown()
+{
+	// Release the buffers.
+	ReleaseBuffers();
+
+	// Release the model.
+	ReleaseModel();
+
+	// Release the height map.
+	ReleaseHeightMap();
+
+	return;
+}
+
+
+void TerrainClass::Render(ID3D11DeviceContext* deviceContext)
+{
+	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	RenderBuffers(deviceContext);
+
+	return;
+}
+
+
+int TerrainClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+
+
+bool TerrainClass::LoadHeightMap(char* filename)
+{
+	FILE* filePtr;
+	int error;
+	unsigned int count;
+	BITMAPFILEHEADER bitmapFileHeader;
+	BITMAPINFOHEADER bitmapInfoHeader;
+	int imageSize, i, j, k, index;
+	unsigned char* bitmapImage;
+	unsigned char height;
+
+
+	// Open the height map file in binary.
+	error = fopen_s(&amp;filePtr, filename, "rb");
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Read in the file header.
+	count = fread(&amp;bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, filePtr);
+	if(count != 1)
+	{
+		return false;
+	}
+
+	// Read in the bitmap info header.
+	count = fread(&amp;bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, filePtr);
+	if(count != 1)
+	{
+		return false;
+	}
+
+	// Save the dimensions of the terrain.
+	m_terrainWidth = bitmapInfoHeader.biWidth;
+	m_terrainHeight = bitmapInfoHeader.biHeight;
+
+	// Calculate the size of the bitmap image data.
+	imageSize = m_terrainWidth * m_terrainHeight * 3;
+
+	// Allocate memory for the bitmap image data.
+	bitmapImage = new unsigned char[imageSize];
+	if(!bitmapImage)
+	{
+		return false;
+	}
+
+	// Move to the beginning of the bitmap data.
+	fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
+
+	// Read in the bitmap image data.
+	count = fread(bitmapImage, 1, imageSize, filePtr);
+	if(count != imageSize)
+	{
+		return false;
+	}
+
+	// Close the file.
+	error = fclose(filePtr);
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Create the structure to hold the height map data.
+	m_heightMap = new HeightMapType[m_terrainWidth * m_terrainHeight];
+	if(!m_heightMap)
+	{
+		return false;
+	}
+
+	// Initialize the position in the image data buffer.
+	k=0;
+
+	// Read the image data into the height map.
+	for(j=0; j&lt;m_terrainHeight; j++)
+	{
+		for(i=0; i&lt;m_terrainWidth; i++)
+		{
+			height = bitmapImage[k];
+			
+			index = (m_terrainWidth * j) + i;
+
+			m_heightMap[index].x = (float)i;
+			m_heightMap[index].y = (float)height;
+			m_heightMap[index].z = (float)j;
+
+			k+=3;
+		}
+	}
+
+	// Release the bitmap image data.
+	delete [] bitmapImage;
+	bitmapImage = 0;
+
+	return true;
+}
+
+
+void TerrainClass::ReduceHeightMap(float value)
+{
+	int i, j;
+
+
+	for(j=0; j&lt;m_terrainHeight; j++)
+	{
+		for(i=0; i&lt;m_terrainWidth; i++)
+		{
+			m_heightMap[(m_terrainWidth * j) + i].y /= value;
+		}
+	}
+
+	return;
+}
+
+
+bool TerrainClass::CalculateNormals()
+{
+	int i, j, index1, index2, index3, index, count;
+	float vertex1[3], vertex2[3], vertex3[3], vector1[3], vector2[3], sum[3], length;
+	VectorType* normals;
+
+
+	// Create a temporary array to hold the un-normalized normal vectors.
+	normals = new VectorType[(m_terrainHeight-1) * (m_terrainWidth-1)];
+	if(!normals)
+	{
+		return false;
+	}
+
+	// Go through all the faces in the mesh and calculate their normals.
+	for(j=0; j&lt;(m_terrainHeight-1); j++)
+	{
+		for(i=0; i&lt;(m_terrainWidth-1); i++)
+		{
+			index1 = (j * m_terrainWidth) + i;
+			index2 = (j * m_terrainWidth) + (i+1);
+			index3 = ((j+1) * m_terrainWidth) + i;
+
+			// Get three vertices from the face.
+			vertex1[0] = m_heightMap[index1].x;
+			vertex1[1] = m_heightMap[index1].y;
+			vertex1[2] = m_heightMap[index1].z;
+		
+			vertex2[0] = m_heightMap[index2].x;
+			vertex2[1] = m_heightMap[index2].y;
+			vertex2[2] = m_heightMap[index2].z;
+		
+			vertex3[0] = m_heightMap[index3].x;
+			vertex3[1] = m_heightMap[index3].y;
+			vertex3[2] = m_heightMap[index3].z;
+
+			// Calculate the two vectors for this face.
+			vector1[0] = vertex1[0] - vertex3[0];
+			vector1[1] = vertex1[1] - vertex3[1];
+			vector1[2] = vertex1[2] - vertex3[2];
+			vector2[0] = vertex3[0] - vertex2[0];
+			vector2[1] = vertex3[1] - vertex2[1];
+			vector2[2] = vertex3[2] - vertex2[2];
+
+			index = (j * (m_terrainWidth-1)) + i;
+
+			// Calculate the cross product of those two vectors to get the un-normalized value for this face normal.
+			normals[index].x = (vector1[1] * vector2[2]) - (vector1[2] * vector2[1]);
+			normals[index].y = (vector1[2] * vector2[0]) - (vector1[0] * vector2[2]);
+			normals[index].z = (vector1[0] * vector2[1]) - (vector1[1] * vector2[0]);
+		}
+	}
+
+	// Now go through all the vertices and take an average of each face normal that the vertex touches to get the averaged normal for that vertex.
+	for(j=0; j&lt;m_terrainHeight; j++)
+	{
+		for(i=0; i&lt;m_terrainWidth; i++)
+		{
+			// Initialize the sum.
+			sum[0] = 0.0f;
+			sum[1] = 0.0f;
+			sum[2] = 0.0f;
+
+			// Initialize the count.
+			count = 0;
+
+			// Bottom left face.
+			if(((i-1) &gt;= 0) &amp;&amp; ((j-1) &gt;= 0))
+			{
+				index = ((j-1) * (m_terrainWidth-1)) + (i-1);
+
+				sum[0] += normals[index].x;
+				sum[1] += normals[index].y;
+				sum[2] += normals[index].z;
+				count++;
+			}
+
+			// Bottom right face.
+			if((i &lt; (m_terrainWidth-1)) &amp;&amp; ((j-1) &gt;= 0))
+			{
+				index = ((j-1) * (m_terrainWidth-1)) + i;
+
+				sum[0] += normals[index].x;
+				sum[1] += normals[index].y;
+				sum[2] += normals[index].z;
+				count++;
+			}
+
+			// Upper left face.
+			if(((i-1) &gt;= 0) &amp;&amp; (j &lt; (m_terrainHeight-1)))
+			{
+				index = (j * (m_terrainWidth-1)) + (i-1);
+
+				sum[0] += normals[index].x;
+				sum[1] += normals[index].y;
+				sum[2] += normals[index].z;
+				count++;
+			}
+
+			// Upper right face.
+			if((i &lt; (m_terrainWidth-1)) &amp;&amp; (j &lt; (m_terrainHeight-1)))
+			{
+				index = (j * (m_terrainWidth-1)) + i;
+
+				sum[0] += normals[index].x;
+				sum[1] += normals[index].y;
+				sum[2] += normals[index].z;
+				count++;
+			}
+			
+			// Take the average of the faces touching this vertex.
+			sum[0] = (sum[0] / (float)count);
+			sum[1] = (sum[1] / (float)count);
+			sum[2] = (sum[2] / (float)count);
+
+			// Calculate the length of this normal.
+			length = sqrt((sum[0] * sum[0]) + (sum[1] * sum[1]) + (sum[2] * sum[2]));
+			
+			// Get an index to the vertex location in the height map array.
+			index = (j * m_terrainWidth) + i;
+
+			// Normalize the final shared normal for this vertex and store it in the height map array.
+			m_heightMap[index].nx = (sum[0] / length);
+			m_heightMap[index].ny = (sum[1] / length);
+			m_heightMap[index].nz = (sum[2] / length);
+		}
+	}
+
+	// Release the temporary normals.
+	delete [] normals;
+	normals = 0;
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the BuildModel function we now create a second set of texture coordinates for sampling the texture layer masks since they cover the entire 32x32 section and not just the individual quads.
+So in the loop that builds the model we need to divide the number of quads (31 quads since it is made of 32 height points) by one and use that as an increment value as we move along the width and height of the terrain section.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool TerrainClass::BuildModel()
+{
+	int i, j, index, index1, index2, index3, index4;
+	float incrementSize, tu2Left, tu2Right, tv2Top, tv2Bottom;
+
+
+	// Set the number of vertices in the model.
+	m_vertexCount = (m_terrainWidth - 1) * (m_terrainHeight - 1) * 6;
+
+	// Create the terrain model array.
+	m_model = new ModelType[m_vertexCount];
+	if(!m_model)
+	{
+		return false;
+	}
+
+	// Setup the increment size for the second set of textures (alpha map).
+	incrementSize = 1.0f / 31.0f;
+
+	// Initialize the texture increments.
+	tu2Left = 0.0f;
+	tu2Right = incrementSize;
+	tv2Bottom = 1.0f;
+	tv2Top = 1.0f - incrementSize;
+	
+	// Load the terrain model with the height map terrain data.
+	index = 0;
+
+	for(j=0; j&lt;(m_terrainHeight-1); j++)
+	{
+		for(i=0; i&lt;(m_terrainWidth-1); i++)
+		{
+			index1 = (m_terrainWidth * j) + i;          // Bottom left.
+			index2 = (m_terrainWidth * j) + (i+1);      // Bottom right.
+			index3 = (m_terrainWidth * (j+1)) + i;      // Upper left.
+			index4 = (m_terrainWidth * (j+1)) + (i+1);  // Upper right.
+
+			// Upper left.
+			m_model[index].x  = m_heightMap[index3].x;
+			m_model[index].y  = m_heightMap[index3].y;
+			m_model[index].z  = m_heightMap[index3].z;
+			m_model[index].nx = m_heightMap[index3].nx;
+			m_model[index].ny = m_heightMap[index3].ny;
+			m_model[index].nz = m_heightMap[index3].nz;
+			m_model[index].tu = 0.0f;
+			m_model[index].tv = 0.0f;
+			m_model[index].tu2 = tu2Left;
+			m_model[index].tv2 = tv2Top;
+			index++;
+
+			// Upper right.
+			m_model[index].x  = m_heightMap[index4].x;
+			m_model[index].y  = m_heightMap[index4].y;
+			m_model[index].z  = m_heightMap[index4].z;
+			m_model[index].nx = m_heightMap[index4].nx;
+			m_model[index].ny = m_heightMap[index4].ny;
+			m_model[index].nz = m_heightMap[index4].nz;
+			m_model[index].tu = 1.0f;
+			m_model[index].tv = 0.0f;
+			m_model[index].tu2 = tu2Right;
+			m_model[index].tv2 = tv2Top;
+			index++;
+
+			// Bottom left.
+			m_model[index].x  = m_heightMap[index1].x;
+			m_model[index].y  = m_heightMap[index1].y;
+			m_model[index].z  = m_heightMap[index1].z;
+			m_model[index].nx = m_heightMap[index1].nx;
+			m_model[index].ny = m_heightMap[index1].ny;
+			m_model[index].nz = m_heightMap[index1].nz;
+			m_model[index].tu = 0.0f;
+			m_model[index].tv = 1.0f;
+			m_model[index].tu2 = tu2Left;
+			m_model[index].tv2 = tv2Bottom;
+			index++;
+
+			// Bottom left.
+			m_model[index].x  = m_heightMap[index1].x;
+			m_model[index].y  = m_heightMap[index1].y;
+			m_model[index].z  = m_heightMap[index1].z;
+			m_model[index].nx = m_heightMap[index1].nx;
+			m_model[index].ny = m_heightMap[index1].ny;
+			m_model[index].nz = m_heightMap[index1].nz;
+			m_model[index].tu = 0.0f;
+			m_model[index].tv = 1.0f;
+			m_model[index].tu2 = tu2Left;
+			m_model[index].tv2 = tv2Bottom;
+			index++;
+
+			// Upper right.
+			m_model[index].x  = m_heightMap[index4].x;
+			m_model[index].y  = m_heightMap[index4].y;
+			m_model[index].z  = m_heightMap[index4].z;
+			m_model[index].nx = m_heightMap[index4].nx;
+			m_model[index].ny = m_heightMap[index4].ny;
+			m_model[index].nz = m_heightMap[index4].nz;
+			m_model[index].tu = 1.0f;
+			m_model[index].tv = 0.0f;
+			m_model[index].tu2 = tu2Right;
+			m_model[index].tv2 = tv2Top;
+			index++;
+
+			// Bottom right.
+			m_model[index].x  = m_heightMap[index2].x;
+			m_model[index].y  = m_heightMap[index2].y;
+			m_model[index].z  = m_heightMap[index2].z;
+			m_model[index].nx = m_heightMap[index2].nx;
+			m_model[index].ny = m_heightMap[index2].ny;
+			m_model[index].nz = m_heightMap[index2].nz;
+			m_model[index].tu = 1.0f;
+			m_model[index].tv = 1.0f;
+			m_model[index].tu2 = tu2Right;
+			m_model[index].tv2 = tv2Bottom;
+			index++;
+
+			// Increment the tu texture coords for the alpha map.
+			tu2Left += incrementSize;
+			tu2Right += incrementSize;
+		}
+
+		// Reset the tu texture coordinate increments for the alpha map.
+		tu2Left = 0.0f;
+		tu2Right = incrementSize;
+
+		// Increment the tv texture coords for the alpha map.
+		tv2Top -= incrementSize;
+		tv2Bottom -= incrementSize;
+	}
+
+	return true;
+}
+
+
+void TerrainClass::CalculateModelVectors()
+{
+	int faceCount, i, index;
+	TempVertexType vertex1, vertex2, vertex3;
+	VectorType tangent, binormal;
+
+
+	// Calculate the number of faces in the terrain model.
+	faceCount = m_vertexCount / 3;
+
+	// Initialize the index to the model data.
+	index = 0;
+
+	// Go through all the faces and calculate the the tangent, binormal, and normal vectors.
+	for(i=0; i&lt;faceCount; i++)
+	{
+		// Get the three vertices for this face from the terrain model.
+		vertex1.x  = m_model[index].x;
+		vertex1.y  = m_model[index].y;
+		vertex1.z  = m_model[index].z;
+		vertex1.tu = m_model[index].tu;
+		vertex1.tv = m_model[index].tv;
+		vertex1.nx = m_model[index].nx;
+		vertex1.ny = m_model[index].ny;
+		vertex1.nz = m_model[index].nz;
+		index++;
+
+		vertex2.x  = m_model[index].x;
+		vertex2.y  = m_model[index].y;
+		vertex2.z  = m_model[index].z;
+		vertex2.tu = m_model[index].tu;
+		vertex2.tv = m_model[index].tv;
+		vertex2.nx = m_model[index].nx;
+		vertex2.ny = m_model[index].ny;
+		vertex2.nz = m_model[index].nz;
+		index++;
+
+		vertex3.x  = m_model[index].x;
+		vertex3.y  = m_model[index].y;
+		vertex3.z  = m_model[index].z;
+		vertex3.tu = m_model[index].tu;
+		vertex3.tv = m_model[index].tv;
+		vertex3.nx = m_model[index].nx;
+		vertex3.ny = m_model[index].ny;
+		vertex3.nz = m_model[index].nz;
+		index++;
+
+		// Calculate the tangent and binormal of that face.
+		CalculateTangentBinormal(vertex1, vertex2, vertex3, tangent, binormal);
+
+		// Store the tangent and binormal for this face back in the model structure.
+		m_model[index-1].tx = tangent.x;
+		m_model[index-1].ty = tangent.y;
+		m_model[index-1].tz = tangent.z;
+		m_model[index-1].bx = binormal.x;
+		m_model[index-1].by = binormal.y;
+		m_model[index-1].bz = binormal.z;
+
+		m_model[index-2].tx = tangent.x;
+		m_model[index-2].ty = tangent.y;
+		m_model[index-2].tz = tangent.z;
+		m_model[index-2].bx = binormal.x;
+		m_model[index-2].by = binormal.y;
+		m_model[index-2].bz = binormal.z;
+
+		m_model[index-3].tx = tangent.x;
+		m_model[index-3].ty = tangent.y;
+		m_model[index-3].tz = tangent.z;
+		m_model[index-3].bx = binormal.x;
+		m_model[index-3].by = binormal.y;
+		m_model[index-3].bz = binormal.z;
+	}
+
+	return;
+}
+
+
+void TerrainClass::CalculateTangentBinormal(TempVertexType vertex1, TempVertexType vertex2, TempVertexType vertex3, VectorType&amp; tangent, 
+					    VectorType&amp; binormal)
+{
+	float vector1[3], vector2[3];
+	float tuVector[2], tvVector[2];
+	float den;
+	float length;
+
+
+	// Calculate the two vectors for this face.
+	vector1[0] = vertex2.x - vertex1.x;
+	vector1[1] = vertex2.y - vertex1.y;
+	vector1[2] = vertex2.z - vertex1.z;
+
+	vector2[0] = vertex3.x - vertex1.x;
+	vector2[1] = vertex3.y - vertex1.y;
+	vector2[2] = vertex3.z - vertex1.z;
+
+	// Calculate the tu and tv texture space vectors.
+	tuVector[0] = vertex2.tu - vertex1.tu;
+	tvVector[0] = vertex2.tv - vertex1.tv;
+
+	tuVector[1] = vertex3.tu - vertex1.tu;
+	tvVector[1] = vertex3.tv - vertex1.tv;
+
+	// Calculate the denominator of the tangent/binormal equation.
+	den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
+
+	// Calculate the cross products and multiply by the coefficient to get the tangent and binormal.
+	tangent.x = (tvVector[1] * vector1[0] - tvVector[0] * vector2[0]) * den;
+	tangent.y = (tvVector[1] * vector1[1] - tvVector[0] * vector2[1]) * den;
+	tangent.z = (tvVector[1] * vector1[2] - tvVector[0] * vector2[2]) * den;
+
+	binormal.x = (tuVector[0] * vector2[0] - tuVector[1] * vector1[0]) * den;
+	binormal.y = (tuVector[0] * vector2[1] - tuVector[1] * vector1[1]) * den;
+	binormal.z = (tuVector[0] * vector2[2] - tuVector[1] * vector1[2]) * den;
+
+	// Calculate the length of this normal.
+	length = sqrt((tangent.x * tangent.x) + (tangent.y * tangent.y) + (tangent.z * tangent.z));
+			
+	// Normalize the normal and then store it
+	tangent.x = tangent.x / length;
+	tangent.y = tangent.y / length;
+	tangent.z = tangent.z / length;
+
+	// Calculate the length of this normal.
+	length = sqrt((binormal.x * binormal.x) + (binormal.y * binormal.y) + (binormal.z * binormal.z));
+			
+	// Normalize the normal and then store it
+	binormal.x = binormal.x / length;
+	binormal.y = binormal.y / length;
+	binormal.z = binormal.z / length;
+
+	return;
+}
+
+
+bool TerrainClass::InitializeBuffers(ID3D11Device* device)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	int i;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+
+
+	// Set the index count to the same as the vertex count.
+	m_indexCount = m_vertexCount;
+
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The second set of texture coordinates has been added to the creation of the vertex array.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Load the vertex and index array with data from the terrain model.
+	for(i=0; i&lt;m_vertexCount; i++)
+	{
+		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].texture  = D3DXVECTOR2(m_model[i].tu, m_model[i].tv);
+		vertices[i].normal   = D3DXVECTOR3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
+		vertices[i].tangent  = D3DXVECTOR3(m_model[i].tx, m_model[i].ty, m_model[i].tz);
+		vertices[i].binormal = D3DXVECTOR3(m_model[i].bx, m_model[i].by, m_model[i].bz);
+		vertices[i].texture2 = D3DXVECTOR2(m_model[i].tu2, m_model[i].tv2);
+
+		indices[i] = i;
+	}
+
+	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the arrays now that the buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+
+
+void TerrainClass::ReleaseHeightMap()
+{
+	if(m_heightMap)
+	{
+		delete [] m_heightMap;
+		m_heightMap = 0;
+	}
+
+	return;
+}
+
+
+void TerrainClass::ReleaseModel()
+{
+	if(m_model)
+	{
+		delete [] m_model;
+		m_model = 0;
+	}
+
+	return;
+}
+
+
+void TerrainClass::ReleaseBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+
+
+void TerrainClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType); 
+	offset = 0;
+    
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _APPLICATIONCLASS_H_
+#define _APPLICATIONCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "inputclass.h"
+#include "d3dclass.h"
+#include "timerclass.h"
+#include "positionclass.h"
+#include "cameraclass.h"
+#include "lightclass.h"
+#include "terrainclass.h"
+#include "terrainshaderclass.h"
+#include "textureclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ApplicationClass
+////////////////////////////////////////////////////////////////////////////////
+class ApplicationClass
+{
+public:
+	ApplicationClass();
+	ApplicationClass(const ApplicationClass&amp;);
+	~ApplicationClass();
+
+	bool Initialize(HINSTANCE, HWND, int, int);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool HandleMovementInput(float);
+	bool Render();
+
+private:
+	InputClass* m_Input;
+	D3DClass* m_Direct3D;
+	TimerClass* m_Timer;
+	PositionClass* m_Position;
+	CameraClass* m_Camera;
+	LightClass* m_Light;
+	TerrainClass* m_Terrain;
+	TerrainShaderClass* m_TerrainShader;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a number of new textures for the terrain rendering.
+Ideally these should instead be inside a texture manager object and then referenced by index.
+But for the purposes of keeping the tutorial simple I have just placed them all here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	TextureClass *m_ColorTexture1;
+	TextureClass *m_ColorTexture2;
+	TextureClass *m_ColorTexture3;
+	TextureClass *m_ColorTexture4;
+	TextureClass *m_AlphaTexture1;
+	TextureClass *m_NormalTexture1;
+	TextureClass *m_NormalTexture2;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "applicationclass.h"
+
+
+ApplicationClass::ApplicationClass()
+{
+	m_Input = 0;
+	m_Direct3D = 0;
+	m_Timer = 0;
+	m_Position = 0;
+	m_Camera = 0;
+	m_Light = 0;
+	m_Terrain = 0;
+	m_TerrainShader = 0;
+	m_ColorTexture1 = 0;
+	m_ColorTexture2 = 0;
+	m_ColorTexture3 = 0;
+	m_ColorTexture4 = 0;
+	m_AlphaTexture1 = 0;
+	m_NormalTexture1 = 0;
+	m_NormalTexture2 = 0;
+}
+
+
+ApplicationClass::ApplicationClass(const ApplicationClass&amp; other)
+{
+}
+
+
+ApplicationClass::~ApplicationClass()
+{
+}
+
+
+bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+{
+	bool result;
+
+	
+	// Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
+	m_Input = new InputClass;
+	if(!m_Input)
+	{
+		return false;
+	}
+
+	// Initialize the input object.
+	result = m_Input-&gt;Initialize(hinstance, hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the Direct3D object.
+	m_Direct3D = new D3DClass;
+	if(!m_Direct3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_Direct3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize DirectX 11.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the timer object.
+	m_Timer = new TimerClass;
+	if(!m_Timer)
+	{
+		return false;
+	}
+
+	// Initialize the timer object.
+	result = m_Timer-&gt;Initialize();
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the timer object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the position object.
+	m_Position = new PositionClass;
+	if(!m_Position)
+	{
+		return false;
+	}
+
+	// Set the initial position.
+	m_Position-&gt;SetPosition(14.0f, 13.0f, 10.0f);
+	m_Position-&gt;SetRotation(25.0f, 0.0f, 0.0f);
+	
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetDirection(0.5f, -0.75f, 0.0f);
+	
+	// Create the terrain object.
+	m_Terrain = new TerrainClass;
+	if(!m_Terrain)
+	{
+		return false;
+	}
+
+	// Initialize the terrain object.
+	result = m_Terrain-&gt;Initialize(m_Direct3D-&gt;GetDevice(), "../Engine/data/hm.bmp", 10.0f);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the terrain shader object.
+	m_TerrainShader = new TerrainShaderClass;
+	if(!m_TerrainShader)
+	{
+		return false;
+	}
+
+	// Initialize the terrain shader object.
+	result = m_TerrainShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the four color textures.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the first color texture object.
+	m_ColorTexture1 = new TextureClass;
+	if(!m_ColorTexture1)
+	{
+		return false;
+	}
+
+	// Load the first color texture object.
+	result = m_ColorTexture1-&gt;Initialize(m_Direct3D-&gt;GetDevice(), L"../Engine/data/dirt001.dds");
+	if(!result)
+	{
+		return false;
+	}
+
+	// Create the second color texture object.
+	m_ColorTexture2 = new TextureClass;
+	if(!m_ColorTexture2)
+	{
+		return false;
+	}
+
+	// Load the second color texture object.
+	result = m_ColorTexture2-&gt;Initialize(m_Direct3D-&gt;GetDevice(), L"../Engine/data/dirt004.dds");
+	if(!result)
+	{
+		return false;
+	}
+
+	// Create the third color texture object.
+	m_ColorTexture3 = new TextureClass;
+	if(!m_ColorTexture3)
+	{
+		return false;
+	}
+
+	// Load the third color texture object.
+	result = m_ColorTexture3-&gt;Initialize(m_Direct3D-&gt;GetDevice(), L"../Engine/data/dirt002.dds");
+	if(!result)
+	{
+		return false;
+	}
+
+	// Create the fourth color texture object.
+	m_ColorTexture4 = new TextureClass;
+	if(!m_ColorTexture4)
+	{
+		return false;
+	}
+
+	// Load the fourth color texture object.
+	result = m_ColorTexture4-&gt;Initialize(m_Direct3D-&gt;GetDevice(), L"../Engine/data/stone001.dds");
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the texture layer masks that are inside the alpha001.dds texture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the first alpha texture object.
+	m_AlphaTexture1 = new TextureClass;
+	if(!m_AlphaTexture1)
+	{
+		return false;
+	}
+
+	// Load the first alpha texture object.
+	result = m_AlphaTexture1-&gt;Initialize(m_Direct3D-&gt;GetDevice(), L"../Engine/data/alpha001.dds");
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the two bump maps.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the first normal texture object.
+	m_NormalTexture1 = new TextureClass;
+	if(!m_NormalTexture1)
+	{
+		return false;
+	}
+
+	// Load the first alpha texture object.
+	result = m_NormalTexture1-&gt;Initialize(m_Direct3D-&gt;GetDevice(), L"../Engine/data/normal001.dds");
+	if(!result)
+	{
+		return false;
+	}
+
+	// Create the second normal texture object.
+	m_NormalTexture2 = new TextureClass;
+	if(!m_NormalTexture2)
+	{
+		return false;
+	}
+
+	// Load the second alpha texture object.
+	result = m_NormalTexture2-&gt;Initialize(m_Direct3D-&gt;GetDevice(), L"../Engine/data/normal002.dds");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ApplicationClass::Shutdown()
+{
+	// Release the texture objects.
+	if(m_ColorTexture1)
+	{
+		m_ColorTexture1-&gt;Shutdown();
+		delete m_ColorTexture1;
+		m_ColorTexture1 = 0;
+	}
+
+	if(m_ColorTexture2)
+	{
+		m_ColorTexture2-&gt;Shutdown();
+		delete m_ColorTexture2;
+		m_ColorTexture2 = 0;
+	}
+
+	if(m_ColorTexture3)
+	{
+		m_ColorTexture3-&gt;Shutdown();
+		delete m_ColorTexture3;
+		m_ColorTexture3 = 0;
+	}
+
+	if(m_ColorTexture4)
+	{
+		m_ColorTexture4-&gt;Shutdown();
+		delete m_ColorTexture4;
+		m_ColorTexture4 = 0;
+	}
+
+	if(m_AlphaTexture1)
+	{
+		m_AlphaTexture1-&gt;Shutdown();
+		delete m_AlphaTexture1;
+		m_AlphaTexture1 = 0;
+	}
+
+	if(m_NormalTexture1)
+	{
+		m_NormalTexture1-&gt;Shutdown();
+		delete m_NormalTexture1;
+		m_NormalTexture1 = 0;
+	}
+
+	if(m_NormalTexture2)
+	{
+		m_NormalTexture2-&gt;Shutdown();
+		delete m_NormalTexture2;
+		m_NormalTexture2 = 0;
+	}
+
+	// Release the terrain shader object.
+	if(m_TerrainShader)
+	{
+		m_TerrainShader-&gt;Shutdown();
+		delete m_TerrainShader;
+		m_TerrainShader = 0;
+	}
+	
+	// Release the terrain object.
+	if(m_Terrain)
+	{
+		m_Terrain-&gt;Shutdown();
+		delete m_Terrain;
+		m_Terrain = 0;
+	}
+	
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+	
+	// Release the position object.
+	if(m_Position)
+	{
+		delete m_Position;
+		m_Position = 0;
+	}
+
+	// Release the timer object.
+	if(m_Timer)
+	{
+		delete m_Timer;
+		m_Timer = 0;
+	}
+
+	// Release the Direct3D object.
+	if(m_Direct3D)
+	{
+		m_Direct3D-&gt;Shutdown();
+		delete m_Direct3D;
+		m_Direct3D = 0;
+	}
+
+	// Release the input object.
+	if(m_Input)
+	{
+		m_Input-&gt;Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+
+	return;
+}
+
+
+bool ApplicationClass::Frame()
+{
+	bool result;
+
+
+	// Update the system stats.
+	m_Timer-&gt;Frame();
+
+	// Read the user input.
+	result = m_Input-&gt;Frame();
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Check if the user pressed escape and wants to exit the application.
+	if(m_Input-&gt;IsEscapePressed() == true)
+	{
+		return false;
+	}
+
+	// Do the frame input processing.
+	result = HandleMovementInput(m_Timer-&gt;GetTime());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the graphics.
+	result = Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return result;
+}
+
+
+bool ApplicationClass::HandleMovementInput(float frameTime)
+{
+	bool keyDown;
+	float posX, posY, posZ, rotX, rotY, rotZ;
+
+
+	// Set the frame time for calculating the updated position.
+	m_Position-&gt;SetFrameTime(frameTime);
+
+	// Handle the input.
+	keyDown = m_Input-&gt;IsLeftPressed();
+	m_Position-&gt;TurnLeft(keyDown);
+
+	keyDown = m_Input-&gt;IsRightPressed();
+	m_Position-&gt;TurnRight(keyDown);
+
+	keyDown = m_Input-&gt;IsUpPressed();
+	m_Position-&gt;MoveForward(keyDown);
+
+	keyDown = m_Input-&gt;IsDownPressed();
+	m_Position-&gt;MoveBackward(keyDown);
+
+	keyDown = m_Input-&gt;IsAPressed();
+	m_Position-&gt;MoveUpward(keyDown);
+
+	keyDown = m_Input-&gt;IsZPressed();
+	m_Position-&gt;MoveDownward(keyDown);
+
+	keyDown = m_Input-&gt;IsPgUpPressed();
+	m_Position-&gt;LookUpward(keyDown);
+
+	keyDown = m_Input-&gt;IsPgDownPressed();
+	m_Position-&gt;LookDownward(keyDown);
+	
+	// Get the view point position/rotation.
+	m_Position-&gt;GetPosition(posX, posY, posZ);
+	m_Position-&gt;GetRotation(rotX, rotY, rotZ);
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(posX, posY, posZ);
+	m_Camera-&gt;SetRotation(rotX, rotY, rotZ);
+
+	return true;
+}
+
+
+bool ApplicationClass::Render()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+
+
+	// Clear the scene.
+	m_Direct3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, projection, ortho, and base view matrices from the camera and Direct3D objects.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_Direct3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Render the terrain using the terrain shader.
+	m_Terrain-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Render the terrain using the four color textures, the texture layer masks, and the normal maps.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	result = m_TerrainShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Light-&gt;GetDirection(), m_ColorTexture1-&gt;GetTexture(), 
+					 m_ColorTexture2-&gt;GetTexture(), m_ColorTexture3-&gt;GetTexture(), m_ColorTexture4-&gt;GetTexture(), m_AlphaTexture1-&gt;GetTexture(), m_NormalTexture1-&gt;GetTexture(), m_NormalTexture2-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_Direct3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now have a multi-layered terrain in which the layer rendering is controlled on a per-pixel basis.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 17_ Terrain Texture Layers_files/pic0273.gif" width="500" height="282"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Compile and run the program.  Move around using the arrow keys, A, Z, and PgUp and PgDn.  Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Modify the red, green, and blue channel in the alpha001.dds texture to see the effect on the terrain.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Add a fifth layer to the terrain.  Place the new texture mask layer in the alpha channel of the alpha001.dds texture.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Create a different terrain scene by creating your own texture layer mask and terrain textures.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Try different resolutions for the texture layer mask to see the difference it produces when rendering the multiple layers together.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+6. Modify the terrain section to be a terrain node.  And then load four terrain nodes (can be the same textures and mask in each one for now) and render them based on visibility 
+(see the quad tree tutorial for a general idea about how this should work, but note it will need to be modified for this to work correctly).
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+7. Use this technique to create a color map for each section, and then create a simple level of detail system which renders the sections the camera in not currently on with the color map instead.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/tersrc17.zip">tersrc17.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/terexe17.zip">terexe17.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 17_ Terrain Texture Layers_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutterr.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 17_ Terrain Texture Layers_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

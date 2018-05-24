@@ -1,0 +1,2852 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11ter10.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 10: Terrain Cell Culling</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000" style="width:1000px">
+
+<p align="center"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 10: Terrain Cell Culling
+</b></font></p>
+
+<p align="center"><img border="0" src="./Tutorial 10_ Terrain Cell Culling_files/pic3001.gif" width="1024" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the previous tutorial we partitioned our terrain into 33x33 vertex cells.
+The reason we did so is primarily so we can cull out the sections of the terrain we don't want to render, and focus on just rendering what is visible to the user.
+So instead of rendering all two million terrain polygons we can just render the subset that is actually viewable.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To perform the cell culling we need to use the FrustumClass from the DirectX 11 tutorial series.
+This class will help us identify which cells can be viewed and which cells cannot.
+And this will allow us to gain a huge performance increase by only rendering the viewable cells.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have also added three more fields to the user interface so we know how many polygons we are actually rendering, how many cells are being drawn, and how many cells are being culled.
+</font></p><p align="left"><img border="0" src="./Tutorial 10_ Terrain Cell Culling_files/pic4040.gif" width="800" height="450"></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Frustumclass.h</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The FrustumClass has been updated to include a second rectangle checking function which uses the maximum boundaries instead of using the center point and distances from the center.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: frustumclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _FRUSTUMCLASS_H_
+#define _FRUSTUMCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;directxmath.h&gt;
+using namespace DirectX;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: FrustumClass
+////////////////////////////////////////////////////////////////////////////////
+class FrustumClass
+{
+public:
+	FrustumClass();
+	FrustumClass(const FrustumClass&amp;);
+	~FrustumClass();
+
+	void Initialize(float);
+
+	void ConstructFrustum(XMMATRIX, XMMATRIX);
+
+	bool CheckPoint(float, float, float);
+	bool CheckCube(float, float, float, float);
+	bool CheckSphere(float, float, float, float);
+	bool CheckRectangle(float, float, float, float, float, float);</font><font face="arial" color="#aaaaff" size="2">
+	bool CheckRectangle2(float, float, float, float, float, float);</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	float m_screenDepth;
+	float m_planes[6][4];
+};
+
+#endif
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Frustumclass.cpp</u></font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: frustumclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "frustumclass.h"
+
+
+FrustumClass::FrustumClass()
+{
+}
+
+
+FrustumClass::FrustumClass(const FrustumClass&amp; other)
+{
+}
+
+
+FrustumClass::~FrustumClass()
+{
+}
+
+
+void FrustumClass::Initialize(float screenDepth)
+{
+	m_screenDepth = screenDepth;
+	return;
+}
+
+
+void FrustumClass::ConstructFrustum(XMMATRIX projectionMatrix, XMMATRIX viewMatrix)
+{
+	XMFLOAT4X4 pMatrix, matrix;
+	float zMinimum, r, length;
+	XMMATRIX finalMatrix;
+
+
+	// Convert the projection matrix into a 4x4 float type.
+	XMStoreFloat4x4(&amp;pMatrix, projectionMatrix);
+
+	// Calculate the minimum Z distance in the frustum.
+	zMinimum = -pMatrix._43 / pMatrix._33;
+	r = m_screenDepth / (m_screenDepth - zMinimum);
+
+	// Load the updated values back into the projection matrix.
+	pMatrix._33 = r;
+	pMatrix._43 = -r * zMinimum;
+	projectionMatrix = XMLoadFloat4x4(&amp;pMatrix);
+
+	// Create the frustum matrix from the view matrix and updated projection matrix.
+	finalMatrix = XMMatrixMultiply(viewMatrix, projectionMatrix);
+
+	// Convert the final matrix into a 4x4 float type.
+	XMStoreFloat4x4(&amp;matrix, finalMatrix);
+
+	// Calculate near plane of frustum.
+	m_planes[0][0] = matrix._14 + matrix._13;
+	m_planes[0][1] = matrix._24 + matrix._23;
+	m_planes[0][2] = matrix._34 + matrix._33;
+	m_planes[0][3] = matrix._44 + matrix._43;
+
+	// Normalize the near plane.
+	length = sqrtf((m_planes[0][0] * m_planes[0][0]) + (m_planes[0][1] * m_planes[0][1]) + (m_planes[0][2] * m_planes[0][2]));
+	m_planes[0][0] /= length;
+	m_planes[0][1] /= length;
+	m_planes[0][2] /= length;
+	m_planes[0][3] /= length;
+
+	// Calculate far plane of frustum.
+	m_planes[1][0] = matrix._14 - matrix._13;
+	m_planes[1][1] = matrix._24 - matrix._23;
+	m_planes[1][2] = matrix._34 - matrix._33;
+	m_planes[1][3] = matrix._44 - matrix._43;
+
+	// Normalize the far plane.
+	length = sqrtf((m_planes[1][0] * m_planes[1][0]) + (m_planes[1][1] * m_planes[1][1]) + (m_planes[1][2] * m_planes[1][2]));
+	m_planes[1][0] /= length;
+	m_planes[1][1] /= length;
+	m_planes[1][2] /= length;
+	m_planes[1][3] /= length;
+
+	// Calculate left plane of frustum.
+	m_planes[2][0] = matrix._14 + matrix._11;
+	m_planes[2][1] = matrix._24 + matrix._21;
+	m_planes[2][2] = matrix._34 + matrix._31;
+	m_planes[2][3] = matrix._44 + matrix._41;
+
+	// Normalize the left plane.
+	length = sqrtf((m_planes[2][0] * m_planes[2][0]) + (m_planes[2][1] * m_planes[2][1]) + (m_planes[2][2] * m_planes[2][2]));
+	m_planes[2][0] /= length;
+	m_planes[2][1] /= length;
+	m_planes[2][2] /= length;
+	m_planes[2][3] /= length;
+
+	// Calculate right plane of frustum.
+	m_planes[3][0] = matrix._14 - matrix._11;
+	m_planes[3][1] = matrix._24 - matrix._21;
+	m_planes[3][2] = matrix._34 - matrix._31;
+	m_planes[3][3] = matrix._44 - matrix._41;
+
+	// Normalize the right plane.
+	length = sqrtf((m_planes[3][0] * m_planes[3][0]) + (m_planes[3][1] * m_planes[3][1]) + (m_planes[3][2] * m_planes[3][2]));
+	m_planes[3][0] /= length;
+	m_planes[3][1] /= length;
+	m_planes[3][2] /= length;
+	m_planes[3][3] /= length;
+
+	// Calculate top plane of frustum.
+	m_planes[4][0] = matrix._14 - matrix._12;
+	m_planes[4][1] = matrix._24 - matrix._22;
+	m_planes[4][2] = matrix._34 - matrix._32;
+	m_planes[4][3] = matrix._44 - matrix._42;
+
+	// Normalize the top plane.
+	length = sqrtf((m_planes[4][0] * m_planes[4][0]) + (m_planes[4][1] * m_planes[4][1]) + (m_planes[4][2] * m_planes[4][2]));
+	m_planes[4][0] /= length;
+	m_planes[4][1] /= length;
+	m_planes[4][2] /= length;
+	m_planes[4][3] /= length;
+
+	// Calculate bottom plane of frustum.
+	m_planes[5][0] = matrix._14 + matrix._12;
+	m_planes[5][1] = matrix._24 + matrix._22;
+	m_planes[5][2] = matrix._34 + matrix._32;
+	m_planes[5][3] = matrix._44 + matrix._42;
+
+	// Normalize the bottom plane.
+	length = sqrtf((m_planes[5][0] * m_planes[5][0]) + (m_planes[5][1] * m_planes[5][1]) + (m_planes[5][2] * m_planes[5][2]));
+	m_planes[5][0] /= length;
+	m_planes[5][1] /= length;
+	m_planes[5][2] /= length;
+	m_planes[5][3] /= length;
+
+	return;
+}
+
+
+bool FrustumClass::CheckPoint(float x, float y, float z)
+{
+	int i;
+	float dotProduct;
+
+
+	// Check each of the six planes to make sure the point is inside all of them and hence inside the frustum.
+	for(i=0; i&lt;6; i++)
+	{
+		// Calculate the dot product of the plane and the 3D point.
+		dotProduct = (m_planes[i][0] * x) + (m_planes[i][1] * y) + (m_planes[i][2] * z) + (m_planes[i][3] * 1.0f);
+
+		// Determine if the point is on the correct side of the current plane, exit out if it is not.
+		if(dotProduct &lt;= 0.0f)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+bool FrustumClass::CheckCube(float xCenter, float yCenter, float zCenter, float radius)
+{
+	int i;
+	float dotProduct;
+
+
+	// Check each of the six planes to see if the cube is inside the frustum.
+	for(i=0; i&lt;6; i++)
+	{
+		// Check all eight points of the cube to see if they all reside within the frustum.
+		dotProduct = (m_planes[i][0] * (xCenter - radius)) + (m_planes[i][1] * (yCenter - radius)) + (m_planes[i][2] * (zCenter - radius)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt; 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter + radius)) + (m_planes[i][1] * (yCenter - radius)) + (m_planes[i][2] * (zCenter - radius)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt; 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter - radius)) + (m_planes[i][1] * (yCenter + radius)) + (m_planes[i][2] * (zCenter - radius)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt; 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter + radius)) + (m_planes[i][1] * (yCenter + radius)) + (m_planes[i][2] * (zCenter - radius)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt; 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter - radius)) + (m_planes[i][1] * (yCenter - radius)) + (m_planes[i][2] * (zCenter + radius)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt; 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter + radius)) + (m_planes[i][1] * (yCenter - radius)) + (m_planes[i][2] * (zCenter + radius)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt; 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter - radius)) + (m_planes[i][1] * (yCenter + radius)) + (m_planes[i][2] * (zCenter + radius)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt; 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter + radius)) + (m_planes[i][1] * (yCenter + radius)) + (m_planes[i][2] * (zCenter + radius)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt; 0.0f)
+		{
+			continue;
+		}
+		
+		return false;
+	}
+
+	return true;
+}
+
+
+bool FrustumClass::CheckSphere(float xCenter, float yCenter, float zCenter, float radius)
+{
+	int i;
+	float dotProduct;
+
+
+	// Check the six planes to see if the sphere is inside them or not.
+	for(i=0; i&lt;6; i++)
+	{
+		dotProduct = ((m_planes[i][0] * xCenter) + (m_planes[i][1] * yCenter) + (m_planes[i][2] * zCenter) + (m_planes[i][3] * 1.0f));
+		if(dotProduct &lt;= -radius)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+bool FrustumClass::CheckRectangle(float xCenter, float yCenter, float zCenter, float xSize, float ySize, float zSize)
+{
+	int i;
+	float dotProduct;
+
+
+	// Check each of the six planes to see if the rectangle is in the frustum or not.
+	for(i=0; i&lt;6; i++)
+	{
+		dotProduct = (m_planes[i][0] * (xCenter - xSize)) + (m_planes[i][1] * (yCenter - ySize)) + (m_planes[i][2] * (zCenter - zSize)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter + xSize)) + (m_planes[i][1] * (yCenter - ySize)) + (m_planes[i][2] * (zCenter - zSize)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter - xSize)) + (m_planes[i][1] * (yCenter + ySize)) + (m_planes[i][2] * (zCenter - zSize)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter + xSize)) + (m_planes[i][1] * (yCenter + ySize)) + (m_planes[i][2] * (zCenter - zSize)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter - xSize)) + (m_planes[i][1] * (yCenter - ySize)) + (m_planes[i][2] * (zCenter + zSize)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter + xSize)) + (m_planes[i][1] * (yCenter - ySize)) + (m_planes[i][2] * (zCenter + zSize)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter - xSize)) + (m_planes[i][1] * (yCenter + ySize)) + (m_planes[i][2] * (zCenter + zSize)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = (m_planes[i][0] * (xCenter + xSize)) + (m_planes[i][1] * (yCenter + ySize)) + (m_planes[i][2] * (zCenter + zSize)) + (m_planes[i][3] * 1.0f);
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		return false;
+	}
+
+	return true;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new CheckRectangle2 function works the same as the CheckRectangle function but it uses the maximum and minimum dimensions instead of a center point and widths.
+It performs a dot product of the six viewing frustum planes and the six sides of the rectangle.
+If it determines any part of the rectangle is in the viewing frustum then it returns true.
+If it goes through all six planes of the rectangle and doesn't find any instead of viewing frustum then it return false.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">bool FrustumClass::CheckRectangle2(float maxWidth, float maxHeight, float maxDepth, float minWidth, float minHeight, float minDepth)
+{
+	int i;
+	float dotProduct;
+
+
+	// Check if any of the 6 planes of the rectangle are inside the view frustum.
+	for(i=0; i&lt;6; i++)
+	{
+		dotProduct = ((m_planes[i][0] * minWidth) + (m_planes[i][1] * minHeight) + (m_planes[i][2] * minDepth) + (m_planes[i][3] * 1.0f));
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = ((m_planes[i][0] * maxWidth) + (m_planes[i][1] * minHeight) + (m_planes[i][2] * minDepth) + (m_planes[i][3] * 1.0f));
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = ((m_planes[i][0] * minWidth) + (m_planes[i][1] * maxHeight) + (m_planes[i][2] * minDepth) + (m_planes[i][3] * 1.0f));
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = ((m_planes[i][0] * maxWidth) + (m_planes[i][1] * maxHeight) + (m_planes[i][2] * minDepth) + (m_planes[i][3] * 1.0f));
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+		
+		dotProduct = ((m_planes[i][0] * minWidth) + (m_planes[i][1] * minHeight) + (m_planes[i][2] * maxDepth) + (m_planes[i][3] * 1.0f));
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = ((m_planes[i][0] * maxWidth) + (m_planes[i][1] * minHeight) + (m_planes[i][2] * maxDepth) + (m_planes[i][3] * 1.0f));
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = ((m_planes[i][0] * minWidth) + (m_planes[i][1] * maxHeight) + (m_planes[i][2] * maxDepth) + (m_planes[i][3] * 1.0f));
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		dotProduct = ((m_planes[i][0] * maxWidth) + (m_planes[i][1] * maxHeight) + (m_planes[i][2] * maxDepth) + (m_planes[i][3] * 1.0f));
+		if(dotProduct &gt;= 0.0f)
+		{
+			continue;
+		}
+
+		return false;
+	}
+
+	return true;
+}
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainclass.h</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The TerrainClass has been modified to handle frustum culling of terrain cells.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _TERRAINCLASS_H_
+#define _TERRAINCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;fstream&gt;
+#include &lt;stdio.h&gt;
+using namespace std;
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The FrustumClass header file is now included in the TerrainClass header file.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "terraincellclass.h"</font><font face="arial" color="#aaaaff" size="2">
+#include "frustumclass.h"</font><font face="arial" color="#aaffaa" size="2">
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: TerrainClass
+////////////////////////////////////////////////////////////////////////////////
+class TerrainClass
+{
+private:
+	struct HeightMapType
+	{
+		float x, y, z;
+		float nx, ny, nz;
+		float r, g, b;
+	};
+
+	struct ModelType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+		float tx, ty, tz;
+		float bx, by, bz;
+		float r, g, b;
+	};
+
+	struct VectorType
+	{
+		float x, y, z;
+	};
+
+	struct TempVertexType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+	};
+
+public:
+	TerrainClass();
+	TerrainClass(const TerrainClass&amp;);
+	~TerrainClass();
+
+	bool Initialize(ID3D11Device*, char*);
+	void Shutdown();
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+TerrainClass now has a Frame function for culling and polygon calculations each frame.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	void Frame();
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The RenderCell function now takes a frustum class pointer as input.
+Also the boolean return value now indicates whether the cell is visible or not (instead of failure to render).
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	bool RenderCell(ID3D11DeviceContext*, int, FrustumClass*);</font><font face="arial" color="#aaffaa" size="2">
+	void RenderCellLines(ID3D11DeviceContext*, int);
+
+	int GetCellIndexCount(int);
+	int GetCellLinesIndexCount(int);
+	int GetCellCount();
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have three new functions for rendering the polygon render count, the cells drawn count, and the cells culled count.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	int GetRenderCount();
+	int GetCellsDrawn();
+	int GetCellsCulled();</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	bool LoadSetupFile(char*);
+	bool LoadRawHeightMap();
+	void ShutdownHeightMap();
+	void SetTerrainCoordinates();
+	bool CalculateNormals();
+	bool LoadColorMap();
+	bool BuildTerrainModel();
+	void ShutdownTerrainModel();
+	void CalculateTerrainVectors();
+	void CalculateTangentBinormal(TempVertexType, TempVertexType, TempVertexType, VectorType&amp;, VectorType&amp;);
+	bool LoadTerrainCells(ID3D11Device*);
+	void ShutdownTerrainCells();
+
+private:
+	int m_terrainHeight, m_terrainWidth, m_vertexCount;
+	float m_heightScale;
+	char *m_terrainFilename, *m_colorMapFilename;
+	HeightMapType* m_heightMap;
+	ModelType* m_terrainModel;
+	TerrainCellClass* m_TerrainCells;
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have new private integers for maintaining the polygon and cell culling counts.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	int m_cellCount, m_renderCount, m_cellsDrawn, m_cellsCulled;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainclass.cpp</u></font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "terrainclass.h"
+
+
+TerrainClass::TerrainClass()
+{
+	m_terrainFilename = 0;
+	m_colorMapFilename = 0;
+	m_heightMap = 0;
+	m_terrainModel = 0;
+	m_TerrainCells = 0;
+}
+
+
+TerrainClass::TerrainClass(const TerrainClass&amp; other)
+{
+}
+
+
+TerrainClass::~TerrainClass()
+{
+}
+
+
+bool TerrainClass::Initialize(ID3D11Device* device, char* setupFilename)
+{
+	bool result;
+
+
+	// Get the terrain filename, dimensions, and so forth from the setup file.
+	result = LoadSetupFile(setupFilename);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Initialize the terrain height map with the data from the raw file.
+	result = LoadRawHeightMap();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Setup the X and Z coordinates for the height map as well as scale the terrain height by the height scale value.
+	SetTerrainCoordinates();
+
+	// Calculate the normals for the terrain data.
+	result = CalculateNormals();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Load in the color map for the terrain.
+	result = LoadColorMap();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now build the 3D model of the terrain.
+	result = BuildTerrainModel();
+	if(!result)
+	{
+		return false;
+	}
+
+	// We can now release the height map since it is no longer needed in memory once the 3D terrain model has been built.
+	ShutdownHeightMap();
+
+	// Calculate the tangent and binormal for the terrain model.
+	CalculateTerrainVectors();
+
+	// Create and load the cells with the terrain data.
+	result = LoadTerrainCells(device);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Release the terrain model now that the terrain cells have been loaded.
+	ShutdownTerrainModel();
+
+	return true;
+}
+
+
+void TerrainClass::Shutdown()
+{
+	// Release the terrain cells.
+	ShutdownTerrainCells();
+
+	// Release the terrain model.
+	ShutdownTerrainModel();
+
+	// Release the height map.
+	ShutdownHeightMap();
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This is the new Frame function that is called to reset the render counts each ZoneClass frame.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">void TerrainClass::Frame()
+{
+	m_renderCount = 0;
+	m_cellsDrawn = 0;
+	m_cellsCulled = 0;
+	return;
+}</font><font face="arial" color="#aaffaa" size="2">
+
+
+bool TerrainClass::LoadSetupFile(char* filename)
+{
+	int stringLength;
+	ifstream fin;
+	char input;
+
+	// Initialize the strings that will hold the terrain file name and the color map file name.
+	stringLength = 256;
+
+	m_terrainFilename = new char[stringLength];
+	if(!m_terrainFilename)
+	{
+		return false;
+	}
+
+	m_colorMapFilename = new char[stringLength];
+	if(!m_colorMapFilename)
+	{
+		return false;
+	}
+
+	// Open the setup file.  If it could not open the file then exit.
+	fin.open(filename);
+	if(fin.fail())
+	{
+		return false;
+	}
+
+	// Read up to the terrain file name.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+
+	// Read in the terrain file name.
+	fin &gt;&gt; m_terrainFilename;
+
+	// Read up to the value of terrain height.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+
+	// Read in the terrain height.
+	fin &gt;&gt; m_terrainHeight;
+
+	// Read up to the value of terrain width.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+
+	// Read in the terrain width.
+	fin &gt;&gt; m_terrainWidth;
+
+	// Read up to the value of terrain height scaling.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+
+	// Read in the terrain height scaling.
+	fin &gt;&gt; m_heightScale;
+
+	// Read up to the color map file name.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+
+	// Read in the color map file name.
+	fin &gt;&gt; m_colorMapFilename;
+
+	// Close the setup file.
+	fin.close();
+
+	return true;
+}
+
+
+bool TerrainClass::LoadRawHeightMap()
+{
+	int error, i, j, index;
+	FILE* filePtr;
+	unsigned long long imageSize, count;
+	unsigned short* rawImage;
+
+
+	// Create the float array to hold the height map data.
+	m_heightMap = new HeightMapType[m_terrainWidth * m_terrainHeight];
+	if(!m_heightMap)
+	{
+		return false;
+	}
+
+	// Open the 16 bit raw height map file for reading in binary.
+	error = fopen_s(&amp;filePtr, m_terrainFilename, "rb");
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Calculate the size of the raw image data.
+	imageSize = m_terrainHeight * m_terrainWidth;
+
+	// Allocate memory for the raw image data.
+	rawImage = new unsigned short[imageSize];
+	if(!rawImage)
+	{
+		return false;
+	}
+
+	// Read in the raw image data.
+	count = fread(rawImage, sizeof(unsigned short), imageSize, filePtr);
+	if(count != imageSize)
+	{
+		return false;
+	}
+
+	// Close the file.
+	error = fclose(filePtr);
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Copy the image data into the height map array.
+	for(j=0; j&lt;m_terrainHeight; j++)
+	{
+		for(i=0; i&lt;m_terrainWidth; i++)
+		{
+			index = (m_terrainWidth * j) + i;
+
+			// Store the height at this point in the height map array.
+			m_heightMap[index].y = (float)rawImage[index];
+		}
+	}
+
+	// Release the bitmap image data.
+	delete [] rawImage;
+	rawImage = 0;
+
+	// Release the terrain filename now that it has been read in.
+	delete [] m_terrainFilename;
+	m_terrainFilename = 0;
+
+	return true;
+}
+
+
+void TerrainClass::ShutdownHeightMap()
+{
+	// Release the height map array.
+	if(m_heightMap)
+	{
+		delete [] m_heightMap;
+		m_heightMap = 0;
+	}
+
+	return;
+}
+
+
+void TerrainClass::SetTerrainCoordinates()
+{
+	int i, j, index;
+
+
+	// Loop through all the elements in the height map array and adjust their coordinates correctly.
+	for(j=0; j&lt;m_terrainHeight; j++)
+	{
+		for(i=0; i&lt;m_terrainWidth; i++)
+		{
+			index = (m_terrainWidth * j) + i;
+
+			// Set the X and Z coordinates.
+			m_heightMap[index].x = (float)i;
+			m_heightMap[index].z = -(float)j;
+
+			// Move the terrain depth into the positive range.  For example from (0, -256) to (256, 0).
+			m_heightMap[index].z += (float)(m_terrainHeight - 1);
+
+			// Scale the height.
+			m_heightMap[index].y /= m_heightScale;
+		}
+	}
+
+	return;
+}
+
+
+bool TerrainClass::CalculateNormals()
+{
+	int i, j, index1, index2, index3, index;
+	float vertex1[3], vertex2[3], vertex3[3], vector1[3], vector2[3], sum[3], length;
+	VectorType* normals;
+
+
+	// Create a temporary array to hold the face normal vectors.
+	normals = new VectorType[(m_terrainHeight-1) * (m_terrainWidth-1)];
+	if(!normals)
+	{
+		return false;
+	}
+
+	// Go through all the faces in the mesh and calculate their normals.
+	for(j=0; j&lt;(m_terrainHeight-1); j++)
+	{
+		for(i=0; i&lt;(m_terrainWidth-1); i++)
+		{
+			index1 = ((j+1) * m_terrainWidth) + i;      // Bottom left vertex.
+			index2 = ((j+1) * m_terrainWidth) + (i+1);  // Bottom right vertex.
+			index3 = (j * m_terrainWidth) + i;          // Upper left vertex.
+
+			// Get three vertices from the face.
+			vertex1[0] = m_heightMap[index1].x;
+			vertex1[1] = m_heightMap[index1].y;
+			vertex1[2] = m_heightMap[index1].z;
+
+			vertex2[0] = m_heightMap[index2].x;
+			vertex2[1] = m_heightMap[index2].y;
+			vertex2[2] = m_heightMap[index2].z;
+
+			vertex3[0] = m_heightMap[index3].x;
+			vertex3[1] = m_heightMap[index3].y;
+			vertex3[2] = m_heightMap[index3].z;
+
+			// Calculate the two vectors for this face.
+			vector1[0] = vertex1[0] - vertex3[0];
+			vector1[1] = vertex1[1] - vertex3[1];
+			vector1[2] = vertex1[2] - vertex3[2];
+			vector2[0] = vertex3[0] - vertex2[0];
+			vector2[1] = vertex3[1] - vertex2[1];
+			vector2[2] = vertex3[2] - vertex2[2];
+
+			index = (j * (m_terrainWidth - 1)) + i;
+
+			// Calculate the cross product of those two vectors to get the un-normalized value for this face normal.
+			normals[index].x = (vector1[1] * vector2[2]) - (vector1[2] * vector2[1]);
+			normals[index].y = (vector1[2] * vector2[0]) - (vector1[0] * vector2[2]);
+			normals[index].z = (vector1[0] * vector2[1]) - (vector1[1] * vector2[0]);
+
+			// Calculate the length.
+			length = (float)sqrt((normals[index].x * normals[index].x) + (normals[index].y * normals[index].y) + 
+								 (normals[index].z * normals[index].z));
+
+			// Normalize the final value for this face using the length.
+			normals[index].x = (normals[index].x / length);
+			normals[index].y = (normals[index].y / length);
+			normals[index].z = (normals[index].z / length);
+		}
+	}
+
+	// Now go through all the vertices and take a sum of the face normals that touch this vertex.
+	for(j=0; j&lt;m_terrainHeight; j++)
+	{
+		for(i=0; i&lt;m_terrainWidth; i++)
+		{
+			// Initialize the sum.
+			sum[0] = 0.0f;
+			sum[1] = 0.0f;
+			sum[2] = 0.0f;
+
+			// Bottom left face.
+			if(((i-1) &gt;= 0) &amp;&amp; ((j-1) &gt;= 0))
+			{
+				index = ((j-1) * (m_terrainWidth-1)) + (i-1);
+
+				sum[0] += normals[index].x;
+				sum[1] += normals[index].y;
+				sum[2] += normals[index].z;
+			}
+
+			// Bottom right face.
+			if((i&lt;(m_terrainWidth-1)) &amp;&amp; ((j-1) &gt;= 0))
+			{
+				index = ((j - 1) * (m_terrainWidth - 1)) + i;
+
+				sum[0] += normals[index].x;
+				sum[1] += normals[index].y;
+				sum[2] += normals[index].z;
+			}
+
+			// Upper left face.
+			if(((i-1) &gt;= 0) &amp;&amp; (j&lt;(m_terrainHeight-1)))
+			{
+				index = (j * (m_terrainWidth-1)) + (i-1);
+
+				sum[0] += normals[index].x;
+				sum[1] += normals[index].y;
+				sum[2] += normals[index].z;
+			}
+
+			// Upper right face.
+			if((i &lt; (m_terrainWidth-1)) &amp;&amp; (j &lt; (m_terrainHeight-1)))
+			{
+				index = (j * (m_terrainWidth-1)) + i;
+
+				sum[0] += normals[index].x;
+				sum[1] += normals[index].y;
+				sum[2] += normals[index].z;
+			}
+
+			// Calculate the length of this normal.
+			length = (float)sqrt((sum[0] * sum[0]) + (sum[1] * sum[1]) + (sum[2] * sum[2]));
+
+			// Get an index to the vertex location in the height map array.
+			index = (j * m_terrainWidth) + i;
+
+			// Normalize the final shared normal for this vertex and store it in the height map array.
+			m_heightMap[index].nx = (sum[0] / length);
+			m_heightMap[index].ny = (sum[1] / length);
+			m_heightMap[index].nz = (sum[2] / length);
+		}
+	}
+
+	// Release the temporary normals.
+	delete [] normals;
+	normals = 0;
+
+	return true;
+}
+
+
+bool TerrainClass::LoadColorMap()
+{
+	int error, imageSize, i, j, k, index;
+	FILE* filePtr;
+	unsigned long long count;
+	BITMAPFILEHEADER bitmapFileHeader;
+	BITMAPINFOHEADER bitmapInfoHeader;
+	unsigned char* bitmapImage;
+
+
+	// Open the color map file in binary.
+	error = fopen_s(&amp;filePtr, m_colorMapFilename, "rb");
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Read in the file header.
+	count = fread(&amp;bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, filePtr);
+	if(count != 1)
+	{
+		return false;
+	}
+
+	// Read in the bitmap info header.
+	count = fread(&amp;bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, filePtr);
+	if(count != 1)
+	{
+		return false;
+	}
+
+	// Make sure the color map dimensions are the same as the terrain dimensions for easy 1 to 1 mapping.
+	if((bitmapInfoHeader.biWidth != m_terrainWidth) || (bitmapInfoHeader.biHeight != m_terrainHeight))
+	{
+		return false;
+	}
+
+	// Calculate the size of the bitmap image data.
+	// Since this is non-divide by 2 dimensions (eg. 257x257) need to add extra byte to each line.
+	imageSize = m_terrainHeight * ((m_terrainWidth * 3) + 1);
+
+	// Allocate memory for the bitmap image data.
+	bitmapImage = new unsigned char[imageSize];
+	if(!bitmapImage)
+	{
+		return false;
+	}
+
+	// Move to the beginning of the bitmap data.
+	fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
+
+	// Read in the bitmap image data.
+	count = fread(bitmapImage, 1, imageSize, filePtr);
+	if(count != imageSize)
+	{
+		return false;
+	}
+
+	// Close the file.
+	error = fclose(filePtr);
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Initialize the position in the image data buffer.
+	k=0;
+
+	// Read the image data into the color map portion of the height map structure.
+	for(j=0; j&lt;m_terrainHeight; j++)
+	{
+		for(i=0; i&lt;m_terrainWidth; i++)
+		{
+			// Bitmaps are upside down so load bottom to top into the array.
+			index = (m_terrainWidth * (m_terrainHeight - 1 - j)) + i;
+
+			m_heightMap[index].b = (float)bitmapImage[k] / 255.0f;
+			m_heightMap[index].g = (float)bitmapImage[k + 1] / 255.0f;
+			m_heightMap[index].r = (float)bitmapImage[k + 2] / 255.0f;
+
+			k += 3;
+		}
+
+		// Compensate for extra byte at end of each line in non-divide by 2 bitmaps (eg. 257x257).
+		k++;
+	}
+
+	// Release the bitmap image data.
+	delete [] bitmapImage;
+	bitmapImage = 0;
+
+	// Release the color map filename now that is has been read in.
+	delete [] m_colorMapFilename;
+	m_colorMapFilename = 0;
+
+	return true;
+}
+
+
+bool TerrainClass::BuildTerrainModel()
+{
+	int i, j, index, index1, index2, index3, index4;
+
+
+	// Calculate the number of vertices in the 3D terrain model.
+	m_vertexCount = (m_terrainHeight - 1) * (m_terrainWidth - 1) * 6;
+
+	// Create the 3D terrain model array.
+	m_terrainModel = new ModelType[m_vertexCount];
+	if(!m_terrainModel)
+	{
+		return false;
+	}
+
+	// Initialize the index into the height map array.
+	index = 0;
+
+	// Load the 3D terrain model with the height map terrain data.
+	// We will be creating 2 triangles for each of the four points in a quad.
+	for(j=0; j&lt;(m_terrainHeight-1); j++)
+	{
+		for(i=0; i&lt;(m_terrainWidth-1); i++)
+		{
+			// Get the indexes to the four points of the quad.
+			index1 = (m_terrainWidth * j) + i;          // Upper left.
+			index2 = (m_terrainWidth * j) + (i+1);      // Upper right.
+			index3 = (m_terrainWidth * (j+1)) + i;      // Bottom left.
+			index4 = (m_terrainWidth * (j+1)) + (i+1);  // Bottom right.
+
+			// Now create two triangles for that quad.
+			// Triangle 1 - Upper left.
+			m_terrainModel[index].x = m_heightMap[index1].x;
+			m_terrainModel[index].y = m_heightMap[index1].y;
+			m_terrainModel[index].z = m_heightMap[index1].z;
+			m_terrainModel[index].tu = 0.0f;
+			m_terrainModel[index].tv = 0.0f;
+			m_terrainModel[index].nx = m_heightMap[index1].nx;
+			m_terrainModel[index].ny = m_heightMap[index1].ny;
+			m_terrainModel[index].nz = m_heightMap[index1].nz;
+			m_terrainModel[index].r = m_heightMap[index1].r;
+			m_terrainModel[index].g = m_heightMap[index1].g;
+			m_terrainModel[index].b = m_heightMap[index1].b;
+			index++;
+
+			// Triangle 1 - Upper right.
+			m_terrainModel[index].x = m_heightMap[index2].x;
+			m_terrainModel[index].y = m_heightMap[index2].y;
+			m_terrainModel[index].z = m_heightMap[index2].z;
+			m_terrainModel[index].tu = 1.0f;
+			m_terrainModel[index].tv = 0.0f;
+			m_terrainModel[index].nx = m_heightMap[index2].nx;
+			m_terrainModel[index].ny = m_heightMap[index2].ny;
+			m_terrainModel[index].nz = m_heightMap[index2].nz;
+			m_terrainModel[index].r = m_heightMap[index2].r;
+			m_terrainModel[index].g = m_heightMap[index2].g;
+			m_terrainModel[index].b = m_heightMap[index2].b;
+			index++;
+
+			// Triangle 1 - Bottom left.
+			m_terrainModel[index].x = m_heightMap[index3].x;
+			m_terrainModel[index].y = m_heightMap[index3].y;
+			m_terrainModel[index].z = m_heightMap[index3].z;
+			m_terrainModel[index].tu = 0.0f;
+			m_terrainModel[index].tv = 1.0f;
+			m_terrainModel[index].nx = m_heightMap[index3].nx;
+			m_terrainModel[index].ny = m_heightMap[index3].ny;
+			m_terrainModel[index].nz = m_heightMap[index3].nz;
+			m_terrainModel[index].r = m_heightMap[index3].r;
+			m_terrainModel[index].g = m_heightMap[index3].g;
+			m_terrainModel[index].b = m_heightMap[index3].b;
+			index++;
+
+			// Triangle 2 - Bottom left.
+			m_terrainModel[index].x = m_heightMap[index3].x;
+			m_terrainModel[index].y = m_heightMap[index3].y;
+			m_terrainModel[index].z = m_heightMap[index3].z;
+			m_terrainModel[index].tu = 0.0f;
+			m_terrainModel[index].tv = 1.0f;
+			m_terrainModel[index].nx = m_heightMap[index3].nx;
+			m_terrainModel[index].ny = m_heightMap[index3].ny;
+			m_terrainModel[index].nz = m_heightMap[index3].nz;
+			m_terrainModel[index].r = m_heightMap[index3].r;
+			m_terrainModel[index].g = m_heightMap[index3].g;
+			m_terrainModel[index].b = m_heightMap[index3].b;
+			index++;
+
+			// Triangle 2 - Upper right.
+			m_terrainModel[index].x = m_heightMap[index2].x;
+			m_terrainModel[index].y = m_heightMap[index2].y;
+			m_terrainModel[index].z = m_heightMap[index2].z;
+			m_terrainModel[index].tu = 1.0f;
+			m_terrainModel[index].tv = 0.0f;
+			m_terrainModel[index].nx = m_heightMap[index2].nx;
+			m_terrainModel[index].ny = m_heightMap[index2].ny;
+			m_terrainModel[index].nz = m_heightMap[index2].nz;
+			m_terrainModel[index].r = m_heightMap[index2].r;
+			m_terrainModel[index].g = m_heightMap[index2].g;
+			m_terrainModel[index].b = m_heightMap[index2].b;
+			index++;
+
+			// Triangle 2 - Bottom right.
+			m_terrainModel[index].x = m_heightMap[index4].x;
+			m_terrainModel[index].y = m_heightMap[index4].y;
+			m_terrainModel[index].z = m_heightMap[index4].z;
+			m_terrainModel[index].tu = 1.0f;
+			m_terrainModel[index].tv = 1.0f;
+			m_terrainModel[index].nx = m_heightMap[index4].nx;
+			m_terrainModel[index].ny = m_heightMap[index4].ny;
+			m_terrainModel[index].nz = m_heightMap[index4].nz;
+			m_terrainModel[index].r = m_heightMap[index4].r;
+			m_terrainModel[index].g = m_heightMap[index4].g;
+			m_terrainModel[index].b = m_heightMap[index4].b;
+			index++;
+		}
+	}
+
+	return true;
+}
+
+
+void TerrainClass::ShutdownTerrainModel()
+{
+	// Release the terrain model data.
+	if(m_terrainModel)
+	{
+		delete [] m_terrainModel;
+		m_terrainModel = 0;
+	}
+
+	return;
+}
+
+
+void TerrainClass::CalculateTerrainVectors()
+{
+	int faceCount, i, index;
+	TempVertexType vertex1, vertex2, vertex3;
+	VectorType tangent, binormal;
+
+
+	// Calculate the number of faces in the terrain model.
+	faceCount = m_vertexCount / 3;
+
+	// Initialize the index to the model data.
+	index=0;
+
+	// Go through all the faces and calculate the the tangent, binormal, and normal vectors.
+	for(i=0; i&lt;faceCount; i++)
+	{
+		// Get the three vertices for this face from the terrain model.
+		vertex1.x = m_terrainModel[index].x;
+		vertex1.y = m_terrainModel[index].y;
+		vertex1.z = m_terrainModel[index].z;
+		vertex1.tu = m_terrainModel[index].tu;
+		vertex1.tv = m_terrainModel[index].tv;
+		vertex1.nx = m_terrainModel[index].nx;
+		vertex1.ny = m_terrainModel[index].ny;
+		vertex1.nz = m_terrainModel[index].nz;
+		index++;
+
+		vertex2.x = m_terrainModel[index].x;
+		vertex2.y = m_terrainModel[index].y;
+		vertex2.z = m_terrainModel[index].z;
+		vertex2.tu = m_terrainModel[index].tu;
+		vertex2.tv = m_terrainModel[index].tv;
+		vertex2.nx = m_terrainModel[index].nx;
+		vertex2.ny = m_terrainModel[index].ny;
+		vertex2.nz = m_terrainModel[index].nz;
+		index++;
+
+		vertex3.x = m_terrainModel[index].x;
+		vertex3.y = m_terrainModel[index].y;
+		vertex3.z = m_terrainModel[index].z;
+		vertex3.tu = m_terrainModel[index].tu;
+		vertex3.tv = m_terrainModel[index].tv;
+		vertex3.nx = m_terrainModel[index].nx;
+		vertex3.ny = m_terrainModel[index].ny;
+		vertex3.nz = m_terrainModel[index].nz;
+		index++;
+
+		// Calculate the tangent and binormal of that face.
+		CalculateTangentBinormal(vertex1, vertex2, vertex3, tangent, binormal);
+
+		// Store the tangent and binormal for this face back in the model structure.
+		m_terrainModel[index-1].tx = tangent.x;
+		m_terrainModel[index-1].ty = tangent.y;
+		m_terrainModel[index-1].tz = tangent.z;
+		m_terrainModel[index-1].bx = binormal.x;
+		m_terrainModel[index-1].by = binormal.y;
+		m_terrainModel[index-1].bz = binormal.z;
+
+		m_terrainModel[index-2].tx = tangent.x;
+		m_terrainModel[index-2].ty = tangent.y;
+		m_terrainModel[index-2].tz = tangent.z;
+		m_terrainModel[index-2].bx = binormal.x;
+		m_terrainModel[index-2].by = binormal.y;
+		m_terrainModel[index-2].bz = binormal.z;
+
+		m_terrainModel[index-3].tx = tangent.x;
+		m_terrainModel[index-3].ty = tangent.y;
+		m_terrainModel[index-3].tz = tangent.z;
+		m_terrainModel[index-3].bx = binormal.x;
+		m_terrainModel[index-3].by = binormal.y;
+		m_terrainModel[index-3].bz = binormal.z;
+	}
+
+	return;
+}
+
+
+void TerrainClass::CalculateTangentBinormal(TempVertexType vertex1, TempVertexType vertex2, TempVertexType vertex3, VectorType&amp; tangent, VectorType&amp; binormal)
+{
+	float vector1[3], vector2[3];
+	float tuVector[2], tvVector[2];
+	float den;
+	float length;
+
+
+	// Calculate the two vectors for this face.
+	vector1[0] = vertex2.x - vertex1.x;
+	vector1[1] = vertex2.y - vertex1.y;
+	vector1[2] = vertex2.z - vertex1.z;
+
+	vector2[0] = vertex3.x - vertex1.x;
+	vector2[1] = vertex3.y - vertex1.y;
+	vector2[2] = vertex3.z - vertex1.z;
+
+	// Calculate the tu and tv texture space vectors.
+	tuVector[0] = vertex2.tu - vertex1.tu;
+	tvVector[0] = vertex2.tv - vertex1.tv;
+
+	tuVector[1] = vertex3.tu - vertex1.tu;
+	tvVector[1] = vertex3.tv - vertex1.tv;
+
+	// Calculate the denominator of the tangent/binormal equation.
+	den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
+
+	// Calculate the cross products and multiply by the coefficient to get the tangent and binormal.
+	tangent.x = (tvVector[1] * vector1[0] - tvVector[0] * vector2[0]) * den;
+	tangent.y = (tvVector[1] * vector1[1] - tvVector[0] * vector2[1]) * den;
+	tangent.z = (tvVector[1] * vector1[2] - tvVector[0] * vector2[2]) * den;
+
+	binormal.x = (tuVector[0] * vector2[0] - tuVector[1] * vector1[0]) * den;
+	binormal.y = (tuVector[0] * vector2[1] - tuVector[1] * vector1[1]) * den;
+	binormal.z = (tuVector[0] * vector2[2] - tuVector[1] * vector1[2]) * den;
+
+	// Calculate the length of the tangent.
+	length = (float)sqrt((tangent.x * tangent.x) + (tangent.y * tangent.y) + (tangent.z * tangent.z));
+
+	// Normalize the tangent and then store it.
+	tangent.x = tangent.x / length;
+	tangent.y = tangent.y / length;
+	tangent.z = tangent.z / length;
+
+	// Calculate the length of the binormal.
+	length = (float)sqrt((binormal.x * binormal.x) + (binormal.y * binormal.y) + (binormal.z * binormal.z));
+
+	// Normalize the binormal and then store it.
+	binormal.x = binormal.x / length;
+	binormal.y = binormal.y / length;
+	binormal.z = binormal.z / length;
+
+	return;
+}
+
+
+bool TerrainClass::LoadTerrainCells(ID3D11Device* device)
+{
+	int cellHeight, cellWidth, cellRowCount, i, j, index;
+	bool result;
+
+
+	// Set the height and width of each terrain cell to a fixed 33x33 vertex array.
+	cellHeight = 33;
+	cellWidth = 33;
+
+	// Calculate the number of cells needed to store the terrain data.
+	cellRowCount = (m_terrainWidth-1) / (cellWidth-1);
+	m_cellCount = cellRowCount * cellRowCount;
+
+	// Create the terrain cell array.
+	m_TerrainCells = new TerrainCellClass[m_cellCount];
+	if(!m_TerrainCells)
+	{
+		return false;
+	}
+
+	// Loop through and initialize all the terrain cells.
+	for(j=0; j&lt;cellRowCount; j++)
+	{
+		for(i=0; i&lt;cellRowCount; i++)
+		{
+			index = (cellRowCount * j) + i;
+
+			result = m_TerrainCells[index].Initialize(device, m_terrainModel, i, j, cellHeight, cellWidth, m_terrainWidth);
+			if(!result)
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+
+void TerrainClass::ShutdownTerrainCells()
+{
+	int i;
+
+
+	// Release the terrain cell array.
+	if(m_TerrainCells)
+	{
+		for(i=0; i&lt;m_cellCount; i++)
+		{
+			m_TerrainCells[i].Shutdown();
+		}
+
+		delete [] m_TerrainCells;
+		m_TerrainCells = 0;
+	}
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have changed the RenderCell function.
+It now takes as input the FrustumClass pointer so that it can perform culling of the terrain cells.
+The function first gets the dimensions of the terrain cell and then uses the frustum object to determine if the cell can be seen or not.
+If it can't be seen then it increments the cells culled count and returns false.
+If it can be seen then it increments the cells drawn and polygon rendered count and return true.
+It is important to note that the return value no longer means failure to render, it now means if a cell is visible or not.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">bool TerrainClass::RenderCell(ID3D11DeviceContext* deviceContext, int cellId, FrustumClass* Frustum)
+{
+	float maxWidth, maxHeight, maxDepth, minWidth, minHeight, minDepth;
+	bool result;
+
+
+	// Get the dimensions of the terrain cell.
+	m_TerrainCells[cellId].GetCellDimensions(maxWidth, maxHeight, maxDepth, minWidth, minHeight, minDepth);
+
+	// Check if the cell is visible.  If it is not visible then just return and don't render it.
+	result = Frustum-&gt;CheckRectangle2(maxWidth, maxHeight, maxDepth, minWidth, minHeight, minDepth);
+	if(!result)
+	{
+		// Increment the number of cells that were culled.
+		m_cellsCulled++;
+
+		return false;
+	}
+
+	// If it is visible then render it.
+	m_TerrainCells[cellId].Render(deviceContext);
+
+	// Add the polygons in the cell to the render count.
+	m_renderCount += (m_TerrainCells[cellId].GetVertexCount() / 3);
+
+	// Increment the number of cells that were actually drawn.
+	m_cellsDrawn++;
+
+	return true;
+}</font><font face="arial" color="#aaffaa" size="2">
+
+
+void TerrainClass::RenderCellLines(ID3D11DeviceContext* deviceContext, int cellId)
+{
+	m_TerrainCells[cellId].RenderLineBuffers(deviceContext);
+	return;
+}
+
+
+int TerrainClass::GetCellIndexCount(int cellId)
+{
+	return m_TerrainCells[cellId].GetIndexCount();
+}
+
+
+int TerrainClass::GetCellLinesIndexCount(int cellId)
+{
+	return m_TerrainCells[cellId].GetLineBuffersIndexCount();
+}
+
+
+int TerrainClass::GetCellCount()
+{
+	return m_cellCount;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have added three new functions for returning the new render count variables.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">int TerrainClass::GetRenderCount()
+{
+	return m_renderCount;
+}
+
+
+int TerrainClass::GetCellsDrawn()
+{
+	return m_cellsDrawn;
+}
+
+
+int TerrainClass::GetCellsCulled()
+{
+	return m_cellsCulled;
+}
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Userinterfaceclass.h</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The user interface class has been modified to include three new strings for rendering the cell culling and polygon counts.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: userinterfaceclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _USERINTERFACECLASS_H_
+#define _USERINTERFACECLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "textclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: UserInterfaceClass
+////////////////////////////////////////////////////////////////////////////////
+class UserInterfaceClass
+{
+public:
+	UserInterfaceClass();
+	UserInterfaceClass(const UserInterfaceClass&amp;);
+	~UserInterfaceClass();
+
+	bool Initialize(D3DClass*, int, int);
+	void Shutdown();
+
+	bool Frame(ID3D11DeviceContext*, int, float, float, float, float, float, float);
+	bool Render(D3DClass*, ShaderManagerClass*, XMMATRIX, XMMATRIX, XMMATRIX);</font><font face="arial" color="#aaaaff" size="2">
+
+	bool UpdateRenderCounts(ID3D11DeviceContext*, int, int, int);</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	bool UpdateFpsString(ID3D11DeviceContext*, int);
+	bool UpdatePositionStrings(ID3D11DeviceContext*, float, float, float, float, float, float);
+
+private:
+	FontClass* m_Font1;
+	TextClass *m_FpsString, *m_VideoStrings, *m_PositionStrings;
+	int m_previousFps;
+	int m_previousPosition[6];</font><font face="arial" color="#aaaaff" size="2">
+	TextClass* m_RenderCountStrings;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Userinterfaceclass.cpp</u></font></p><pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: userinterfaceclass.cpp
+///////////////////////////////////////////////////////////////////////////////
+#include "userinterfaceclass.h"
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new render count strings are initialized to null in the class constructor.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">UserInterfaceClass::UserInterfaceClass()
+{
+	m_Font1 = 0;
+	m_FpsString = 0;
+	m_VideoStrings = 0;
+	m_PositionStrings = 0;</font><font face="arial" color="#aaaaff" size="2">
+	m_RenderCountStrings = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+UserInterfaceClass::UserInterfaceClass(const UserInterfaceClass&amp; other)
+{
+}
+
+
+UserInterfaceClass::~UserInterfaceClass()
+{
+}
+
+
+bool UserInterfaceClass::Initialize(D3DClass* Direct3D, int screenHeight, int screenWidth)
+{
+	bool result;
+	char videoCard[128];
+	int videoMemory;
+	char videoString[144];
+	char memoryString[32];
+	char tempString[16];
+	int i;
+
+
+	// Create the first font object.
+	m_Font1 = new FontClass;
+	if (!m_Font1)
+	{
+		return false;
+	}
+
+	// Initialize the first font object.
+	result = m_Font1-&gt;Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), "../Engine/data/font/font01.txt", 
+				     "../Engine/data/font/font01.tga", 32.0f, 3);
+	if (!result)
+	{
+		return false;
+	}
+
+	// Create the text object for the fps string.
+	m_FpsString = new TextClass;
+	if (!m_FpsString)
+	{
+		return false;
+	}
+
+	// Initialize the fps text string.
+	result = m_FpsString-&gt;Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+					 "Fps: 0", 10, 50, 0.0f, 1.0f, 0.0f);
+	if (!result)
+	{
+		return false;
+	}
+
+	// Initial the previous frame fps.
+	m_previousFps = -1;
+
+	// Setup the video card strings.
+	Direct3D-&gt;GetVideoCardInfo(videoCard, videoMemory);
+	strcpy_s(videoString, "Video Card: ");
+	strcat_s(videoString, videoCard);
+
+	_itoa_s(videoMemory, tempString, 10);
+
+	strcpy_s(memoryString, "Video Memory: ");
+	strcat_s(memoryString, tempString);
+	strcat_s(memoryString, " MB");
+
+	// Create the text objects for the video strings.
+	m_VideoStrings = new TextClass[2];
+	if (!m_VideoStrings)
+	{
+		return false;
+	}
+
+	// Initialize the video text strings.
+	result = m_VideoStrings[0].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 256, false, m_Font1, 
+					      videoString, 10, 10, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+
+	result = m_VideoStrings[1].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 32, false, m_Font1, 
+					      memoryString, 10, 30, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false;
+	}
+
+	// Create the text objects for the position strings.
+	m_PositionStrings = new TextClass[6];
+	if(!m_PositionStrings)
+	{
+		return false;
+	}
+
+	// Initialize the position text strings.
+	result = m_PositionStrings[0].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+						 "X: 0",  10, 310, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+
+	result = m_PositionStrings[1].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+						 "Y: 0",  10, 330, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+
+	result = m_PositionStrings[2].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+						 "Z: 0",  10, 350, 1.0f, 1.0f, 1.0f);  
+	if(!result) 
+	{ 
+		return false; 
+	}
+
+	result = m_PositionStrings[3].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+						 "rX: 0", 10, 370, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false;
+	}
+
+	result = m_PositionStrings[4].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+						 "rY: 0", 10, 390, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+
+	result = m_PositionStrings[5].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+						 "rZ: 0", 10, 410, 1.0f, 1.0f, 1.0f);  
+	if(!result) 
+	{ 
+		return false; 
+	}
+
+	// Initialize the previous frame position.
+	for(i=0; i&lt;6; i++)
+	{
+		m_previousPosition[i] = -1;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The three new render count strings are created and initialized here.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Create the text objects for the render count strings.
+	m_RenderCountStrings = new TextClass[3];
+	if(!m_RenderCountStrings)
+	{
+		return false;
+	}
+
+	// Initialize the render count strings.
+	result = m_RenderCountStrings[0].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 32, false, m_Font1,
+						    "Polys Drawn: 0", 10, 260, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+
+	result = m_RenderCountStrings[1].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 32, false, m_Font1, 
+						    "Cells Drawn: 0", 10, 280, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+
+	result = m_RenderCountStrings[2].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 32, false, m_Font1, 
+						    "Cells Culled: 0", 10, 300, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void UserInterfaceClass::Shutdown()
+{
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We release the three new render count strings in the Shutdown function.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Release the render count strings.
+	if(m_RenderCountStrings)
+	{
+		m_RenderCountStrings[0].Shutdown();
+		m_RenderCountStrings[1].Shutdown();
+		m_RenderCountStrings[2].Shutdown();
+
+		delete [] m_RenderCountStrings;
+		m_RenderCountStrings = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the position text strings.
+	if(m_PositionStrings)
+	{
+		m_PositionStrings[0].Shutdown();
+		m_PositionStrings[1].Shutdown();
+		m_PositionStrings[2].Shutdown();
+		m_PositionStrings[3].Shutdown();
+		m_PositionStrings[4].Shutdown();
+		m_PositionStrings[5].Shutdown();
+
+		delete [] m_PositionStrings;
+		m_PositionStrings = 0;
+	}
+
+	// Release the video card string.
+	if(m_VideoStrings)
+	{
+		m_VideoStrings[0].Shutdown();
+		m_VideoStrings[1].Shutdown();
+
+		delete [] m_VideoStrings;
+		m_VideoStrings = 0;
+	}
+
+
+	// Release the fps text string.
+	if(m_FpsString)
+	{
+		m_FpsString-&gt;Shutdown();
+		delete m_FpsString;
+		m_FpsString = 0;
+	}
+
+	// Release the font object.
+	if(m_Font1)
+	{
+		m_Font1-&gt;Shutdown();
+		delete m_Font1;
+		m_Font1 = 0;
+	}
+
+	return;
+}
+
+
+bool UserInterfaceClass::Frame(ID3D11DeviceContext* deviceContext, int fps, float posX, float posY, float posZ, 
+			       float rotX, float rotY, float rotZ)
+{
+	bool result;
+
+
+	// Update the fps string.
+	result = UpdateFpsString(deviceContext, fps);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Update the position strings.
+	result = UpdatePositionStrings(deviceContext, posX, posY, posZ, rotX, rotY, rotZ);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool UserInterfaceClass::Render(D3DClass* Direct3D, ShaderManagerClass* ShaderManager, XMMATRIX worldMatrix, XMMATRIX viewMatrix, 
+				XMMATRIX orthoMatrix)
+{
+	int i;
+
+
+	// Turn off the Z buffer and enable alpha blending to begin 2D rendering.
+	Direct3D-&gt;TurnZBufferOff();
+	Direct3D-&gt;EnableAlphaBlending();
+
+	// Render the fps string.
+	m_FpsString-&gt;Render(Direct3D-&gt;GetDeviceContext(), ShaderManager, worldMatrix, viewMatrix, orthoMatrix, m_Font1-&gt;GetTexture());
+
+	// Render the video card strings.
+	m_VideoStrings[0].Render(Direct3D-&gt;GetDeviceContext(), ShaderManager, worldMatrix, viewMatrix, orthoMatrix, m_Font1-&gt;GetTexture());
+	m_VideoStrings[1].Render(Direct3D-&gt;GetDeviceContext(), ShaderManager, worldMatrix, viewMatrix, orthoMatrix, m_Font1-&gt;GetTexture());
+
+	// Render the position and rotation strings.
+	for(i=0; i&lt;6; i++)
+	{
+		m_PositionStrings[i].Render(Direct3D-&gt;GetDeviceContext(), ShaderManager, worldMatrix, viewMatrix, orthoMatrix, m_Font1-&gt;GetTexture());
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new render count strings are rendered here.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Render the render count strings.
+	for(i=0; i&lt;3; i++)
+	{
+		m_RenderCountStrings[i].Render(Direct3D-&gt;GetDeviceContext(), ShaderManager, worldMatrix, viewMatrix, orthoMatrix, m_Font1-&gt;GetTexture());
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Turn off alpha blending now that the text has been rendered.
+	Direct3D-&gt;DisableAlphaBlending();
+
+	// Turn the Z buffer back on now that the 2D rendering has completed.
+	Direct3D-&gt;TurnZBufferOn();
+
+	return true;
+}
+
+
+bool UserInterfaceClass::UpdateFpsString(ID3D11DeviceContext* deviceContext, int fps)
+{
+	char tempString[16];
+	char finalString[16];
+	float red, green, blue;
+	bool result;
+
+
+	// Check if the fps from the previous frame was the same, if so don't need to update the text string.
+	if(m_previousFps == fps)
+	{
+		return true;
+	}
+
+	// Store the fps for checking next frame.
+	m_previousFps = fps;
+
+	// Truncate the fps to below 100,000.
+	if(fps &gt; 99999)
+	{
+		fps = 99999;
+	}
+
+	// Convert the fps integer to string format.
+	_itoa_s(fps, tempString, 10);
+
+	// Setup the fps string.
+	strcpy_s(finalString, "Fps: ");
+	strcat_s(finalString, tempString);
+
+	// If fps is 60 or above set the fps color to green.
+	if(fps &gt;= 60)
+	{
+		red = 0.0f;
+		green = 1.0f;
+		blue = 0.0f;
+	}
+
+	// If fps is below 60 set the fps color to yellow.
+	if(fps &lt; 60)
+	{
+		red = 1.0f;
+		green = 1.0f;
+		blue = 0.0f;
+	}
+
+	// If fps is below 30 set the fps color to red.
+	if(fps &lt; 30)
+	{
+		red = 1.0f;
+		green = 0.0f;
+		blue = 0.0f;
+	}
+
+	// Update the sentence vertex buffer with the new string information.
+	result = m_FpsString-&gt;UpdateSentence(deviceContext, m_Font1, finalString, 10, 50, red, green, blue);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool UserInterfaceClass::UpdatePositionStrings(ID3D11DeviceContext* deviceContext, float posX, float posY, float posZ, 
+					       float rotX, float rotY, float rotZ)
+{
+	int positionX, positionY, positionZ, rotationX, rotationY, rotationZ;
+	char tempString[16];
+	char finalString[16];
+	bool result;
+
+
+	// Convert the float values to integers.
+	positionX = (int)posX;
+	positionY = (int)posY;
+	positionZ = (int)posZ;
+	rotationX = (int)rotX;
+	rotationY = (int)rotY;
+	rotationZ = (int)rotZ;
+
+	// Update the position strings if the value has changed since the last frame.
+	if(positionX != m_previousPosition[0])
+	{
+		m_previousPosition[0] = positionX;
+		_itoa_s(positionX, tempString, 10);
+		strcpy_s(finalString, "X: ");
+		strcat_s(finalString, tempString);
+		result = m_PositionStrings[0].UpdateSentence(deviceContext, m_Font1, finalString, 10, 100, 1.0f, 1.0f, 1.0f); 
+		if(!result) { return false; }
+	}
+
+	if(positionY != m_previousPosition[1])
+	{
+		m_previousPosition[1] = positionY;
+		_itoa_s(positionY, tempString, 10);
+		strcpy_s(finalString, "Y: ");
+		strcat_s(finalString, tempString);
+		result = m_PositionStrings[1].UpdateSentence(deviceContext, m_Font1, finalString, 10, 120, 1.0f, 1.0f, 1.0f); 
+		if(!result) { return false; }
+	}
+
+	if(positionZ != m_previousPosition[2])
+	{
+		m_previousPosition[2] = positionZ;
+		_itoa_s(positionZ, tempString, 10);
+		strcpy_s(finalString, "Z: ");
+		strcat_s(finalString, tempString);
+		result = m_PositionStrings[2].UpdateSentence(deviceContext, m_Font1, finalString, 10, 140, 1.0f, 1.0f, 1.0f); 
+		if(!result) { return false; }
+	}
+
+	if(rotationX != m_previousPosition[3])
+	{
+		m_previousPosition[3] = rotationX;
+		_itoa_s(rotationX, tempString, 10);
+		strcpy_s(finalString, "rX: ");
+		strcat_s(finalString, tempString);
+		result = m_PositionStrings[3].UpdateSentence(deviceContext, m_Font1, finalString, 10, 180, 1.0f, 1.0f, 1.0f); 
+		if(!result) { return false; }
+	}
+
+	if(rotationY != m_previousPosition[4])
+	{
+		m_previousPosition[4] = rotationY;
+		_itoa_s(rotationY, tempString, 10);
+		strcpy_s(finalString, "rY: ");
+		strcat_s(finalString, tempString);
+		result = m_PositionStrings[4].UpdateSentence(deviceContext, m_Font1, finalString, 10, 200, 1.0f, 1.0f, 1.0f); 
+		if(!result) { return false; }
+	}
+
+	if(rotationZ != m_previousPosition[5])
+	{
+		m_previousPosition[5] = rotationZ;
+		_itoa_s(rotationZ, tempString, 10);
+		strcpy_s(finalString, "rZ: ");
+		strcat_s(finalString, tempString);
+		result = m_PositionStrings[5].UpdateSentence(deviceContext, m_Font1, finalString, 10, 220, 1.0f, 1.0f, 1.0f); 
+		if(!result) { return false; }
+	}
+
+	return true;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+UpdateRenderCounts is the new function used by the ZoneClass to update the render count strings.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">bool UserInterfaceClass::UpdateRenderCounts(ID3D11DeviceContext* deviceContext, int renderCount, int nodesDrawn, int nodesCulled)
+{
+	char tempString[32];
+	char finalString[32];
+	bool result;
+
+
+	// Convert the render count integer to string format.
+	_itoa_s(renderCount, tempString, 10);
+
+	// Setup the render count string.
+	strcpy_s(finalString, "Polys Drawn: ");
+	strcat_s(finalString, tempString);
+
+	// Update the sentence vertex buffer with the new string information.
+	result = m_RenderCountStrings[0].UpdateSentence(deviceContext, m_Font1, finalString, 10, 260, 1.0f, 1.0f, 1.0f);
+	if (!result)
+	{
+		return false;
+	}
+
+	// Convert the cells drawn integer to string format.
+	_itoa_s(nodesDrawn, tempString, 10);
+
+	// Setup the cells drawn string.
+	strcpy_s(finalString, "Cells Drawn: ");
+	strcat_s(finalString, tempString);
+
+	// Update the sentence vertex buffer with the new string information.
+	result = m_RenderCountStrings[1].UpdateSentence(deviceContext, m_Font1, finalString, 10, 280, 1.0f, 1.0f, 1.0f);
+	if (!result)
+	{
+		return false;
+	}
+
+	// Convert the cells culled integer to string format.
+	_itoa_s(nodesCulled, tempString, 10);
+
+	// Setup the cells culled string.
+	strcpy_s(finalString, "Cells Culled: ");
+	strcat_s(finalString, tempString);
+
+	// Update the sentence vertex buffer with the new string information.
+	result = m_RenderCountStrings[2].UpdateSentence(deviceContext, m_Font1, finalString, 10, 300, 1.0f, 1.0f, 1.0f);
+	if (!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Zoneclass.h</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have now included the FrustumClass in the ZoneClass definition.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: zoneclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _ZONECLASS_H_
+#define _ZONECLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "inputclass.h"
+#include "shadermanagerclass.h"
+#include "texturemanagerclass.h"
+#include "timerclass.h"
+#include "userinterfaceclass.h"
+#include "cameraclass.h"
+#include "lightclass.h"
+#include "positionclass.h"</font><font face="arial" color="#aaaaff" size="2">
+#include "frustumclass.h"</font><font face="arial" color="#aaffaa" size="2">
+#include "skydomeclass.h"
+#include "terrainclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ZoneClass
+////////////////////////////////////////////////////////////////////////////////
+class ZoneClass
+{
+public:
+	ZoneClass();
+	ZoneClass(const ZoneClass&amp;);
+	~ZoneClass();
+
+	bool Initialize(D3DClass*, HWND, int, int, float);
+	void Shutdown();
+	bool Frame(D3DClass*, InputClass*, ShaderManagerClass*, TextureManagerClass*, float, int);
+
+private:
+	void HandleMovementInput(InputClass*, float);
+	bool Render(D3DClass*, ShaderManagerClass*, TextureManagerClass*);
+
+private:
+	UserInterfaceClass* m_UserInterface;
+	CameraClass* m_Camera;
+	LightClass* m_Light;
+	PositionClass* m_Position;</font><font face="arial" color="#aaaaff" size="2">
+	FrustumClass* m_Frustum;</font><font face="arial" color="#aaffaa" size="2">
+	SkyDomeClass* m_SkyDome;
+	TerrainClass* m_Terrain;
+	bool m_displayUI, m_wireFrame, m_cellLines;
+};
+
+#endif
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Zoneclass.cpp</u></font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: zoneclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "zoneclass.h"
+
+
+ZoneClass::ZoneClass()
+{
+	m_UserInterface = 0;
+	m_Camera = 0;
+	m_Light = 0;
+	m_Position = 0;</font><font face="arial" color="#aaaaff" size="2">
+	m_Frustum = 0;</font><font face="arial" color="#aaffaa" size="2">
+	m_SkyDome = 0;
+	m_Terrain = 0;
+}
+
+
+ZoneClass::ZoneClass(const ZoneClass&amp; other)
+{
+}
+
+
+ZoneClass::~ZoneClass()
+{
+}
+
+
+bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int screenHeight, float screenDepth)
+{
+	bool result;
+
+
+	// Create the user interface object.
+	m_UserInterface = new UserInterfaceClass;
+	if(!m_UserInterface)
+	{
+		return false;
+	}
+
+	// Initialize the user interface object.
+	result = m_UserInterface-&gt;Initialize(Direct3D, screenHeight, screenWidth);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the user interface object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera and build the matrices needed for rendering.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	m_Camera-&gt;Render();
+	m_Camera-&gt;RenderBaseViewMatrix();
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetDirection(-0.5f, -1.0f, -0.5f);
+
+	// Create the position object.
+	m_Position = new PositionClass;
+	if(!m_Position)
+	{
+		return false;
+	}
+
+	// Set the initial position and rotation.
+	m_Position-&gt;SetPosition(512.0f, 30.0f, -10.0f);
+	m_Position-&gt;SetRotation(0.0f, 0.0f, 0.0f);
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frustum object is created and initialized here.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Create the frustum object.
+	m_Frustum = new FrustumClass;
+	if(!m_Frustum)
+	{
+		return false;
+	}
+
+	// Initialize the frustum object.
+	m_Frustum-&gt;Initialize(screenDepth);</font><font face="arial" color="#aaffaa" size="2">
+
+	// Create the sky dome object.
+	m_SkyDome = new SkyDomeClass;
+	if(!m_SkyDome)
+	{
+		return false;
+	}
+
+	// Initialize the sky dome object.
+	result = m_SkyDome-&gt;Initialize(Direct3D-&gt;GetDevice());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sky dome object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the terrain object.
+	m_Terrain = new TerrainClass;
+	if(!m_Terrain)
+	{
+		return false;
+	}
+
+	// Initialize the terrain object.
+	result = m_Terrain-&gt;Initialize(Direct3D-&gt;GetDevice(), "../Engine/data/setup.txt");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
+		return false;
+	}
+	
+	// Set the UI to display by default.
+	m_displayUI = true;
+
+	// Set wire frame rendering initially to disabled.
+	m_wireFrame = false;
+
+	// Set the rendering of cell lines initially to enabled.
+	m_cellLines = true;
+
+	return true;
+}
+
+
+void ZoneClass::Shutdown()
+{
+	// Release the terrain object.
+	if(m_Terrain)
+	{
+		m_Terrain-&gt;Shutdown();
+		delete m_Terrain;
+		m_Terrain = 0;
+	}
+
+	// Release the sky dome object.
+	if(m_SkyDome)
+	{
+		m_SkyDome-&gt;Shutdown();
+		delete m_SkyDome;
+		m_SkyDome = 0;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frustum object is released in the Shutdown function when we are done using it.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Release the frustum object.
+	if(m_Frustum)
+	{
+		delete m_Frustum;
+		m_Frustum = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the position object.
+	if(m_Position)
+	{
+		delete m_Position;
+		m_Position = 0;
+	}
+
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the user interface object.
+	if(m_UserInterface)
+	{
+		m_UserInterface-&gt;Shutdown();
+		delete m_UserInterface;
+		m_UserInterface = 0;
+	}
+
+	return;
+}
+
+
+bool ZoneClass::Frame(D3DClass* Direct3D, InputClass* Input, ShaderManagerClass* ShaderManager, TextureManagerClass* TextureManager, 
+		      float frameTime, int fps)
+{
+	bool result;
+	float posX, posY, posZ, rotX, rotY, rotZ;
+
+
+	// Do the frame input processing.
+	HandleMovementInput(Input, frameTime);
+
+	// Get the view point position/rotation.
+	m_Position-&gt;GetPosition(posX, posY, posZ);
+	m_Position-&gt;GetRotation(rotX, rotY, rotZ);
+
+	// Do the frame processing for the user interface.
+	result = m_UserInterface-&gt;Frame(Direct3D-&gt;GetDeviceContext(), fps, posX, posY, posZ, rotX, rotY, rotZ);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now called the TerrainClass::Frame function to reset the render counts each frame.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Do the terrain frame processing.
+	m_Terrain-&gt;Frame();</font><font face="arial" color="#aaffaa" size="2">
+
+	// Render the graphics.
+	result = Render(Direct3D, ShaderManager, TextureManager);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ZoneClass::HandleMovementInput(InputClass* Input, float frameTime)
+{
+	bool keyDown;
+	float posX, posY, posZ, rotX, rotY, rotZ;
+
+
+	// Set the frame time for calculating the updated position.
+	m_Position-&gt;SetFrameTime(frameTime);
+
+	// Handle the input.
+	keyDown = Input-&gt;IsLeftPressed();
+	m_Position-&gt;TurnLeft(keyDown);
+
+	keyDown = Input-&gt;IsRightPressed();
+	m_Position-&gt;TurnRight(keyDown);
+
+	keyDown = Input-&gt;IsUpPressed();
+	m_Position-&gt;MoveForward(keyDown);
+
+	keyDown = Input-&gt;IsDownPressed();
+	m_Position-&gt;MoveBackward(keyDown);
+
+	keyDown = Input-&gt;IsAPressed();
+	m_Position-&gt;MoveUpward(keyDown);
+
+	keyDown = Input-&gt;IsZPressed();
+	m_Position-&gt;MoveDownward(keyDown);
+
+	keyDown = Input-&gt;IsPgUpPressed();
+	m_Position-&gt;LookUpward(keyDown);
+
+	keyDown = Input-&gt;IsPgDownPressed();
+	m_Position-&gt;LookDownward(keyDown);
+
+	// Get the view point position/rotation.
+	m_Position-&gt;GetPosition(posX, posY, posZ);
+	m_Position-&gt;GetRotation(rotX, rotY, rotZ);
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(posX, posY, posZ);
+	m_Camera-&gt;SetRotation(rotX, rotY, rotZ);
+
+	// Determine if the user interface should be displayed or not.
+	if(Input-&gt;IsF1Toggled())
+	{
+		m_displayUI = !m_displayUI;
+	}
+
+	// Determine if the terrain should be rendered in wireframe or not.
+	if(Input-&gt;IsF2Toggled())
+	{
+		m_wireFrame = !m_wireFrame;
+	}
+
+	// Determine if we should render the lines around each terrain cell.
+	if(Input-&gt;IsF3Toggled())
+	{
+		m_cellLines = !m_cellLines;
+	}
+
+	return;
+}
+
+
+bool ZoneClass::Render(D3DClass* Direct3D, ShaderManagerClass* ShaderManager, TextureManagerClass* TextureManager)
+{
+	XMMATRIX worldMatrix, viewMatrix, projectionMatrix, baseViewMatrix, orthoMatrix;
+	bool result;
+	XMFLOAT3 cameraPosition;
+	int i;
+
+	
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	Direct3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	Direct3D-&gt;GetProjectionMatrix(projectionMatrix);
+	m_Camera-&gt;GetBaseViewMatrix(baseViewMatrix);
+	Direct3D-&gt;GetOrthoMatrix(orthoMatrix);
+	
+	// Get the position of the camera.
+	cameraPosition = m_Camera-&gt;GetPosition();
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frustum is reconstructed each frame with the updated matrices.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Construct the frustum.
+	m_Frustum-&gt;ConstructFrustum(projectionMatrix, viewMatrix);</font><font face="arial" color="#aaffaa" size="2">
+
+	// Clear the buffers to begin the scene.
+	Direct3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Turn off back face culling and turn off the Z buffer.
+	Direct3D-&gt;TurnOffCulling();
+	Direct3D-&gt;TurnZBufferOff();
+
+	// Translate the sky dome to be centered around the camera position.
+	worldMatrix = XMMatrixTranslation(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+	// Render the sky dome using the sky dome shader.
+	m_SkyDome-&gt;Render(Direct3D-&gt;GetDeviceContext());
+	result = ShaderManager-&gt;RenderSkyDomeShader(Direct3D-&gt;GetDeviceContext(), m_SkyDome-&gt;GetIndexCount(), worldMatrix, viewMatrix, 
+						    projectionMatrix, m_SkyDome-&gt;GetApexColor(), m_SkyDome-&gt;GetCenterColor());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	Direct3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Turn the Z buffer back and back face culling on.
+	Direct3D-&gt;TurnZBufferOn();
+	Direct3D-&gt;TurnOnCulling();
+	
+	// Turn on wire frame rendering of the terrain if needed.
+	if(m_wireFrame)
+	{
+		Direct3D-&gt;EnableWireframe();
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have modified how the rendering works.
+We loop through all of the terrain cells as usual, but now we send in the frustum to each cell to determine if we should render it or not.
+And likewise we don't render the bounding box if the cell is not visible.
+This is where we get our performance boost.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Render the terrain cells (and cell lines if needed).
+	for(i=0; i&lt;m_Terrain-&gt;GetCellCount(); i++)
+	{
+		// Render each terrain cell if it is visible only.
+		result = m_Terrain-&gt;RenderCell(Direct3D-&gt;GetDeviceContext(), i, m_Frustum);
+		if(result)
+		{
+			// Render the cell buffers using the terrain shader.
+			result = ShaderManager-&gt;RenderTerrainShader(Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetCellIndexCount(i), worldMatrix, viewMatrix,
+								    projectionMatrix, TextureManager-&gt;GetTexture(0), TextureManager-&gt;GetTexture(1),
+								    m_Light-&gt;GetDirection(), m_Light-&gt;GetDiffuseColor());
+			if(!result)
+			{
+				return false;
+			}
+
+			// If needed then render the bounding box around this terrain cell using the color shader. 
+			if(m_cellLines)
+			{
+				m_Terrain-&gt;RenderCellLines(Direct3D-&gt;GetDeviceContext(), i);
+				ShaderManager-&gt;RenderColorShader(Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetCellLinesIndexCount(i), worldMatrix, 
+								 viewMatrix, projectionMatrix);
+				if(!result)
+				{
+					return false;
+				}
+			}
+		}
+	}</font><font face="arial" color="#aaffaa" size="2">
+	
+	// Turn off wire frame rendering of the terrain if it was on.
+	if(m_wireFrame)
+	{
+		Direct3D-&gt;DisableWireframe();  
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+After the rendering is complete we get the cell cull and polygon counts and send them to the user interface for this frame.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Update the render counts in the UI.
+	result = m_UserInterface-&gt;UpdateRenderCounts(Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetRenderCount(), m_Terrain-&gt;GetCellsDrawn(), 
+						     m_Terrain-&gt;GetCellsCulled());
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Render the user interface.
+	if(m_displayUI)
+	{
+		result = m_UserInterface-&gt;Render(Direct3D, ShaderManager, worldMatrix, baseViewMatrix, orthoMatrix);
+		if(!result)
+		{
+			return false;
+		}
+	}
+
+	// Present the rendered scene to the screen.
+	Direct3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We can now efficiently render only the visible portions of our terrain and cull all the non-visible cells.
+</font></p><p align="left"><img border="0" src="./Tutorial 10_ Terrain Cell Culling_files/pic4040.gif" width="800" height="450"></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the code in 64 bit mode and run the program.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Unlock the FPS and enable rendering of the bounding boxes.  Move around the terrain and see how that affects the fps.
+</font></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11ter10_src.zip">dx11ter10_src.zip</a></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11ter10_exe.zip">dx11ter10_exe.zip</a></font></p><table align="center" border="0" width="1024"><tbody><tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</tr></tbody></table>
+
+<p align="center"><img border="0" src="./Tutorial 10_ Terrain Cell Culling_files/pic3002.gif" width="1024" height="1"></p>
+
+<p align="center"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutdx11s2ter.html">Back to Tutorial Index</a></font></p>
+
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 10_ Terrain Cell Culling_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

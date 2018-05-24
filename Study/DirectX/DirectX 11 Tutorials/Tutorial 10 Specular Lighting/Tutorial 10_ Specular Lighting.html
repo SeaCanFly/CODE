@@ -1,0 +1,1529 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut10.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 10: Specular Lighting</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 10: Specular Lighting
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 10_ Specular Lighting_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will be an introduction to using specular lighting in DirectX 11 with HLSL.
+The code in this tutorial builds on the code from the previous tutorial.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Specular lighting is the use of bright spot highlights to give visual clues for light source locations.
+For example a red sphere with just ambient and diffuse lighting looks like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 10_ Specular Lighting_files/pic0027.gif" width="200" height="200"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now if we add a white specular highlight we get the following result:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 10_ Specular Lighting_files/pic0028.gif" width="200" height="200"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Specular lighting is most commonly used to give light reflection off of metallic surfaces such as mirrors and highly polished/reflective metal surfaces.
+It is also used on other materials such as reflecting sunlight off of water.
+Used well it can add a degree of photo realism to most 3D scenes.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The equation for specular lighting is the following:
+</font></p>
+ 
+<pre><font face="arial" color="#FFFFFF" size="2">	SpecularLighting = SpecularColor * (SpecularColorOfLight * ((NormalVector dot HalfWayVector) power SpecularReflectionPower) * Attentuation * Spotlight)
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will modify the equation to produce just the basic specular lighting effect as follows:
+</font></p>
+ 
+<pre><font face="arial" color="#FFFFFF" size="2">	SpecularLighting = SpecularLightColor * (ViewingDirection dot ReflectionVector) power SpecularReflectionPower
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The reflection vector in this equation has to be produced by multiplying double the light intensity by the vertex normal.
+The direction of the light is subtracted which then gives the reflection vector between the light source and the viewing angle: 
+</font></p>
+ 
+<pre><font face="arial" color="#FFFFFF" size="2">	ReflectionVector = 2 * LightIntensity * VertexNormal - LightDirection
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The viewing direction in the equation is produced by subtracting the location of the camera by the position of the vertex:
+</font></p>
+ 
+<pre><font face="arial" color="#FFFFFF" size="2">	ViewingDirection = CameraPosition - VertexPosition
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Lets take a look at the modified light shader to see how this is implemented:
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Light.vs</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: light.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We add a new constant buffer to hold camera information.
+In this shader we require the position of the camera to determine where this vertex is being viewed from for specular calculations.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">cbuffer CameraBuffer
+{
+    float3 cameraPosition;
+    float padding;
+};</font><font face="arial" color="#aaffaa" size="2">
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PixelInputType structure is modified as the viewing direction needs to be calculated in the vertex shader and then sent into the pixel shader 
+for specular lighting calculations.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 viewDirection : TEXCOORD1;
+};</font><font face="arial" color="#aaffaa" size="2">
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType LightVertexShader(VertexInputType input)
+{
+    PixelInputType output;</font><font face="arial" color="#aaaaff" size="2">
+    float4 worldPosition;</font><font face="arial" color="#aaffaa" size="2">
+
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+    
+    // Calculate the normal vector against the world matrix only.
+    output.normal = mul(input.normal, (float3x3)worldMatrix);
+	
+    // Normalize the normal vector.
+    output.normal = normalize(output.normal);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The viewing direction is calculated here in the vertex shader.
+We calculate the world position of the vertex and subtract that from the camera position to determine where we are viewing the scene from.
+The final value is normalized and sent into the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">    // Calculate the position of the vertex in the world.
+    worldPosition = mul(input.position, worldMatrix);
+
+    // Determine the viewing direction based on the position of the camera and the position of the vertex in the world.
+    output.viewDirection = cameraPosition.xyz - worldPosition.xyz;
+	
+    // Normalize the viewing direction vector.
+    output.viewDirection = normalize(output.viewDirection);</font><font face="arial" color="#aaffaa" size="2">
+
+    return output;
+}
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Light.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: light.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+Texture2D shaderTexture;
+SamplerState SampleType;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The light buffer has been updated to hold specularColor and specularPower values for specular lighting calculations.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">cbuffer LightBuffer
+{
+    float4 ambientColor;
+    float4 diffuseColor;
+    float3 lightDirection;
+    float specularPower;
+    float4 specularColor;
+};</font><font face="arial" color="#aaffaa" size="2">
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PixelInputType structure is modified here as well to reflect the changes to it in the vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 viewDirection : TEXCOORD1;
+};</font><font face="arial" color="#aaffaa" size="2">
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 LightPixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 textureColor;
+    float3 lightDir;
+    float lightIntensity;
+    float4 color;</font><font face="arial" color="#aaaaff" size="2">
+    float3 reflection;
+    float4 specular;</font><font face="arial" color="#aaffaa" size="2">
+
+
+    // Sample the pixel color from the texture using the sampler at this texture coordinate location.
+    textureColor = shaderTexture.Sample(SampleType, input.tex);
+
+    // Set the default output color to the ambient light value for all pixels.
+    color = ambientColor;</font><font face="arial" color="#aaaaff" size="2">
+
+    // Initialize the specular color.
+    specular = float4(0.0f, 0.0f, 0.0f, 0.0f);</font><font face="arial" color="#aaffaa" size="2">
+
+    // Invert the light direction for calculations.
+    lightDir = -lightDirection;
+
+    // Calculate the amount of light on this pixel.
+    lightIntensity = saturate(dot(input.normal, lightDir));
+
+    if(lightIntensity &gt; 0.0f)
+    {
+        // Determine the final diffuse color based on the diffuse color and the amount of light intensity.
+        color += (diffuseColor * lightIntensity);</font><font face="arial" color="#aaaaff" size="2">
+
+        // Saturate the ambient and diffuse color.
+        color = saturate(color);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The reflection vector for specular lighting is calculated here in the pixel shader provided the light intensity is greater than zero.
+This is the same equation as listed at the beginning of the tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">        // Calculate the reflection vector based on the light intensity, normal vector, and light direction.
+        reflection = normalize(2 * lightIntensity * input.normal - lightDir); 
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The amount of specular light is then calculated using the reflection vector and the viewing direction.
+The smaller the angle between the viewer and the light source the greater the specular light reflection will be.
+The result is taken to the power of the specularPower value.
+The lower the specularPower value the greater the final effect is.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">        // Determine the amount of specular light based on the reflection vector, viewing direction, and specular power.
+        specular = pow(saturate(dot(reflection, input.viewDirection)), specularPower);</font><font face="arial" color="#aaffaa" size="2">
+    }
+
+    // Multiply the texture pixel and the input color to get the textured result.
+    color = color * textureColor;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We don't add the specular effect until the end. 
+It is a highlight and needs to be added to the final value or it will not show up properly.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">    // Add the specular component last to the output color.
+    color = saturate(color + specular);</font><font face="arial" color="#aaffaa" size="2">
+
+    return color;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Lightshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The LightShaderClass has been modified from the previous tutorial to handle specular lighting now.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: lightshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _LIGHTSHADERCLASS_H_
+#define _LIGHTSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: LightShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class LightShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We add a new camera buffer structure to match the new camera constant buffer in the vertex shader.
+Note we add a padding to make the structure size a multiple of 16 to prevent CreateBuffer failing when using sizeof with this structure.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	struct CameraBufferType
+	{
+		D3DXVECTOR3 cameraPosition;
+		float padding;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The LightBufferType has been modified to hold a specular color and specular power to match the light constant buffer in the pixel shader.
+Pay attention to the fact that I placed the specular power by the light direction to form a 4 float slot instead of using padding so that the structure
+could be kept in multiples of 16 bytes.
+Also had specular power been placed last in the structure and no padding used beneath light direction then the shader would not have functioned correctly.
+This is because even though the structure was a multiple of 16 the individual slots themselves were not aligned logically to 16 bytes each.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	struct LightBufferType
+	{
+		D3DXVECTOR4 ambientColor;
+		D3DXVECTOR4 diffuseColor;
+		D3DXVECTOR3 lightDirection;
+		float specularPower;
+		D3DXVECTOR4 specularColor;
+	};</font><font face="arial" color="#aaffaa" size="2">
+
+public:
+	LightShaderClass();
+	LightShaderClass(const LightShaderClass&amp;);
+	~LightShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4, D3DXVECTOR4, 
+		    D3DXVECTOR3, D3DXVECTOR4, float);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4, D3DXVECTOR4,
+				 D3DXVECTOR3, D3DXVECTOR4, float);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleState;
+	ID3D11Buffer* m_matrixBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We add a new camera constant buffer here which will be used for setting the camera position in the vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	ID3D11Buffer* m_cameraBuffer;</font><font face="arial" color="#aaffaa" size="2">
+	ID3D11Buffer* m_lightBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Lightshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: lightshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "lightshaderclass.h"
+
+
+LightShaderClass::LightShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleState = 0;
+	m_matrixBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the new camera constant buffer to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_cameraBuffer = 0;</font><font face="arial" color="#aaffaa" size="2">
+	m_lightBuffer = 0;
+}
+
+
+LightShaderClass::LightShaderClass(const LightShaderClass&amp; other)
+{
+}
+
+
+LightShaderClass::~LightShaderClass()
+{
+}
+
+
+bool LightShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+
+
+	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/light.vs", L"../Engine/light.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void LightShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function now takes in cameraPosition, specularColor, and specularPower values and sends them into the SetShaderParameters function 
+to make them active in the light shader before rendering occurs.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool LightShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+			      D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, D3DXVECTOR3 lightDirection, D3DXVECTOR4 ambientColor,
+			      D3DXVECTOR4 diffuseColor, D3DXVECTOR3 cameraPosition, D3DXVECTOR4 specularColor, float specularPower)
+</font><font face="arial" color="#aaffaa" size="2">{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.</font><font face="arial" color="#aaaaff" size="2">
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, ambientColor, diffuseColor, 
+				     cameraPosition, specularColor, specularPower);</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool LightShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;</font><font face="arial" color="#aaaaff" size="2">
+	D3D11_BUFFER_DESC cameraBufferDesc;</font><font face="arial" color="#aaffaa" size="2">
+	D3D11_BUFFER_DESC lightBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+
+	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "LightVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "LightPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	// This setup needs to match the VertexType stucture in the ModelClass and in the shader.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	polygonLayout[2].SemanticName = "NORMAL";
+	polygonLayout[2].SemanticIndex = 0;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[2].InputSlot = 0;
+	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[2].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We setup the description of the new camera buffer and then create a buffer using that description.
+This will allow us to interface with and set the camera position in the vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Setup the description of the camera dynamic constant buffer that is in the vertex shader.
+	cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cameraBufferDesc.ByteWidth = sizeof(CameraBufferType);
+	cameraBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cameraBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cameraBufferDesc.MiscFlags = 0;
+	cameraBufferDesc.StructureByteStride = 0;
+
+	// Create the camera constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;cameraBufferDesc, NULL, &amp;m_cameraBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;lightBufferDesc, NULL, &amp;m_lightBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void LightShaderClass::ShutdownShader()
+{
+	// Release the light constant buffer.
+	if(m_lightBuffer)
+	{
+		m_lightBuffer-&gt;Release();
+		m_lightBuffer = 0;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Release the new camera constant buffer in the ShutdownShader function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Release the camera constant buffer.
+	if(m_cameraBuffer)
+	{
+		m_cameraBuffer-&gt;Release();
+		m_cameraBuffer = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetShaderParameters function has been modified to take as input cameraPosition, specularColor, and specularPower.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+					   D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, D3DXVECTOR3 lightDirection, 
+					   D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor, D3DXVECTOR3 cameraPosition, D3DXVECTOR4 specularColor, 
+					   float specularPower)</font><font face="arial" color="#aaffaa" size="2">
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	unsigned int bufferNumber;
+	MatrixBufferType* dataPtr;
+	LightBufferType* dataPtr2;</font><font face="arial" color="#aaaaff" size="2">
+	CameraBufferType* dataPtr3;</font><font face="arial" color="#aaffaa" size="2">
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we lock the camera buffer and set the camera position value in it.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Lock the camera constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr3 = (CameraBufferType*)mappedResource.pData;
+
+	// Copy the camera position into the constant buffer.
+	dataPtr3-&gt;cameraPosition = cameraPosition;
+	dataPtr3-&gt;padding = 0.0f;
+
+	// Unlock the camera constant buffer.
+	deviceContext-&gt;Unmap(m_cameraBuffer, 0);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Note that we set the bufferNumber to 1 instead of 0 before setting the constant buffer. 
+This is because it is the second buffer in the vertex shader (the first being the matrix buffer). 
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Set the position of the camera constant buffer in the vertex shader.
+	bufferNumber = 1;
+
+	// Now set the camera constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_cameraBuffer);</font><font face="arial" color="#aaffaa" size="2">
+	
+	// Set shader texture resource in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;texture);
+
+	// Lock the light constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the light constant buffer.
+	dataPtr2 = (LightBufferType*)mappedResource.pData;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The light constant buffer now sets the specular color and specular power so that the pixel shader can perform specular lighting calculations.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Copy the lighting variables into the light constant buffer.
+	dataPtr2-&gt;ambientColor = ambientColor;
+	dataPtr2-&gt;diffuseColor = diffuseColor;
+	dataPtr2-&gt;lightDirection = lightDirection;</font><font face="arial" color="#aaaaff" size="2">
+	dataPtr2-&gt;specularColor = specularColor;
+	dataPtr2-&gt;specularPower = specularPower;</font><font face="arial" color="#aaffaa" size="2">
+	
+	// Unlock the light constant buffer.
+	deviceContext-&gt;Unmap(m_lightBuffer, 0);
+
+	// Set the position of the light constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_lightBuffer);
+
+	return true;
+}
+
+
+void LightShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Lightclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The LightClass has been modified for this tutorial to include specular components and specular related helper functions.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: lightclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _LIGHTCLASS_H_
+#define _LIGHTCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: LightClass
+////////////////////////////////////////////////////////////////////////////////
+class LightClass
+{
+public:
+	LightClass();
+	LightClass(const LightClass&amp;);
+	~LightClass();
+
+	void SetAmbientColor(float, float, float, float);
+	void SetDiffuseColor(float, float, float, float);
+	void SetDirection(float, float, float);</font><font face="arial" color="#aaaaff" size="2">
+	void SetSpecularColor(float, float, float, float);
+	void SetSpecularPower(float);</font><font face="arial" color="#aaffaa" size="2">
+
+	D3DXVECTOR4 GetAmbientColor();
+	D3DXVECTOR4 GetDiffuseColor();
+	D3DXVECTOR3 GetDirection();</font><font face="arial" color="#aaaaff" size="2">
+	D3DXVECTOR4 GetSpecularColor();
+	float GetSpecularPower();</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	D3DXVECTOR4 m_ambientColor;
+	D3DXVECTOR4 m_diffuseColor;
+	D3DXVECTOR3 m_direction;</font><font face="arial" color="#aaaaff" size="2">
+	D3DXVECTOR4 m_specularColor;
+	float m_specularPower;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Lightclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: lightclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "lightclass.h"
+
+
+LightClass::LightClass()
+{
+}
+
+
+LightClass::LightClass(const LightClass&amp; other)
+{
+}
+
+
+LightClass::~LightClass()
+{
+}
+
+
+void LightClass::SetAmbientColor(float red, float green, float blue, float alpha)
+{
+	m_ambientColor = D3DXVECTOR4(red, green, blue, alpha);
+	return;
+}
+
+
+void LightClass::SetDiffuseColor(float red, float green, float blue, float alpha)
+{
+	m_diffuseColor = D3DXVECTOR4(red, green, blue, alpha);
+	return;
+}
+
+
+void LightClass::SetDirection(float x, float y, float z)
+{
+	m_direction = D3DXVECTOR3(x, y, z);
+	return;
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+void LightClass::SetSpecularColor(float red, float green, float blue, float alpha)
+{
+	m_specularColor = D3DXVECTOR4(red, green, blue, alpha);
+	return;
+}
+
+
+void LightClass::SetSpecularPower(float power)
+{
+	m_specularPower = power;
+	return;
+}</font><font face="arial" color="#aaffaa" size="2">
+
+
+D3DXVECTOR4 LightClass::GetAmbientColor()
+{
+	return m_ambientColor;
+}
+
+
+D3DXVECTOR4 LightClass::GetDiffuseColor()
+{
+	return m_diffuseColor;
+}
+
+
+D3DXVECTOR3 LightClass::GetDirection()
+{
+	return m_direction;
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+D3DXVECTOR4 LightClass::GetSpecularColor()
+{
+	return m_specularColor;
+}
+
+
+float LightClass::GetSpecularPower()
+{
+	return m_specularPower;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The header file for the GraphicsClass has not changed for this tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+#include "lightshaderclass.h"
+#include "lightclass.h"
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool Render(float);
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	ModelClass* m_Model;
+	LightShaderClass* m_LightShader;
+	LightClass* m_Light;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_Model = 0;
+	m_LightShader = 0;
+	m_Light = 0;
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	
+	// Create the model object.
+	m_Model = new ModelClass;
+	if(!m_Model)
+	{
+		return false;
+	}
+
+	// Initialize the model object.
+	result = m_Model-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/cube.txt", L"../Engine/data/seafloor.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light shader object.
+	m_LightShader = new LightShaderClass;
+	if(!m_LightShader)
+	{
+		return false;
+	}
+
+	// Initialize the light shader object.
+	result = m_LightShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the light class object we now set the specular color and the specular power.
+For this tutorial we set the specular color to white and set the specular power to 32.
+Remember that the lower the specular power value the greater the specular effect will be.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the light object.
+	m_Light-&gt;SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);</font><font face="arial" color="#aaaaff" size="2">
+	m_Light-&gt;SetDirection(0.0f, 0.0f, 1.0f);
+	m_Light-&gt;SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetSpecularPower(32.0f);</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the light shader object.
+	if(m_LightShader)
+	{
+		m_LightShader-&gt;Shutdown();
+		delete m_LightShader;
+		m_LightShader = 0;
+	}
+
+	// Release the model object.
+	if(m_Model)
+	{
+		m_Model-&gt;Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame()
+{
+	bool result;
+	static float rotation = 0.0f;
+
+
+	// Update the rotation variable each frame.
+	rotation += (float)D3DX_PI * 0.005f;
+	if(rotation &gt; 360.0f)
+	{
+		rotation -= 360.0f;
+	}
+	
+	// Render the graphics scene.
+	result = Render(rotation);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool GraphicsClass::Render(float rotation)
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Rotate the world matrix by the rotation value so that the triangle will spin.
+	D3DXMatrixRotationY(&amp;worldMatrix, rotation);
+
+	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model-&gt;Render(m_D3D-&gt;GetDeviceContext());
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The light shader render function now takes in the camera position, the light specular color, and the light specular power.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Render the model using the light shader.
+	result = m_LightShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+				       m_Model-&gt;GetTexture(), m_Light-&gt;GetDirection(), m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor(), 
+				       m_Camera-&gt;GetPosition(), m_Light-&gt;GetSpecularColor(), m_Light-&gt;GetSpecularPower());</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With the addition of specular lighting we now get a bright white flash each time the cube surface evenly faces the camera viewing direction.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 10_ Specular Lighting_files/pic0029.gif" width="220" height="220"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile and run the project and ensure you get a spinning cube that flashes a bright specular highlight each time if faces the camera.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Change the direction of the light such as m_Light-&gt;SetDirection(1.0f, 0.0f, 1.0f) to see the effect if the light source is from a different direction.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Create a 5000+ poly sphere model with a red texture to recreate the sphere images at the top of the tutorial.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2010 Project: <a href="http://www.rastertek.com/dx11tut10.zip">dx11tut10.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src10.zip">dx11src10.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe10.zip">dx11exe10.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 10_ Specular Lighting_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 10_ Specular Lighting_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

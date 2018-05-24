@@ -1,0 +1,1152 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11ter12.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 12: Terrain Mini-Maps</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000" style="width:1000px">
+
+<p align="center"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 12: Terrain Mini-Maps
+</b></font></p>
+
+<p align="center"><img border="0" src="./Tutorial 12_ Terrain Mini-Maps_files/pic3001.gif" width="1024" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Mini-maps are small 2D maps in the user interface that help the user locate their current position on the terrain.
+Most commonly they will be the color map that is used for the terrain with additional markings for points of interest and such.
+Sometimes they are also artist created to give a different look to the map that fits with the rest of the user interface.
+I personally like to combine the color map with a light map to give it a 3D top down perspective.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For example I run the RAW viewing program that I wrote which takes the RAW height map and the color map as input.
+The program then produces the normal map, light map, and fully rendered map:
+</font></p><p align="left"><img border="0" src="./Tutorial 12_ Terrain Mini-Maps_files/pic4044.gif" width="800" height="600"></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+It also writes out the  three maps it produces in bitmap format so I can access them after running the program:
+</font></p><p align="left"><img border="0" src="./Tutorial 12_ Terrain Mini-Maps_files/pic4045.gif" width="512" height="513"></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+So I take the fully rendered bitmap and use Photoshop to shrink it from 1025x1025 down to 150x150.
+I then put a 2 pixel white border around it creating a 154x154 mini-map with a 150x150 map section:
+</font></p><p align="left"><img border="0" src="./Tutorial 12_ Terrain Mini-Maps_files/pic4046.gif" width="154" height="154"></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Finally I take that mini-map and use the BitmapClass to render it in 2D in my terrain's user interface.
+I also use a 3x3 green pixel which I put on top of the mini-map in accordance with the camera's position on the terrain.
+Each frame I update the mini-map with the new position of the camera to keep the green pixel updated on the mini-map.
+This way when I move around so does the green dot on the mini-map.
+</font></p><p align="left"><img border="0" src="./Tutorial 12_ Terrain Mini-Maps_files/pic4047.gif" width="800" height="450"></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Minimapclass.h</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The MiniMapClass contains two textures.
+One is for the mini-map itself, the other is for the green location marker.
+The class basically renders those two bitmaps to the screen in 2D and also keeps an update position of where the camera is on the terrain so that the green position indicator can be updated each frame.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: minimapclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _MINIMAPCLASS_H_
+#define _MINIMAPCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "bitmapclass.h"
+#include "shadermanagerclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: MiniMapClass
+////////////////////////////////////////////////////////////////////////////////
+class MiniMapClass
+{
+public:
+	MiniMapClass();
+	MiniMapClass(const MiniMapClass&amp;);
+	~MiniMapClass();
+
+	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, int, int, float, float);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, ShaderManagerClass*, XMMATRIX, XMMATRIX, XMMATRIX);
+	
+	void PositionUpdate(float, float);
+
+private:
+	int m_mapLocationX, m_mapLocationY, m_pointLocationX, m_pointLocationY;
+	float m_mapSizeX, m_mapSizeY, m_terrainWidth, m_terrainHeight;
+	BitmapClass *m_MiniMapBitmap, *m_PointBitmap;
+};
+
+#endif
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Minimapclass.cpp</u></font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: minimapclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "minimapclass.h"
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The two bitmaps are initialized to null in the class constructor.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">MiniMapClass::MiniMapClass()
+{
+	m_MiniMapBitmap = 0;
+	m_PointBitmap = 0;
+}
+
+
+MiniMapClass::MiniMapClass(const MiniMapClass&amp; other)
+{
+}
+
+
+MiniMapClass::~MiniMapClass()
+{
+}
+
+
+bool MiniMapClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, int screenWidth, int screenHeight, 
+			      float terrainWidth, float terrainHeight)
+{
+	bool result;
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function starts by storing the location of the mini-map, its size, and the actual size of the terrain mesh. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Set the size of the mini-map minus the borders.
+	m_mapSizeX = 150.0f;
+	m_mapSizeY = 150.0f;
+
+	// Initialize the location of the mini-map on the screen.
+	m_mapLocationX = screenWidth - (int)m_mapSizeX - 10;
+	m_mapLocationY = 10;
+
+	// Store the terrain size.
+	m_terrainWidth = terrainWidth;
+	m_terrainHeight = terrainHeight;
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next we create the mini-map from the minimap.tga file.
+Even though the rendered map is 1025x1025 we have shrunk it down to 154x154 so that displaying it does not take up too much of the screen. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Create the mini-map bitmap object.
+	m_MiniMapBitmap = new BitmapClass;
+	if(!m_MiniMapBitmap)
+	{
+		return false;
+	}
+
+	// Initialize the mini-map bitmap object.
+	result = m_MiniMapBitmap-&gt;Initialize(device, deviceContext, screenWidth, screenHeight, 154, 154, 
+					     "../Engine/data/minimap/minimap.tga");
+	if(!result)
+	{
+		return false;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And finally we load the point indicator.
+It is a 3x3 green pixel that we will use and constantly update to show where the user currently is located on the mini-map. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Create the point bitmap object.
+	m_PointBitmap = new BitmapClass;
+	if(!m_PointBitmap)
+	{
+		return false;
+	}
+
+	// Initialize the point bitmap object.
+	result = m_PointBitmap-&gt;Initialize(device, deviceContext, screenWidth, screenHeight, 3, 3, 
+					   "../Engine/data/minimap/point.tga");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function releases the two bitmap objects that were used for rendering the mini-map elements. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void MiniMapClass::Shutdown()
+{
+	// Release the point bitmap object.
+	if(m_PointBitmap)
+	{
+		m_PointBitmap-&gt;Shutdown();
+		delete m_PointBitmap;
+		m_PointBitmap = 0;
+	}
+
+	// Release the mini-map bitmap object.
+	if(m_MiniMapBitmap)
+	{
+		m_MiniMapBitmap-&gt;Shutdown();
+		delete m_MiniMapBitmap;
+		m_MiniMapBitmap = 0;
+	}
+
+	return;
+}
+
+
+bool MiniMapClass::Render(ID3D11DeviceContext* deviceContext, ShaderManagerClass* ShaderManager, XMMATRIX worldMatrix, 
+			  XMMATRIX viewMatrix, XMMATRIX orthoMatrix)
+{
+	bool result;
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First we start by rendering the mini-map bitmap.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Put the mini-map bitmap vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	result = m_MiniMapBitmap-&gt;Render(deviceContext, m_mapLocationX, m_mapLocationY);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the mini-map bitmap using the texture shader.
+	result = ShaderManager-&gt;RenderTextureShader(deviceContext, m_MiniMapBitmap-&gt;GetIndexCount(), worldMatrix, viewMatrix, 
+						    orthoMatrix, m_MiniMapBitmap-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And then the point indicator is rendered on the mini-map according the where the user is currently located on the 3D terrain mesh. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Put the point bitmap vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	result = m_PointBitmap-&gt;Render(deviceContext, m_pointLocationX, m_pointLocationY);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the point bitmap using the texture shader.
+	result = ShaderManager-&gt;RenderTextureShader(deviceContext, m_PointBitmap-&gt;GetIndexCount(), worldMatrix, viewMatrix, 
+						    orthoMatrix, m_PointBitmap-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PositionUpdate function is used for updating where the 3x3 green pixel point indicator should be located on the mini-map.
+It converts the 3D float position of the camera on the terrain into a 2D position on the bitmap.
+It also makes sure the indicator never goes past the borders of the mini-map. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void MiniMapClass::PositionUpdate(float positionX, float positionZ)
+{
+	float percentX, percentY;
+
+
+	// Ensure the point does not leave the minimap borders even if the camera goes past the terrain borders.
+	if(positionX &lt; 0)
+	{
+		positionX = 0;
+	}
+
+	if(positionZ &lt; 0)
+	{
+		positionZ = 0;
+	}
+
+	if(positionX &gt; m_terrainWidth)
+	{
+		positionX = m_terrainWidth;
+	}
+
+	if(positionZ &gt; m_terrainHeight)
+	{
+		positionZ = m_terrainHeight;
+	}
+
+	// Calculate the position of the camera on the minimap in terms of percentage.
+	percentX = positionX / m_terrainWidth;
+	percentY = 1.0f - (positionZ / m_terrainHeight);
+
+	// Determine the pixel location of the point on the mini-map.
+	m_pointLocationX = (m_mapLocationX + 2) + (int)(percentX * m_mapSizeX);
+	m_pointLocationY = (m_mapLocationY + 2) + (int)(percentY * m_mapSizeY);
+
+	// Subtract one from the location to center the point on the mini-map according to the 3x3 point pixel image size.
+	m_pointLocationX = m_pointLocationX - 1;
+	m_pointLocationY = m_pointLocationY - 1;
+
+	return;
+}
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Userinterfaceclass.h</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The MiniMapClass has been added to the UserInterfaceClass.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: userinterfaceclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _USERINTERFACECLASS_H_
+#define _USERINTERFACECLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "textclass.h"</font><font face="arial" color="#aaaaff" size="2">
+#include "minimapclass.h"</font><font face="arial" color="#aaffaa" size="2">
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: UserInterfaceClass
+////////////////////////////////////////////////////////////////////////////////
+class UserInterfaceClass
+{
+public:
+	UserInterfaceClass();
+	UserInterfaceClass(const UserInterfaceClass&amp;);
+	~UserInterfaceClass();
+
+	bool Initialize(D3DClass*, int, int);
+	void Shutdown();
+
+	bool Frame(ID3D11DeviceContext*, int, float, float, float, float, float, float);
+	bool Render(D3DClass*, ShaderManagerClass*, XMMATRIX, XMMATRIX, XMMATRIX);
+
+	bool UpdateRenderCounts(ID3D11DeviceContext*, int, int, int);
+
+private:
+	bool UpdateFpsString(ID3D11DeviceContext*, int);
+	bool UpdatePositionStrings(ID3D11DeviceContext*, float, float, float, float, float, float);
+
+private:
+	FontClass* m_Font1;
+	TextClass *m_FpsString, *m_VideoStrings, *m_PositionStrings;
+	int m_previousFps;
+	int m_previousPosition[6];
+	TextClass* m_RenderCountStrings;</font><font face="arial" color="#aaaaff" size="2">
+	MiniMapClass* m_MiniMap;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Userinterfaceclass.cpp</u></font></p><pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: userinterfaceclass.cpp
+///////////////////////////////////////////////////////////////////////////////
+#include "userinterfaceclass.h"
+
+
+UserInterfaceClass::UserInterfaceClass()
+{
+	m_Font1 = 0;
+	m_FpsString = 0;
+	m_VideoStrings = 0;
+	m_PositionStrings = 0;
+	m_RenderCountStrings = 0;</font><font face="arial" color="#aaaaff" size="2">
+	m_MiniMap = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+UserInterfaceClass::UserInterfaceClass(const UserInterfaceClass&amp; other)
+{
+}
+
+
+UserInterfaceClass::~UserInterfaceClass()
+{
+}
+
+
+bool UserInterfaceClass::Initialize(D3DClass* Direct3D, int screenHeight, int screenWidth)
+{
+	bool result;
+	char videoCard[128];
+	int videoMemory;
+	char videoString[144];
+	char memoryString[32];
+	char tempString[16];
+	int i;
+
+
+	// Create the first font object.
+	m_Font1 = new FontClass;
+	if (!m_Font1)
+	{
+		return false;
+	}
+
+	// Initialize the first font object.
+	result = m_Font1-&gt;Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), "../Engine/data/font/font01.txt", 
+				     "../Engine/data/font/font01.tga", 32.0f, 3);
+	if (!result)
+	{
+		return false;
+	}
+
+	// Create the text object for the fps string.
+	m_FpsString = new TextClass;
+	if (!m_FpsString)
+	{
+		return false;
+	}
+
+	// Initialize the fps text string.
+	result = m_FpsString-&gt;Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+					 "Fps: 0", 10, 50, 0.0f, 1.0f, 0.0f);
+	if (!result)
+	{
+		return false;
+	}
+
+	// Initial the previous frame fps.
+	m_previousFps = -1;
+
+	// Setup the video card strings.
+	Direct3D-&gt;GetVideoCardInfo(videoCard, videoMemory);
+	strcpy_s(videoString, "Video Card: ");
+	strcat_s(videoString, videoCard);
+
+	_itoa_s(videoMemory, tempString, 10);
+
+	strcpy_s(memoryString, "Video Memory: ");
+	strcat_s(memoryString, tempString);
+	strcat_s(memoryString, " MB");
+
+	// Create the text objects for the video strings.
+	m_VideoStrings = new TextClass[2];
+	if (!m_VideoStrings)
+	{
+		return false;
+	}
+
+	// Initialize the video text strings.
+	result = m_VideoStrings[0].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 256, false, m_Font1, 
+					      videoString, 10, 10, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+
+	result = m_VideoStrings[1].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 32, false, m_Font1, 
+					      memoryString, 10, 30, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false;
+	}
+
+	// Create the text objects for the position strings.
+	m_PositionStrings = new TextClass[6];
+	if(!m_PositionStrings)
+	{
+		return false;
+	}
+
+	// Initialize the position text strings.
+	result = m_PositionStrings[0].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+						 "X: 0",  10, 310, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+
+	result = m_PositionStrings[1].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+						 "Y: 0",  10, 330, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+
+	result = m_PositionStrings[2].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+						 "Z: 0",  10, 350, 1.0f, 1.0f, 1.0f);  
+	if(!result) 
+	{ 
+		return false; 
+	}
+
+	result = m_PositionStrings[3].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+						 "rX: 0", 10, 370, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false;
+	}
+
+	result = m_PositionStrings[4].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+						 "rY: 0", 10, 390, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+
+	result = m_PositionStrings[5].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 16, false, m_Font1, 
+						 "rZ: 0", 10, 410, 1.0f, 1.0f, 1.0f);  
+	if(!result) 
+	{ 
+		return false; 
+	}
+
+	// Initialize the previous frame position.
+	for(i=0; i&lt;6; i++)
+	{
+		m_previousPosition[i] = -1;
+	}
+
+	// Create the text objects for the render count strings.
+	m_RenderCountStrings = new TextClass[3];
+	if(!m_RenderCountStrings)
+	{
+		return false;
+	}
+
+	// Initialize the render count strings.
+	result = m_RenderCountStrings[0].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 32, false, m_Font1,
+						    "Polys Drawn: 0", 10, 260, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+
+	result = m_RenderCountStrings[1].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 32, false, m_Font1, 
+						    "Cells Drawn: 0", 10, 280, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+
+	result = m_RenderCountStrings[2].Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 32, false, m_Font1, 
+						    "Cells Culled: 0", 10, 300, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{ 
+		return false; 
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We setup the mini-map object here.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Create the mini-map object.
+	m_MiniMap = new MiniMapClass;
+	if(!m_MiniMap)
+	{
+		return false;
+	}
+
+	// Initialize the mini-map object.
+	result = m_MiniMap-&gt;Initialize(Direct3D-&gt;GetDevice(), Direct3D-&gt;GetDeviceContext(), screenWidth, screenHeight, 1025, 1025);
+	if(!m_MiniMap)
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+	
+	return true;
+}
+
+
+void UserInterfaceClass::Shutdown()
+{
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The mini-map is released in the Shutdown function.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Release the mini-map object.
+	if(m_MiniMap)
+	{
+		m_MiniMap-&gt;Shutdown();
+		delete m_MiniMap;
+		m_MiniMap = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the render count strings.
+	if(m_RenderCountStrings)
+	{
+		m_RenderCountStrings[0].Shutdown();
+		m_RenderCountStrings[1].Shutdown();
+		m_RenderCountStrings[2].Shutdown();
+
+		delete [] m_RenderCountStrings;
+		m_RenderCountStrings = 0;
+	}
+
+	// Release the position text strings.
+	if(m_PositionStrings)
+	{
+		m_PositionStrings[0].Shutdown();
+		m_PositionStrings[1].Shutdown();
+		m_PositionStrings[2].Shutdown();
+		m_PositionStrings[3].Shutdown();
+		m_PositionStrings[4].Shutdown();
+		m_PositionStrings[5].Shutdown();
+
+		delete [] m_PositionStrings;
+		m_PositionStrings = 0;
+	}
+
+	// Release the video card string.
+	if(m_VideoStrings)
+	{
+		m_VideoStrings[0].Shutdown();
+		m_VideoStrings[1].Shutdown();
+
+		delete [] m_VideoStrings;
+		m_VideoStrings = 0;
+	}
+
+
+	// Release the fps text string.
+	if(m_FpsString)
+	{
+		m_FpsString-&gt;Shutdown();
+		delete m_FpsString;
+		m_FpsString = 0;
+	}
+
+	// Release the font object.
+	if(m_Font1)
+	{
+		m_Font1-&gt;Shutdown();
+		delete m_Font1;
+		m_Font1 = 0;
+	}
+
+	return;
+}
+
+
+bool UserInterfaceClass::Frame(ID3D11DeviceContext* deviceContext, int fps, float posX, float posY, float posZ, 
+			       float rotX, float rotY, float rotZ)
+{
+	bool result;
+
+
+	// Update the fps string.
+	result = UpdateFpsString(deviceContext, fps);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Update the position strings.
+	result = UpdatePositionStrings(deviceContext, posX, posY, posZ, rotX, rotY, rotZ);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Each frame we update the X and Z position in the 2D mini-map to reflect where the camera has moved to on the 3D terrain.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Update the mini-map position indicator.
+	m_MiniMap-&gt;PositionUpdate(posX, posZ);</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+bool UserInterfaceClass::Render(D3DClass* Direct3D, ShaderManagerClass* ShaderManager, XMMATRIX worldMatrix, XMMATRIX viewMatrix, 
+				XMMATRIX orthoMatrix)
+{
+	int i;
+	bool result;
+
+
+	// Turn off the Z buffer and enable alpha blending to begin 2D rendering.
+	Direct3D-&gt;TurnZBufferOff();
+	Direct3D-&gt;EnableAlphaBlending();
+
+	// Render the fps string.
+	m_FpsString-&gt;Render(Direct3D-&gt;GetDeviceContext(), ShaderManager, worldMatrix, viewMatrix, orthoMatrix, m_Font1-&gt;GetTexture());
+
+	// Render the video card strings.
+	m_VideoStrings[0].Render(Direct3D-&gt;GetDeviceContext(), ShaderManager, worldMatrix, viewMatrix, orthoMatrix, m_Font1-&gt;GetTexture());
+	m_VideoStrings[1].Render(Direct3D-&gt;GetDeviceContext(), ShaderManager, worldMatrix, viewMatrix, orthoMatrix, m_Font1-&gt;GetTexture());
+
+	// Render the position and rotation strings.
+	for(i=0; i&lt;6; i++)
+	{
+		m_PositionStrings[i].Render(Direct3D-&gt;GetDeviceContext(), ShaderManager, worldMatrix, viewMatrix, orthoMatrix, m_Font1-&gt;GetTexture());
+	}
+
+	// Render the render count strings.
+	for(i=0; i&lt;3; i++)
+	{
+		m_RenderCountStrings[i].Render(Direct3D-&gt;GetDeviceContext(), ShaderManager, worldMatrix, viewMatrix, orthoMatrix, m_Font1-&gt;GetTexture());
+	}
+
+	// Turn off alpha blending now that the text has been rendered.
+	Direct3D-&gt;DisableAlphaBlending();
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The mini-map rendering is called here.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Render the mini-map.
+	result = m_MiniMap-&gt;Render(Direct3D-&gt;GetDeviceContext(), ShaderManager, worldMatrix, viewMatrix, orthoMatrix);
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Turn the Z buffer back on now that the 2D rendering has completed.
+	Direct3D-&gt;TurnZBufferOn();
+
+	return true;
+}
+
+
+bool UserInterfaceClass::UpdateFpsString(ID3D11DeviceContext* deviceContext, int fps)
+{
+	char tempString[16];
+	char finalString[16];
+	float red, green, blue;
+	bool result;
+
+
+	// Check if the fps from the previous frame was the same, if so don't need to update the text string.
+	if(m_previousFps == fps)
+	{
+		return true;
+	}
+
+	// Store the fps for checking next frame.
+	m_previousFps = fps;
+
+	// Truncate the fps to below 100,000.
+	if(fps &gt; 99999)
+	{
+		fps = 99999;
+	}
+
+	// Convert the fps integer to string format.
+	_itoa_s(fps, tempString, 10);
+
+	// Setup the fps string.
+	strcpy_s(finalString, "Fps: ");
+	strcat_s(finalString, tempString);
+
+	// If fps is 60 or above set the fps color to green.
+	if(fps &gt;= 60)
+	{
+		red = 0.0f;
+		green = 1.0f;
+		blue = 0.0f;
+	}
+
+	// If fps is below 60 set the fps color to yellow.
+	if(fps &lt; 60)
+	{
+		red = 1.0f;
+		green = 1.0f;
+		blue = 0.0f;
+	}
+
+	// If fps is below 30 set the fps color to red.
+	if(fps &lt; 30)
+	{
+		red = 1.0f;
+		green = 0.0f;
+		blue = 0.0f;
+	}
+
+	// Update the sentence vertex buffer with the new string information.
+	result = m_FpsString-&gt;UpdateSentence(deviceContext, m_Font1, finalString, 10, 50, red, green, blue);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool UserInterfaceClass::UpdatePositionStrings(ID3D11DeviceContext* deviceContext, float posX, float posY, float posZ, 
+					       float rotX, float rotY, float rotZ)
+{
+	int positionX, positionY, positionZ, rotationX, rotationY, rotationZ;
+	char tempString[16];
+	char finalString[16];
+	bool result;
+
+
+	// Convert the float values to integers.
+	positionX = (int)posX;
+	positionY = (int)posY;
+	positionZ = (int)posZ;
+	rotationX = (int)rotX;
+	rotationY = (int)rotY;
+	rotationZ = (int)rotZ;
+
+	// Update the position strings if the value has changed since the last frame.
+	if(positionX != m_previousPosition[0])
+	{
+		m_previousPosition[0] = positionX;
+		_itoa_s(positionX, tempString, 10);
+		strcpy_s(finalString, "X: ");
+		strcat_s(finalString, tempString);
+		result = m_PositionStrings[0].UpdateSentence(deviceContext, m_Font1, finalString, 10, 100, 1.0f, 1.0f, 1.0f); 
+		if(!result) { return false; }
+	}
+
+	if(positionY != m_previousPosition[1])
+	{
+		m_previousPosition[1] = positionY;
+		_itoa_s(positionY, tempString, 10);
+		strcpy_s(finalString, "Y: ");
+		strcat_s(finalString, tempString);
+		result = m_PositionStrings[1].UpdateSentence(deviceContext, m_Font1, finalString, 10, 120, 1.0f, 1.0f, 1.0f); 
+		if(!result) { return false; }
+	}
+
+	if(positionZ != m_previousPosition[2])
+	{
+		m_previousPosition[2] = positionZ;
+		_itoa_s(positionZ, tempString, 10);
+		strcpy_s(finalString, "Z: ");
+		strcat_s(finalString, tempString);
+		result = m_PositionStrings[2].UpdateSentence(deviceContext, m_Font1, finalString, 10, 140, 1.0f, 1.0f, 1.0f); 
+		if(!result) { return false; }
+	}
+
+	if(rotationX != m_previousPosition[3])
+	{
+		m_previousPosition[3] = rotationX;
+		_itoa_s(rotationX, tempString, 10);
+		strcpy_s(finalString, "rX: ");
+		strcat_s(finalString, tempString);
+		result = m_PositionStrings[3].UpdateSentence(deviceContext, m_Font1, finalString, 10, 180, 1.0f, 1.0f, 1.0f); 
+		if(!result) { return false; }
+	}
+
+	if(rotationY != m_previousPosition[4])
+	{
+		m_previousPosition[4] = rotationY;
+		_itoa_s(rotationY, tempString, 10);
+		strcpy_s(finalString, "rY: ");
+		strcat_s(finalString, tempString);
+		result = m_PositionStrings[4].UpdateSentence(deviceContext, m_Font1, finalString, 10, 200, 1.0f, 1.0f, 1.0f); 
+		if(!result) { return false; }
+	}
+
+	if(rotationZ != m_previousPosition[5])
+	{
+		m_previousPosition[5] = rotationZ;
+		_itoa_s(rotationZ, tempString, 10);
+		strcpy_s(finalString, "rZ: ");
+		strcat_s(finalString, tempString);
+		result = m_PositionStrings[5].UpdateSentence(deviceContext, m_Font1, finalString, 10, 220, 1.0f, 1.0f, 1.0f); 
+		if(!result) { return false; }
+	}
+
+	return true;
+}
+
+
+bool UserInterfaceClass::UpdateRenderCounts(ID3D11DeviceContext* deviceContext, int renderCount, int nodesDrawn, int nodesCulled)
+{
+	char tempString[32];
+	char finalString[32];
+	bool result;
+
+
+	// Convert the render count integer to string format.
+	_itoa_s(renderCount, tempString, 10);
+
+	// Setup the render count string.
+	strcpy_s(finalString, "Polys Drawn: ");
+	strcat_s(finalString, tempString);
+
+	// Update the sentence vertex buffer with the new string information.
+	result = m_RenderCountStrings[0].UpdateSentence(deviceContext, m_Font1, finalString, 10, 260, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Convert the cells drawn integer to string format.
+	_itoa_s(nodesDrawn, tempString, 10);
+
+	// Setup the cells drawn string.
+	strcpy_s(finalString, "Cells Drawn: ");
+	strcat_s(finalString, tempString);
+
+	// Update the sentence vertex buffer with the new string information.
+	result = m_RenderCountStrings[1].UpdateSentence(deviceContext, m_Font1, finalString, 10, 280, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Convert the cells culled integer to string format.
+	_itoa_s(nodesCulled, tempString, 10);
+
+	// Setup the cells culled string.
+	strcpy_s(finalString, "Cells Culled: ");
+	strcat_s(finalString, tempString);
+
+	// Update the sentence vertex buffer with the new string information.
+	result = m_RenderCountStrings[2].UpdateSentence(deviceContext, m_Font1, finalString, 10, 300, 1.0f, 1.0f, 1.0f);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now have a mini-map implemented with a green pixel indicator which reflects the user's current position on the 3D terrain. 
+</font></p><p align="left"><img border="0" src="./Tutorial 12_ Terrain Mini-Maps_files/pic4047.gif" width="800" height="450"></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the code in 64 bit mode and run the program.  Move around the terrain and you will notice the green pixel shows your current location on the mini-map.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Move the mini-map 2D rendering to a different location on the screen.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Create your own mini-map and indicator. 
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Write a section of code to move the camera on the terrain to wherever you clicked on the 2D mini-map using the mouse input.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Add a fog of war effect where the map becomes uncovered in a small circular radius as the point moves around the map.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+6. Add a random moving object on the terrain that updates the mini-map with a red point.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+7. Think about how to implement a 3D mini-map for your own project.
+</font></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11ter12_src.zip">dx11ter12_src.zip</a></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11ter12_exe.zip">dx11ter12_exe.zip</a></font></p><table align="center" border="0" width="1024"><tbody><tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</tr></tbody></table>
+
+<p align="center"><img border="0" src="./Tutorial 12_ Terrain Mini-Maps_files/pic3002.gif" width="1024" height="1"></p>
+
+<p align="center"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutdx11s2ter.html">Back to Tutorial Index</a></font></p>
+
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 12_ Terrain Mini-Maps_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

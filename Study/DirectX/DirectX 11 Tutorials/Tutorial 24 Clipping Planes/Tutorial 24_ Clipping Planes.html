@@ -1,0 +1,1158 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut24.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 24: Clipping Planes</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 24: Clipping Planes
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 24_ Clipping Planes_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover how to use clipping planes in DirectX 11 using HLSL and C++.
+The code in this tutorial is based on the previous tutorials. 
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Clip planes are generally used to truncate geometry along a given plane in 3D space.
+The most common example that most people will be familiar with is the near and far clipping planes that we setup when creating a view port.
+The far plane of the view port clips any geometry that goes beyond it so that we are not drawing the entire contents of massive 3D scenes.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Those who used older versions of DirectX will find that DirectX 10/11 implements clip planes somewhat differently.
+Previously you used to create a plane object and then use SetRenderState with the device to set the clip plane to be active in culling geometry.
+In DirectX 11 you instead use the SV_ClipDistance semantic in pixel shader input structures to accomplish the same thing.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In this tutorial we will cover how to create a clip plane anywhere in your scene to cull any geometry that passes that plane.
+Note that clip planes combined with render to texture can produce some very powerful effects that we will cover in other tutorials.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frame work has been modified to use the new ClipPlaneShaderClass.
+This class is just a slight rewrite of the TextureShaderClass.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 24_ Clipping Planes_files/pic0079.gif" width="409" height="224"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Clipplane.vs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The clip plane HLSL files are just the basic texture shaders slightly modified to handle a single clip plane.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: clipplane.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a clip plane 4 float vector so that outside objects can set where the clip plane is located and which side of the plane will be clipped. 
+The first three floats specify the location of the clip plane, the fourth float indicates the position. 
+For example if it holds (0.0f, 1.0f, 0.0f, -5.0f) then it means that it will clip everything beneath the Y axis and this clipping will start at the height of 5.0. 
+So any pixel in the scene that is below 5.0 on the Y-axis will never be drawn. 
+In this tutorial we will use the value (0.0f, -1.0f, 0.0f, 0.0f) which means that anything above 0.0 on the Y axis will be culled.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer ClipPlaneBuffer
+{
+    float4 clipPlane;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is the clip plane semantic that is needed as input to the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    float clip : SV_ClipDistance0;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType ClipPlaneVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To setup the clip plane for the pixel shader input we do a dot product of the input vertex in world space against the clip plane. 
+The clip plane will now be active and the pixel shader will not draw anything that this clip plane is culling.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Set the clipping plane.
+    output.clip = dot(mul(input.position, worldMatrix), clipPlane);
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Clipplane.ps</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Only the PixelInputType structure has changed to match the one in the vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: clipplane.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+Texture2D shaderTexture;
+SamplerState SampleType;
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float clip : SV_ClipDistance0;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 ClipPlanePixelShader(PixelInputType input) : SV_TARGET
+{
+    return shaderTexture.Sample(SampleType, input.tex);
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Clipplaneshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ClipPlaneShaderClass is just the TextureShaderClass modified to handle clipping.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: clipplaneshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _CLIPPLANESHADERCLASS_H_
+#define _CLIPPLANESHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ClipPlaneShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class ClipPlaneShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a new structure to match the clip plane constant buffer in the vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct ClipPlaneBufferType
+	{
+		D3DXVECTOR4 clipPlane;
+	};
+
+public:
+	ClipPlaneShaderClass();
+	ClipPlaneShaderClass(const ClipPlaneShaderClass&amp;);
+	~ClipPlaneShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, D3DXVECTOR4);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, D3DXVECTOR4);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11Buffer* m_matrixBuffer;
+	ID3D11SamplerState* m_sampleState;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a new constant buffer for the clip plane data.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11Buffer* m_clipPlaneBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Clipplaneshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: clipplaneshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "clipplaneshaderclass.h"
+
+
+ClipPlaneShaderClass::ClipPlaneShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_matrixBuffer = 0;
+	m_sampleState = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the clip plane buffer to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_clipPlaneBuffer = 0;
+}
+
+
+ClipPlaneShaderClass::ClipPlaneShaderClass(const ClipPlaneShaderClass&amp; other)
+{
+}
+
+
+ClipPlaneShaderClass::~ClipPlaneShaderClass()
+{
+}
+
+
+bool ClipPlaneShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the clip plane HLSL files. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/clipplane.vs", L"../Engine/clipplane.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ClipPlaneShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function now also takes as input a 4 float vector clip plane. 
+This clip plane is then set in the shader before rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool ClipPlaneShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, 
+				  D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
+				  D3DXVECTOR4 clipPlane)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, clipPlane);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool ClipPlaneShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	unsigned int numElements;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC clipPlaneBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the clip plane vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "ClipPlaneVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 
+				       0, NULL, &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the clip plane pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "ClipPlanePixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 
+				       0, NULL, &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, 
+					    &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, 
+					   &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	// This setup needs to match the VertexType stucture in the ModelClass and in the shader.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), 
+					   vertexShaderBuffer-&gt;GetBufferSize(), &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Setup the description of the dynamic constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Setup the clip plane buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the description of the clip plane dynamic constant buffer that is in the vertex shader.
+	clipPlaneBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	clipPlaneBufferDesc.ByteWidth = sizeof(ClipPlaneBufferType);
+	clipPlaneBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	clipPlaneBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	clipPlaneBufferDesc.MiscFlags = 0;
+	clipPlaneBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;clipPlaneBufferDesc, NULL, &amp;m_clipPlaneBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ClipPlaneShaderClass::ShutdownShader()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Release the new clip plane buffer in the ShutdownShader function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the clip plane constant buffer.
+	if(m_clipPlaneBuffer)
+	{
+		m_clipPlaneBuffer-&gt;Release();
+		m_clipPlaneBuffer = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void ClipPlaneShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+
+
+bool ClipPlaneShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+					       D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
+					       D3DXVECTOR4 clipPlane)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* dataPtr;
+	unsigned int bufferNumber;
+	ClipPlaneBufferType* dataPtr2;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the matrix constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the matrix constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the matrix constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the matrix constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the matrix constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+
+	// Set shader texture resource in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;texture);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we lock the clip plane constant buffer, set the clip plane value, and then unlock the buffer again.
+This will set the clip plane data inside the shader.
+Also note that this is the second buffer in the vertex shader so we have to increment the bufferNumber from 0 to 1.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Lock the clip plane constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_clipPlaneBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the clip plane constant buffer.
+	dataPtr2 = (ClipPlaneBufferType*)mappedResource.pData;
+
+	// Copy the clip plane into the clip plane constant buffer.
+	dataPtr2-&gt;clipPlane = clipPlane;
+
+	// Unlock the buffer.
+	deviceContext-&gt;Unmap(m_clipPlaneBuffer, 0);
+
+	// Set the position of the clip plane constant buffer in the vertex shader.
+	bufferNumber = 1;
+
+	// Now set the clip plane constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_clipPlaneBuffer);
+
+	return true;
+}
+
+
+void ClipPlaneShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Include the new clip plane shader class.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">#include "clipplaneshaderclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+	bool Render();
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	ModelClass* m_Model;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create a ClipPlaneShaderClass object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ClipPlaneShaderClass* m_ClipPlaneShader;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will just cover the functions that have changed since the previous tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_Model = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the ClipPlaneShaderClass object to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_ClipPlaneShader = 0;
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+		
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Create the model object.
+	m_Model = new ModelClass;
+	if(!m_Model)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the triangle model in.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the model object.
+	result = m_Model-&gt;Initialize(m_D3D-&gt;GetDevice(), L"../Engine/data/seafloor.dds", "../Engine/data/triangle.txt");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the clip plane shader object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the clip plane shader object.
+	m_ClipPlaneShader = new ClipPlaneShaderClass;
+	if(!m_ClipPlaneShader)
+	{
+		return false;
+	}
+
+	// Initialize the clip plane shader object.
+	result = m_ClipPlaneShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the clip plane shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Release the clip plane shader object in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the clip plane shader object.
+	if(m_ClipPlaneShader)
+	{
+		m_ClipPlaneShader-&gt;Shutdown();
+		delete m_ClipPlaneShader;
+		m_ClipPlaneShader = 0;
+	}
+
+	// Release the model object.
+	if(m_Model)
+	{
+		m_Model-&gt;Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Render()
+{
+	D3DXVECTOR4 clipPlane;
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create a clip plane first. 
+This clip plane will truncate anything below 0.0 on the Y axis.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup a clipping plane.
+	clipPlane = D3DXVECTOR4(0.0f, -1.0f, 0.0f, 0.0f);
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model-&gt;Render(m_D3D-&gt;GetDeviceContext());
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now draw the triangle using the clip plane shader. 
+It should now cut off the top half of the triangle.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Render the model with the clip plane shader.
+	result = m_ClipPlaneShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, 
+					   projectionMatrix, m_Model-&gt;GetTexture(), clipPlane);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now have a modified texture shader that will cull pixels based on clip planes that we've created.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 24_ Clipping Planes_files/pic0080.gif" width="200" height="100"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the code and you should get a triangle cut in half on the Y axis.  Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Load the cube model instead of the triangle model and turn off culling in the D3DClass.  Set the cube to rotate and move the camera up a bit as well.
+You should see the cube cut in half and be able to see inside it now.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Change the clip plane to cull different parts of the cube on different heights and different planes.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2008 Project: <a href="http://www.rastertek.com/dx11tut24.zip">dx11tut24.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src24.zip">dx11src24.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe24.zip">dx11exe24.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 24_ Clipping Planes_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 24_ Clipping Planes_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

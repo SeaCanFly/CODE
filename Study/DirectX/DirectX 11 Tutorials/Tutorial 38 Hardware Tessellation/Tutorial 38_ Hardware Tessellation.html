@@ -1,0 +1,2035 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut38.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 38: Hardware Tessellation</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 38: Hardware Tessellation
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 38_ Hardware Tessellation_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Hardware tessellation is one of the new features of DirectX 11 that was unavailable in previous versions.
+This tutorial will cover how to perform tessellation using DirectX 11 with HLSL and C++.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Previously to tessellate models, terrain, and such you would need to do the subdivision of the polygon mesh in software.
+Once the subdivision was complete you would send the large number of polygons you generated to the video card.
+However this method of tessellation was inefficient and created a rendering performance bottleneck.
+But now with DirectX 11 and shader model 5 you can send your base polygon mesh to the video card 
+and then instruct the video card to perform your specific subdivision algorithm in the hardware.
+You are given complete control over the programming of the subdivision by use of the new programmable hull and domain shaders.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For most of the tutorials we usually just write a vertex and pixel shader.
+And although there are many stages in the graphics pipeline our concern has just been those two programmable pieces.
+So usually our program flow would look like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 38_ Hardware Tessellation_files/pic0192.gif" width="98" height="73"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With the addition of a programmable hull and domain shader we now write four shader programs instead of two to achieve hardware tessellation.
+In simple terms the main change is that the programmable vertex shader has been broken into three parts.
+These three parts are the vertex shader, the hull shader, and the domain shader.
+Tessellation occurs between the hull and the domain shader.
+The pixel shader remains as it was.
+So our updated program flow will now look like the following: 
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 38_ Hardware Tessellation_files/pic0193.gif" width="121" height="161"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Also instead of sending triangle lists to the video card we now send patch lists.
+A patch is a primitive made up of control points.
+For example if we send a single triangle to the video card it is considered a single patch with three control points.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The process can be very complicated but I am going to present just the basics of tessellation for this tutorial.
+We will be modifying tutorial 4 and tessellating the single green triangle into a triangle mesh made of many vertices.
+We will start first by looking at how we modify the vertex shader to implement hardware tessellation.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Color.vs</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: color.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float3 position : POSITION;
+    float4 color : COLOR;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The first change to the vertex shader is the output structure.
+Previously the output was sent to the pixel shader, now the output goes to the hull shader instead. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">struct HullInputType
+{
+    float3 position : POSITION;
+    float4 color : COLOR;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+HullInputType ColorVertexShader(VertexInputType input)
+{
+    HullInputType output;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the vertex shader we pass the vertices and color data through to the hull shader.
+Since the vertices will be increasing with the tessellation we now do the transforming and such in the domain shader.
+The vertex shader's purpose is now just for vertex animation and passing data into the hull shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Pass the vertex position into the hull shader.
+    output.position = input.position;
+    
+    // Pass the input color into the hull shader.
+    output.color = input.color;
+    
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Color.hs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The HLSL hull shader is made up of two parts, a patch constant function and the hull shader itself.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: color.hs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The tessellation constant buffer defined here provides the shader with the tessellation factor we want to supply the tessellator with.
+This is set in the ColorShaderClass object before rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer TessellationBuffer
+{
+    float tessellationAmount;
+    float3 padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The HullInputType structure is the same as the output structure from the vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">struct HullInputType
+{
+    float3 position : POSITION;
+    float4 color : COLOR;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ConstantOutputType structure is what will be the output from the patch constant function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">struct ConstantOutputType
+{
+    float edges[3] : SV_TessFactor;
+    float inside : SV_InsideTessFactor;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The HullOutputType structure is what will be the output from the hull shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">struct HullOutputType
+{
+    float3 position : POSITION;
+    float4 color : COLOR;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+ColorPatchConstantFunction is the patch constant function that gets called by the hull shader.
+It receives as input the patch and the id of the patch that will be tessellated.
+The function is used to set/calculate any data that is constant for the entire patch.
+In the example here we set the tessellation factor for the three edges of the triangle and the inside center point of the triangle.
+We set all four factors to the tessellationAmount that comes in from the ColorShaderClass object.
+This function is called by the hull shader and its output is passed into the tessellator.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Patch Constant Function
+////////////////////////////////////////////////////////////////////////////////
+ConstantOutputType ColorPatchConstantFunction(InputPatch&lt;HullInputType, 3&gt; inputPatch, uint patchId : SV_PrimitiveID)
+{    
+    ConstantOutputType output;
+
+
+    // Set the tessellation factors for the three edges of the triangle.
+    output.edges[0] = tessellationAmount;
+    output.edges[1] = tessellationAmount;
+    output.edges[2] = tessellationAmount;
+
+    // Set the tessellation factor for tessallating inside the triangle.
+    output.inside = tessellationAmount;
+
+    return output;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The hull shader is called for each output control point.
+It also calls the patch constant function.
+The hull shader receives as input the patch, the id of the control point, and the patch id.
+In the example here we simply pass the color and control points to the domain shader, however you could do more computing and manipulation with 
+the control points if you wanted to.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+You will also notice a small header to the hull shader which defines the attributes.
+The first attribute is the domain which is the patch type, in this case we are working with triangles.
+The second attribute is the tessellation partitioning type, we use integers for this example.
+The third attribute is the primitive type that will be outputted from the tessellator, here we choose triangles.
+The fourth attribute is the number of control points that we will be outputting.
+In this example we are just passing out three control points for each patch.
+And the final attribute is the name of the constant function that the hull shader will call for setting the patch constant data which is the input to the tessellator.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Hull Shader
+////////////////////////////////////////////////////////////////////////////////
+[domain("tri")]
+[partitioning("integer")]
+[outputtopology("triangle_cw")]
+[outputcontrolpoints(3)]
+[patchconstantfunc("ColorPatchConstantFunction")]
+
+HullOutputType ColorHullShader(InputPatch&lt;HullInputType, 3&gt; patch, uint pointId : SV_OutputControlPointID, uint patchId : SV_PrimitiveID)
+{
+    HullOutputType output;
+
+
+    // Set the position for this control point as the output position.
+    output.position = patch[pointId].position;
+
+    // Set the input color as the output color.
+    output.color = patch[pointId].color;
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Color.ds</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The domain shader is what receives the tessellated data and is then used to manipulate and 
+transform the final vertices just like how we previously used to do so in the vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: color.ds
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a matrix buffer just like the previous tutorial except it is now in the domain shader instead of the vertex shader.
+This is because we need to transform the tessellated data, not the un-tessellated input vertices.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The domain shader needs the two output structures from the hull shader as these will be inputs to the domain shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">struct ConstantOutputType
+{
+    float edges[3] : SV_TessFactor;
+    float inside : SV_InsideTessFactor;
+};
+
+struct HullOutputType
+{
+    float3 position : POSITION;
+    float4 color : COLOR;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The output of the domain shader goes to the pixel shader.
+This was previously in the vertex shader in the original tutorial that we are modifying.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The domain shader has a single domain attribute.
+In this example we are setting for triangle patches.
+The inputs to the domain shader are the outputs from the hull shader and constant function.
+The uvwCoords are the weights from the tessellator which indicate how much each control point contributes to the location of the new vertex.
+U is for the first control point, V is for the second control point, and W is for the third.
+In this example all three control points give an even amount of weight to the new vertice so it is placed in the mid point of the three.
+You can see the calculation in the first line in the shader.
+And once we have the new vertex location we transform it as usual and pass it and the color into the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Domain Shader
+////////////////////////////////////////////////////////////////////////////////
+[domain("tri")]
+
+PixelInputType ColorDomainShader(ConstantOutputType input, float3 uvwCoord : SV_DomainLocation, const OutputPatch&lt;HullOutputType, 3&gt; patch)
+{
+    float3 vertexPosition;
+    PixelInputType output;
+ 
+
+    // Determine the position of the new vertex.
+    vertexPosition = uvwCoord.x * patch[0].position + uvwCoord.y * patch[1].position + uvwCoord.z * patch[2].position;
+    
+    // Calculate the position of the new vertex against the world, view, and projection matrices.
+    output.position = mul(float4(vertexPosition, 1.0f), worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+
+    // Send the input color into the pixel shader.
+    output.color = patch[0].color;
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Color.ps</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The pixel shader remains the same as it was in the original colored triangle tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: color.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 ColorPixelShader(PixelInputType input) : SV_TARGET
+{
+    return input.color;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Colorshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ColorShaderClass has been modified to handle tessellation.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: colorshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _COLORSHADERCLASS_H_
+#define _COLORSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ColorShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class ColorShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a new structure for the tessellation buffer that will be used for setting the tessellation amount in the hull shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	struct TessellationBufferType
+	{
+		float tessellationAmount;
+		D3DXVECTOR3 padding;
+	};</font><font face="arial" color="#aaffaa" size="2">
+
+public:
+	ColorShaderClass();
+	ColorShaderClass(const ColorShaderClass&amp;);
+	~ColorShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();</font><font face="arial" color="#aaaaff" size="2">
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, float);</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);</font><font face="arial" color="#aaaaff" size="2">
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, float);</font><font face="arial" color="#aaffaa" size="2">
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There will now be a hull and domain shader used by the ColorShaderClass.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	ID3D11HullShader* m_hullShader;
+	ID3D11DomainShader* m_domainShader;</font><font face="arial" color="#aaffaa" size="2">
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11Buffer* m_matrixBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a new buffer also for the tessellation amount that will be set in the hull shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	ID3D11Buffer* m_tessellationBuffer;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Colorshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: colorshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "colorshaderclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new domain and hull shader as well as the new tessellation buffer pointers are set to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">ColorShaderClass::ColorShaderClass()
+{
+	m_vertexShader = 0;</font><font face="arial" color="#aaaaff" size="2">
+	m_hullShader = 0;
+	m_domainShader = 0;</font><font face="arial" color="#aaffaa" size="2">
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_matrixBuffer = 0;</font><font face="arial" color="#aaaaff" size="2">
+	m_tessellationBuffer = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+ColorShaderClass::ColorShaderClass(const ColorShaderClass&amp; other)
+{
+}
+
+
+ColorShaderClass::~ColorShaderClass()
+{
+}
+
+
+bool ColorShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The InitializeShader function now takes the four shader file names as input.
+You can combine all the shaders into a single text file but I have separated them for clarity.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the shaders.</font><font face="arial" color="#aaaaff" size="2">
+	result = InitializeShader(device, hwnd, L"../Engine/color.vs", L"../Engine/color.hs", L"../Engine/color.ds", L"../Engine/color.ps");</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ColorShaderClass::Shutdown()
+{
+	// Shutdown the shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The input to the Render function now includes a tessellation amount which sets how much the triangle should be tessellated.
+The tessellation amount is then passed into the RenderShader function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool ColorShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+			      D3DXMATRIX projectionMatrix, float tessellationAmount)</font><font face="arial" color="#aaffaa" size="2">
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.</font><font face="arial" color="#aaaaff" size="2">
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, tessellationAmount);</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The InitializeShader function has been expanded to also handle hull and domain shaders.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool ColorShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* hsFilename, WCHAR* dsFilename, WCHAR* psFilename)</font><font face="arial" color="#aaffaa" size="2">
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have to new ID3D10Blob pointers to hold the HLSL shader code so that they can be compiled.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	ID3D10Blob* hullShaderBuffer;
+	ID3D10Blob* domainShaderBuffer;</font><font face="arial" color="#aaffaa" size="2">
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	unsigned int numElements;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There is also a new buffer description variable for the tessellation constant buffer in the hull shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	D3D11_BUFFER_DESC tessellationBufferDesc;</font><font face="arial" color="#aaffaa" size="2">
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;</font><font face="arial" color="#aaaaff" size="2">
+	hullShaderBuffer = 0;
+	domainShaderBuffer = 0;</font><font face="arial" color="#aaffaa" size="2">
+	pixelShaderBuffer = 0;
+
+	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "ColorVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we compile the hull shader HLSL code.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Compile the hull shader code.
+	result = D3DX11CompileFromFile(hsFilename, NULL, NULL, "ColorHullShader", "hs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;hullShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, hsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, hsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And after that we compile the domain shader HLSL code.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Compile the domain shader code.
+	result = D3DX11CompileFromFile(dsFilename, NULL, NULL, "ColorDomainShader", "ds_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;domainShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, dsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, dsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "ColorPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create the hull and domain shaders from the compiled HLSL buffers.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the hull shader from the buffer.
+	result = device-&gt;CreateHullShader(hullShaderBuffer-&gt;GetBufferPointer(), hullShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_hullShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the domain shader from the buffer.
+	result = device-&gt;CreateDomainShader(domainShaderBuffer-&gt;GetBufferPointer(), domainShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_domainShader);
+	if(FAILED(result))
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "COLOR";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the shader buffers since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	hullShaderBuffer-&gt;Release();
+	hullShaderBuffer = 0;
+
+	domainShaderBuffer-&gt;Release();
+	domainShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Setup the description of the dynamic matrix constant buffer that is in the domain shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the domain shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We setup the new tessellation constant buffer here.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Setup the description of the dynamic tessellation constant buffer that is in the hull shader.
+	tessellationBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	tessellationBufferDesc.ByteWidth = sizeof(TessellationBufferType);
+	tessellationBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	tessellationBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	tessellationBufferDesc.MiscFlags = 0;
+	tessellationBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the hull shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;tessellationBufferDesc, NULL, &amp;m_tessellationBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void ColorShaderClass::ShutdownShader()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Release the new tessellation buffer here in the ShutdownShader function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Release the tessellation constant buffer.
+	if(m_tessellationBuffer)
+	{
+		m_tessellationBuffer-&gt;Release();
+		m_tessellationBuffer = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And also release the hull and domain shader in the ShutdownShader function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Release the domain shader.
+	if(m_domainShader)
+	{
+		m_domainShader-&gt;Release();
+		m_domainShader = 0;
+	}
+
+	// Release the hull shader.
+	if(m_hullShader)
+	{
+		m_hullShader-&gt;Release();
+		m_hullShader = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void ColorShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetShaderParameters function has been modified since the matrices are now set in the domain shader and the new tessellation amount is set in the hull shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool ColorShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix,
+					   D3DXMATRIX projectionMatrix, float tessellationAmount)</font><font face="arial" color="#aaffaa" size="2">
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	unsigned int bufferNumber;
+	MatrixBufferType* dataPtr;</font><font face="arial" color="#aaaaff" size="2">
+	TessellationBufferType* dataPtr2;</font><font face="arial" color="#aaffaa" size="2">
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the matrix constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the matrix constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the matrix constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the matrix constant buffer in the domain shader.
+	bufferNumber = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the matrices in the domain shader instead of the vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Finally set the matrix constant buffer in the domain shader with the updated values.
+	deviceContext-&gt;DSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new tessellation constant buffer that is in the hull shader is set here.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Lock the tessellation constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_tessellationBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the tessellation constant buffer.
+	dataPtr2 = (TessellationBufferType*)mappedResource.pData;
+
+	// Copy the tessellation data into the constant buffer.
+	dataPtr2-&gt;tessellationAmount = tessellationAmount;
+	dataPtr2-&gt;padding = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+
+	// Unlock the tessellation constant buffer.
+	deviceContext-&gt;Unmap(m_tessellationBuffer, 0);
+
+	// Set the position of the tessellation constant buffer in the hull shader.
+	bufferNumber = 0;
+
+	// Now set the tessellation constant buffer in the hull shader with the updated values.
+	deviceContext-&gt;HSSetConstantBuffers(bufferNumber, 1, &amp;m_tessellationBuffer);</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void ColorShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We also now set the hull and domain shader in the RenderShader function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the vertex, hull, domain, and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);</font><font face="arial" color="#aaaaff" size="2">
+	deviceContext-&gt;HSSetShader(m_hullShader, NULL, 0);
+	deviceContext-&gt;DSSetShader(m_domainShader, NULL, 0);</font><font face="arial" color="#aaffaa" size="2">
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Modelclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The header file for the ModelClass has not been modified from the original tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: modelclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _MODELCLASS_H_
+#define _MODELCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ModelClass
+////////////////////////////////////////////////////////////////////////////////
+class ModelClass
+{
+private:
+	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR4 color;
+	};
+
+public:
+	ModelClass();
+	ModelClass(const ModelClass&amp;);
+	~ModelClass();
+
+	bool Initialize(ID3D11Device*);
+	void Shutdown();
+	void Render(ID3D11DeviceContext*);
+
+	int GetIndexCount();
+
+private:
+	bool InitializeBuffers(ID3D11Device*);
+	void ShutdownBuffers();
+	void RenderBuffers(ID3D11DeviceContext*);
+
+private:
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+	int m_vertexCount, m_indexCount;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Modelclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: modelclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "modelclass.h"
+
+
+ModelClass::ModelClass()
+{
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+}
+
+
+ModelClass::ModelClass(const ModelClass&amp; other)
+{
+}
+
+
+ModelClass::~ModelClass()
+{
+}
+
+
+bool ModelClass::Initialize(ID3D11Device* device)
+{
+	bool result;
+
+
+	// Initialize the vertex and index buffers.
+	result = InitializeBuffers(device);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ModelClass::Shutdown()
+{
+	// Shutdown the vertex and index buffers.
+	ShutdownBuffers();
+
+	return;
+}
+
+
+void ModelClass::Render(ID3D11DeviceContext* deviceContext)
+{
+	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	RenderBuffers(deviceContext);
+
+	return;
+}
+
+
+int ModelClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+
+
+bool ModelClass::InitializeBuffers(ID3D11Device* device)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+
+
+	// Set the number of vertices in the vertex array.
+	m_vertexCount = 3;
+
+	// Set the number of indices in the index array.
+	m_indexCount = 3;
+
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+
+	// Load the vertex array with data.
+	vertices[0].position = D3DXVECTOR3(-1.0f, -1.0f, 0.0f);  // Bottom left.
+	vertices[0].color = D3DXVECTOR4(0.0f, 1.0f, 0.0f, 1.0f);
+
+	vertices[1].position = D3DXVECTOR3(0.0f, 1.0f, 0.0f);  // Top middle.
+	vertices[1].color = D3DXVECTOR4(0.0f, 1.0f, 0.0f, 1.0f);
+
+	vertices[2].position = D3DXVECTOR3(1.0f, -1.0f, 0.0f);  // Bottom right.
+	vertices[2].color = D3DXVECTOR4(0.0f, 1.0f, 0.0f, 1.0f);
+
+	// Load the index array with data.
+	indices[0] = 0;  // Bottom left.
+	indices[1] = 1;  // Top middle.
+	indices[2] = 2;  // Bottom right.
+
+	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+
+
+void ModelClass::ShutdownBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+
+
+void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType); 
+	offset = 0;
+    
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The only change to the ModelClass is that we now render control point patch lists instead of triangle lists.
+This is required for tessellation to work.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Set the type of primitive that should be rendered from this vertex buffer.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);</font><font face="arial" color="#aaffaa" size="2">
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>D3dclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Since we want to render the wire frame of the triangle in this tutorial we had to do one modification to the D3DClass::Initialize function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, float screenDepth, float screenNear)
+{
+	HRESULT result;
+	IDXGIFactory* factory;
+	IDXGIAdapter* adapter;
+	IDXGIOutput* adapterOutput;
+	unsigned int numModes, i, numerator, denominator, stringLength;
+	DXGI_MODE_DESC* displayModeList;
+	DXGI_ADAPTER_DESC adapterDesc;
+	int error;
+	DXGI_SWAP_CHAIN_DESC swapChainDesc;
+	D3D_FEATURE_LEVEL featureLevel;
+	ID3D11Texture2D* backBufferPtr;
+	D3D11_TEXTURE2D_DESC depthBufferDesc;
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	D3D11_RASTERIZER_DESC rasterDesc;
+	D3D11_VIEWPORT viewport;
+	float fieldOfView, screenAspect;
+
+
+	// Store the vsync setting.
+	m_vsync_enabled = vsync;
+
+	// Create a DirectX graphics interface factory.
+	result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&amp;factory);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Use the factory to create an adapter for the primary graphics interface (video card).
+	result = factory-&gt;EnumAdapters(0, &amp;adapter);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Enumerate the primary adapter output (monitor).
+	result = adapter-&gt;EnumOutputs(0, &amp;adapterOutput);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM display format for the adapter output (monitor).
+	result = adapterOutput-&gt;GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &amp;numModes, NULL);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create a list to hold all the possible display modes for this monitor/video card combination.
+	displayModeList = new DXGI_MODE_DESC[numModes];
+	if(!displayModeList)
+	{
+		return false;
+	}
+
+	// Now fill the display mode list structures.
+	result = adapterOutput-&gt;GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &amp;numModes, displayModeList);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Now go through all the display modes and find the one that matches the screen width and height.
+	// When a match is found store the numerator and denominator of the refresh rate for that monitor.
+	for(i=0; i&lt;numModes; i++)
+	{
+		if(displayModeList[i].Width == (unsigned int)screenWidth)
+		{
+			if(displayModeList[i].Height == (unsigned int)screenHeight)
+			{
+				numerator = displayModeList[i].RefreshRate.Numerator;
+				denominator = displayModeList[i].RefreshRate.Denominator;
+			}
+		}
+	}
+
+	// Get the adapter (video card) description.
+	result = adapter-&gt;GetDesc(&amp;adapterDesc);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Store the dedicated video card memory in megabytes.
+	m_videoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
+
+	// Convert the name of the video card to a character array and store it.
+	error = wcstombs_s(&amp;stringLength, m_videoCardDescription, 128, adapterDesc.Description, 128);
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Release the display mode list.
+	delete [] displayModeList;
+	displayModeList = 0;
+
+	// Release the adapter output.
+	adapterOutput-&gt;Release();
+	adapterOutput = 0;
+
+	// Release the adapter.
+	adapter-&gt;Release();
+	adapter = 0;
+
+	// Release the factory.
+	factory-&gt;Release();
+	factory = 0;
+
+	// Initialize the swap chain description.
+	ZeroMemory(&amp;swapChainDesc, sizeof(swapChainDesc));
+
+	// Set to a single back buffer.
+	swapChainDesc.BufferCount = 1;
+
+	// Set the width and height of the back buffer.
+	swapChainDesc.BufferDesc.Width = screenWidth;
+	swapChainDesc.BufferDesc.Height = screenHeight;
+
+	// Set regular 32-bit surface for the back buffer.
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+	// Set the refresh rate of the back buffer.
+	if(m_vsync_enabled)
+	{
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = numerator;
+		swapChainDesc.BufferDesc.RefreshRate.Denominator = denominator;
+	}
+	else
+	{
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
+		swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+	}
+
+	// Set the usage of the back buffer.
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
+	// Set the handle for the window to render to.
+	swapChainDesc.OutputWindow = hwnd;
+
+	// Turn multisampling off.
+	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SampleDesc.Quality = 0;
+
+	// Set to full screen or windowed mode.
+	if(fullscreen)
+	{
+		swapChainDesc.Windowed = false;
+	}
+	else
+	{
+		swapChainDesc.Windowed = true;
+	}
+
+	// Set the scan line ordering and scaling to unspecified.
+	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+
+	// Discard the back buffer contents after presenting.
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+	// Don't set the advanced flags.
+	swapChainDesc.Flags = 0;
+
+	// Set the feature level to DirectX 11.
+	featureLevel = D3D_FEATURE_LEVEL_11_0;
+
+	// Create the swap chain, Direct3D device, and Direct3D device context.
+	result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &amp;featureLevel, 1, 
+					       D3D11_SDK_VERSION, &amp;swapChainDesc, &amp;m_swapChain, &amp;m_device, NULL, &amp;m_deviceContext);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get the pointer to the back buffer.
+	result = m_swapChain-&gt;GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&amp;backBufferPtr);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the render target view with the back buffer pointer.
+	result = m_device-&gt;CreateRenderTargetView(backBufferPtr, NULL, &amp;m_renderTargetView);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release pointer to the back buffer as we no longer need it.
+	backBufferPtr-&gt;Release();
+	backBufferPtr = 0;
+
+	// Initialize the description of the depth buffer.
+	ZeroMemory(&amp;depthBufferDesc, sizeof(depthBufferDesc));
+
+	// Set up the description of the depth buffer.
+	depthBufferDesc.Width = screenWidth;
+	depthBufferDesc.Height = screenHeight;
+	depthBufferDesc.MipLevels = 1;
+	depthBufferDesc.ArraySize = 1;
+	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBufferDesc.SampleDesc.Count = 1;
+	depthBufferDesc.SampleDesc.Quality = 0;
+	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBufferDesc.CPUAccessFlags = 0;
+	depthBufferDesc.MiscFlags = 0;
+
+	// Create the texture for the depth buffer using the filled out description.
+	result = m_device-&gt;CreateTexture2D(&amp;depthBufferDesc, NULL, &amp;m_depthStencilBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Initialize the description of the stencil state.
+	ZeroMemory(&amp;depthStencilDesc, sizeof(depthStencilDesc));
+
+	// Set up the description of the stencil state.
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing.
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing.
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Create the depth stencil state.
+	result = m_device-&gt;CreateDepthStencilState(&amp;depthStencilDesc, &amp;m_depthStencilState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set the depth stencil state.
+	m_deviceContext-&gt;OMSetDepthStencilState(m_depthStencilState, 1);
+
+	// Initialize the depth stencil view.
+	ZeroMemory(&amp;depthStencilViewDesc, sizeof(depthStencilViewDesc));
+
+	// Set up the depth stencil view description.
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	// Create the depth stencil view.
+	result = m_device-&gt;CreateDepthStencilView(m_depthStencilBuffer, &amp;depthStencilViewDesc, &amp;m_depthStencilView);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Bind the render target view and depth stencil buffer to the output render pipeline.
+	m_deviceContext-&gt;OMSetRenderTargets(1, &amp;m_renderTargetView, m_depthStencilView);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Change the raster description to render wire frame for this tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the raster description which will determine how and what polygons will be drawn.
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;</font><font face="arial" color="#aaaaff" size="2">
+	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;</font><font face="arial" color="#aaffaa" size="2">
+	rasterDesc.FrontCounterClockwise = false;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	// Create the rasterizer state from the description we just filled out.
+	result = m_device-&gt;CreateRasterizerState(&amp;rasterDesc, &amp;m_rasterState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Now set the rasterizer state.
+	m_deviceContext-&gt;RSSetState(m_rasterState);
+	
+	// Setup the viewport for rendering.
+	viewport.Width = (float)screenWidth;
+	viewport.Height = (float)screenHeight;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+
+	// Create the viewport.
+	m_deviceContext-&gt;RSSetViewports(1, &amp;viewport);
+
+	// Setup the projection matrix.
+	fieldOfView = (float)D3DX_PI / 4.0f;
+	screenAspect = (float)screenWidth / (float)screenHeight;
+
+	// Create the projection matrix for 3D rendering.
+	D3DXMatrixPerspectiveFovLH(&amp;m_projectionMatrix, fieldOfView, screenAspect, screenNear, screenDepth);
+
+	// Initialize the world matrix to the identity matrix.
+	D3DXMatrixIdentity(&amp;m_worldMatrix);
+
+	// Create an orthographic projection matrix for 2D rendering.
+	D3DXMatrixOrthoLH(&amp;m_orthoMatrix, (float)screenWidth, (float)screenHeight, screenNear, screenDepth);
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GraphicsClass header and source file have not been modified for this tutorial.
+I have them here just for reference.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+#include "colorshaderclass.h"
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool Render();
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	ModelClass* m_Model;
+	ColorShaderClass* m_ColorShader;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_Model = 0;
+	m_ColorShader = 0;
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	
+	// Create the model object.
+	m_Model = new ModelClass;
+	if(!m_Model)
+	{
+		return false;
+	}
+
+	// Initialize the model object.
+	result = m_Model-&gt;Initialize(m_D3D-&gt;GetDevice());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the color shader object.
+	m_ColorShader = new ColorShaderClass;
+	if(!m_ColorShader)
+	{
+		return false;
+	}
+
+	// Initialize the color shader object.
+	result = m_ColorShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the color shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+	// Release the color shader object.
+	if(m_ColorShader)
+	{
+		m_ColorShader-&gt;Shutdown();
+		delete m_ColorShader;
+		m_ColorShader = 0;
+	}
+
+	// Release the model object.
+	if(m_Model)
+	{
+		m_Model-&gt;Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame()
+{
+	bool result;
+
+
+	// Render the graphics scene.
+	result = Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool GraphicsClass::Render()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the model using the color shader.
+	result = m_ColorShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 12.0f);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now have the ability to subdivide our polygon meshes using the GPU instead of the CPU.
+If you want to see a more advanced example you can look at the SubD11 example project that comes with the DirectX SDK.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 38_ Hardware Tessellation_files/pic0191.gif" width="200" height="200"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile and run the program, you should see a tessellated wire frame green triangle.  Press escape to quit when done.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Change the tessellation amount to see its effect on the tessellation of the triangle.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Modify how the uvwCoord weights affect the tessellation of the new vertex in the domain shader.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Look at the HLSL file for the SubD11 code in the DirectX SDK.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2010 Project: <a href="http://www.rastertek.com/dx11tut38.zip">dx11tut38.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src38.zip">dx11src38.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe38.zip">dx11exe38.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 38_ Hardware Tessellation_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 38_ Hardware Tessellation_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

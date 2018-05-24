@@ -1,0 +1,1840 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut20.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 20: Bump Mapping</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 20: Bump Mapping
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 20_ Bump Mapping_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover how to perform bump mapping in DirectX 11 using HLSL and C++. 
+The code in this tutorial is based on the code in the previous tutorials.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The proper terminology for the bump mapping technique we use is called normal mapping. 
+The reason being is that we use a special texture called a normal map which is essentially a look up table for surface normals. 
+Each pixel in this normal map indicates the light direction for the corresponding pixel on the texture color map.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For example take the following color map:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 20_ Bump Mapping_files/pic0047.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+A normal map for the above texture would look like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 20_ Bump Mapping_files/pic0060.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Using the normal map with the current light direction for each pixel would then produce the following bump mapped texture:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 20_ Bump Mapping_files/pic0061.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+As you can see the effect is very realistic and the cost of producing it using bump mapping is far less expensive
+then rendering a high polygon surface to get the same result.
+</font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To create a normal map you usually need someone to produce a 3D model of the surface and then use a tool to convert that 3D model into
+a normal map.  There are also certain tools that will work with 2D textures to produce a somewhat decent normal map but it is obviously not
+as accurate as the 3D model version would be.
+</font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The tools that create normal maps take the x, y, z coordinates and translate them to red, green, blue pixels 
+with the intensity of each color indicating the angle of the normal they represent.
+The normal of our polygon surface is still calculated the same way as before.  
+However the two other normals we need to calculate require the vertex and texture coordinates for that polygon surface.  
+These two normals are called the tangent and binormal.
+The diagram below shows the direction of each normal:
+</font></p>
+ 
+<p align="left"><img border="0" src="./Tutorial 20_ Bump Mapping_files/pic0062.gif" width="244" height="206"></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The normal is still pointing straight out towards the viewer.  
+The tangent and binormal however run across the surface of the polygon with the tangent going along the x-axis and the binormal going along the y-axis.
+These two normals then directly translate to the tu and tv texture coordinates of the normal map with the texture U coordinate mapping to the tangent
+and the texture V coordinate mapping to the binormal.
+</font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will need to do some precalculation to determine the binormal and tangent vector using the normal and texture coordinates.
+Also note that you should never do this inside the shader as it is fairly expensive with all the floating point math involved,
+I instead use a function in my C++ code that you will see to do this during the model loading.
+Also if you are looking to use this effect on a large number of high polygon models 
+it may be best to precalculate these different normals and store them in your model format.
+Once we  have precalculated the tangent and binormal we can use this equation to determine the bump normal at any pixel using the normal map:
+</font></p>
+ 
+<pre><font face="arial" color="#FFFFFF" size="2">	bumpNormal = (bumpMap.x * input.tangent) + (bumpMap.y * input.binormal) + (bumpMap.z * input.normal);
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Once we have the normal for that pixel we can then calculate against the light direction and multiply by the color value of the pixel from the color texture
+to get our final result.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frame work for this tutorial looks like the following.  The only new class is the BumpMapShaderClass.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 20_ Bump Mapping_files/pic0064.gif" width="488" height="212"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will start the tutorial by looking at the bump map HLSL shader code:
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Bumpmap.vs</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: bumpmap.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Both the VertexInputType and PixelInputType now have a tangent and binormal vector for bump map calculations.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float3 binormal : BINORMAL;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float3 binormal : BINORMAL;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType BumpMapVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+    
+    // Calculate the normal vector against the world matrix only and then normalize the final value.
+    output.normal = mul(input.normal, (float3x3)worldMatrix);
+    output.normal = normalize(output.normal);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Both the input tangent and binormal are calculated against the world matrix and then normalized the same as the input normal vector.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Calculate the tangent vector against the world matrix only and then normalize the final value.
+    output.tangent = mul(input.tangent, (float3x3)worldMatrix);
+    output.tangent = normalize(output.tangent);
+
+    // Calculate the binormal vector against the world matrix only and then normalize the final value.
+    output.binormal = mul(input.binormal, (float3x3)worldMatrix);
+    output.binormal = normalize(output.binormal);
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Bumpmap.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: bumpmap.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The bump map shader requires two textures. The first texture in the array is the color texture. The second texture is the normal map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Texture2D shaderTextures[2];
+SamplerState SampleType;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Just like most light shaders the direction and color of the light is required for lighting calculations.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer LightBuffer
+{
+    float4 diffuseColor;
+    float3 lightDirection;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float3 binormal : BINORMAL;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The pixel shader works as we described above with a couple additional lines of code. 
+First we sample the pixel from the color texture and the normal map.
+We then multiply the normal map value by two and then subtract one to move it into the -1.0 to +1.0 float range.
+We have to do this because the sampled value that is presented to us in the 0.0 to +1.0 texture range which only 
+covers half the range we need for bump map normal calculations.
+After that we then calculate the bump normal which uses the equation we described earlier.
+This bump normal is normalized and then used to determine the light intensity at this pixel by doing a dot product with the light direction.
+Once we have the light intensity at this pixel the bump mapping is now done.
+We use the light intensity with the light color and texture color to get the final pixel color.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 BumpMapPixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 textureColor;
+    float4 bumpMap;
+    float3 bumpNormal;
+    float3 lightDir;
+    float lightIntensity;
+    float4 color;
+
+
+    // Sample the texture pixel at this location.
+    textureColor = shaderTextures[0].Sample(SampleType, input.tex);
+	
+    // Sample the pixel in the bump map.
+    bumpMap = shaderTextures[1].Sample(SampleType, input.tex);
+
+    // Expand the range of the normal value from (0, +1) to (-1, +1).
+    bumpMap = (bumpMap * 2.0f) - 1.0f;
+
+    // Calculate the normal from the data in the bump map.
+    bumpNormal = (bumpMap.x * input.tangent) + (bumpMap.y * input.binormal) + (bumpMap.z * input.normal);
+	
+    // Normalize the resulting bump normal.
+    bumpNormal = normalize(bumpNormal);
+
+    // Invert the light direction for calculations.
+    lightDir = -lightDirection;
+
+    // Calculate the amount of light on this pixel based on the bump map normal value.
+    lightIntensity = saturate(dot(bumpNormal, lightDir));
+
+    // Determine the final diffuse color based on the diffuse color and the amount of light intensity.
+    color = saturate(diffuseColor * lightIntensity);
+
+    // Combine the final bump light color with the texture color.
+    color = color * textureColor;
+	
+    return color;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Bumpmapshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The BumpMapShaderClass is just a modified version of the shader classes from the previous tutorials.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: bumpmapshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _BUMPMAPSHADERCLASS_H_
+#define _BUMPMAPSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: BumpMapShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class BumpMapShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+
+	struct LightBufferType
+	{
+		D3DXVECTOR4 diffuseColor;
+		D3DXVECTOR3 lightDirection;
+		float padding;
+	};
+
+public:
+	BumpMapShaderClass();
+	BumpMapShaderClass(const BumpMapShaderClass&amp;);
+	~BumpMapShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView**, D3DXVECTOR3, 
+		    D3DXVECTOR4);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView**, D3DXVECTOR3, 
+				 D3DXVECTOR4);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11Buffer* m_matrixBuffer;
+	ID3D11SamplerState* m_sampleState;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The bump map shader will require a constant buffer to interface with the light direction and light color.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11Buffer* m_lightBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Bumpmapshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: bumpmapshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "bumpmapshaderclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor initializes the pointers to null.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">BumpMapShaderClass::BumpMapShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_matrixBuffer = 0;
+	m_sampleState = 0;
+	m_lightBuffer = 0;
+}
+
+
+BumpMapShaderClass::BumpMapShaderClass(const BumpMapShaderClass&amp; other)
+{
+}
+
+
+BumpMapShaderClass::~BumpMapShaderClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function will call the shader to load the bump map HLSL files.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool BumpMapShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+
+
+	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/bumpmap.vs", L"../Engine/bumpmap.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Shutdown releases the shader effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void BumpMapShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function sets the shader parameters first and then renders the model using the bump map shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool BumpMapShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+				D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView** textureArray, D3DXVECTOR3 lightDirection,
+				D3DXVECTOR4 diffuseColor)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, textureArray, lightDirection, 
+				     diffuseColor);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+InitializeShader sets up the bump map shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool BumpMapShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The polygon layout is now set to five elements to accommodate the tangent and binormal.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	D3D11_INPUT_ELEMENT_DESC polygonLayout[5];
+	unsigned int numElements;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC lightBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The bump map vertex shader is loaded here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "BumpMapVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 
+				       0, NULL, &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The bump map pixel shader is loaded here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "BumpMapPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 
+				       0, NULL, &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, 
+					    &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, 
+					   &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	// This setup needs to match the VertexType stucture in the ModelClass and in the shader.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	polygonLayout[2].SemanticName = "NORMAL";
+	polygonLayout[2].SemanticIndex = 0;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[2].InputSlot = 0;
+	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[2].InstanceDataStepRate = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The layout now includes a tangent and binormal element which are setup the same as the normal element with the exception of the semantic name.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	polygonLayout[3].SemanticName = "TANGENT";
+	polygonLayout[3].SemanticIndex = 0;
+	polygonLayout[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[3].InputSlot = 0;
+	polygonLayout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[3].InstanceDataStepRate = 0;
+
+	polygonLayout[4].SemanticName = "BINORMAL";
+	polygonLayout[4].SemanticIndex = 0;
+	polygonLayout[4].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[4].InputSlot = 0;
+	polygonLayout[4].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[4].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[4].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), 
+					   vertexShaderBuffer-&gt;GetBufferSize(), &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Setup the description of the matrix dynamic constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the matrix constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The light constant buffer is setup here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;lightBufferDesc, NULL, &amp;m_lightBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ShutdownShader function releases all the pointers that were setup in the InitializeShader function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void BumpMapShaderClass::ShutdownShader()
+{
+	// Release the light constant buffer.
+	if(m_lightBuffer)
+	{
+		m_lightBuffer-&gt;Release();
+		m_lightBuffer = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+OutputShaderErrorMessage writes out errors to a text file if the HLSL shader file won't compile properly.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void BumpMapShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetShaderParameters function sets the shader parameters before rendering occurs.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool BumpMapShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, 
+					     D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, 
+					     ID3D11ShaderResourceView** textureArray, D3DXVECTOR3 lightDirection, 
+					     D3DXVECTOR4 diffuseColor)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* dataPtr;
+	unsigned int bufferNumber;
+	LightBufferType* dataPtr2;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the matrix constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the matrix constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the matrix constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the matrix constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The texture array is set here, it contains two textures. 
+The first texture is the color texture and the second texture is the normal map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set shader texture array resource in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 2, textureArray);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The light buffer in the pixel shader is then set with the diffuse light color and light direction.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Lock the light constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (LightBufferType*)mappedResource.pData;
+
+	// Copy the lighting variables into the constant buffer.
+	dataPtr2-&gt;diffuseColor = diffuseColor;
+	dataPtr2-&gt;lightDirection = lightDirection;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_lightBuffer, 0);
+
+	// Set the position of the light constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_lightBuffer);
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+RenderShader draws the model using the bump map shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void BumpMapShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangles.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Modelclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: modelclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _MODELCLASS_H_
+#define _MODELCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "texturearrayclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ModelClass
+////////////////////////////////////////////////////////////////////////////////
+class ModelClass
+{
+private:
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The VertexType structure has been changed to now have a tangent and binormal vector.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
+		D3DXVECTOR3 normal;
+		D3DXVECTOR3 tangent;
+		D3DXVECTOR3 binormal;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ModelType structure has also been changed to have a tangent and binormal vector.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct ModelType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+		float tx, ty, tz;
+		float bx, by, bz;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The following two structures will be used for calculating the tangent and binormal.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct TempVertexType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+	};
+
+	struct VectorType
+	{
+		float x, y, z;
+	};
+
+public:
+	ModelClass();
+	ModelClass(const ModelClass&amp;);
+	~ModelClass();
+
+	bool Initialize(ID3D11Device*, char*, WCHAR*, WCHAR*);
+	void Shutdown();
+	void Render(ID3D11DeviceContext*);
+
+	int GetIndexCount();
+	ID3D11ShaderResourceView** GetTextureArray();
+
+private:
+	bool InitializeBuffers(ID3D11Device*);
+	void ShutdownBuffers();
+	void RenderBuffers(ID3D11DeviceContext*);
+
+	bool LoadTextures(ID3D11Device*, WCHAR*, WCHAR*);
+	void ReleaseTextures();
+
+	bool LoadModel(char*);
+	void ReleaseModel();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have three new functions for calculating the tangent and binormal vectors for the model.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	void CalculateModelVectors();
+	void CalculateTangentBinormal(TempVertexType, TempVertexType, TempVertexType, VectorType&amp;, VectorType&amp;);
+	void CalculateNormal(VectorType, VectorType, VectorType&amp;);
+
+private:
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+	int m_vertexCount, m_indexCount;
+	ModelType* m_model;
+	TextureArrayClass* m_TextureArray;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Modelclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: modelclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "modelclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function now takes in two texture filenames. 
+The first texture filename is for the color texture. 
+The second texture filename is for the normal map that will be used to create the bump effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool ModelClass::Initialize(ID3D11Device* device, char* modelFilename, WCHAR* textureFilename1, WCHAR* textureFilename2)
+{
+	bool result;
+
+
+	// Load in the model data,
+	result = LoadModel(modelFilename);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+After the model data has been loaded we now call the new CalculateModelVectors function to calculate the tangent and binormal. 
+It also recalculates the normal vector.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Calculate the normal, tangent, and binormal vectors for the model.
+	CalculateModelVectors();
+
+	// Initialize the vertex and index buffers.
+	result = InitializeBuffers(device);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The two textures for the model are loaded here. 
+The first is the color texture and the second is the normal map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Load the textures for this model.
+	result = LoadTextures(device, textureFilename1, textureFilename2);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool ModelClass::InitializeBuffers(ID3D11Device* device)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+	int i;
+
+
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The InitializeBuffers function has changed at this point where the vertex array is loaded with data from the ModelType array. 
+The ModelType array now has tangent and binormal values for the model so they need to be copied into the vertex array which 
+will then be copied into the vertex buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Load the vertex array and index array with data.
+	for(i=0; i&lt;m_vertexCount; i++)
+	{
+		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].texture = D3DXVECTOR2(m_model[i].tu, m_model[i].tv);
+		vertices[i].normal = D3DXVECTOR3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
+		vertices[i].tangent = D3DXVECTOR3(m_model[i].tx, m_model[i].ty, m_model[i].tz);
+		vertices[i].binormal = D3DXVECTOR3(m_model[i].bx, m_model[i].by, m_model[i].bz);
+
+		indices[i] = i;
+	}
+
+	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+LoadTextures now creates a vertex array and then loads the color texture and normal map into the two element texture array.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool ModelClass::LoadTextures(ID3D11Device* device, WCHAR* filename1, WCHAR* filename2)
+{
+	bool result;
+
+
+	// Create the texture array object.
+	m_TextureArray = new TextureArrayClass;
+	if(!m_TextureArray)
+	{
+		return false;
+	}
+
+	// Initialize the texture array object.
+	result = m_TextureArray-&gt;Initialize(device, filename1, filename2);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+CalculateModelVectors generates the tangent and binormal for the model as well as a recalculated normal vector. 
+To start it calculates how many faces (triangles) are in the model. 
+Then for each of those triangles it gets the three vertices and uses that to calculate the tangent, binormal, and normal. 
+After calculating those three normal vectors it then saves them back into the model structure.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void ModelClass::CalculateModelVectors()
+{
+	int faceCount, i, index;
+	TempVertexType vertex1, vertex2, vertex3;
+	VectorType tangent, binormal, normal;
+
+
+	// Calculate the number of faces in the model.
+	faceCount = m_vertexCount / 3;
+
+	// Initialize the index to the model data.
+	index = 0;
+
+	// Go through all the faces and calculate the the tangent, binormal, and normal vectors.
+	for(i=0; i&lt;faceCount; i++)
+	{
+		// Get the three vertices for this face from the model.
+		vertex1.x = m_model[index].x;
+		vertex1.y = m_model[index].y;
+		vertex1.z = m_model[index].z;
+		vertex1.tu = m_model[index].tu;
+		vertex1.tv = m_model[index].tv;
+		vertex1.nx = m_model[index].nx;
+		vertex1.ny = m_model[index].ny;
+		vertex1.nz = m_model[index].nz;
+		index++;
+
+		vertex2.x = m_model[index].x;
+		vertex2.y = m_model[index].y;
+		vertex2.z = m_model[index].z;
+		vertex2.tu = m_model[index].tu;
+		vertex2.tv = m_model[index].tv;
+		vertex2.nx = m_model[index].nx;
+		vertex2.ny = m_model[index].ny;
+		vertex2.nz = m_model[index].nz;
+		index++;
+
+		vertex3.x = m_model[index].x;
+		vertex3.y = m_model[index].y;
+		vertex3.z = m_model[index].z;
+		vertex3.tu = m_model[index].tu;
+		vertex3.tv = m_model[index].tv;
+		vertex3.nx = m_model[index].nx;
+		vertex3.ny = m_model[index].ny;
+		vertex3.nz = m_model[index].nz;
+		index++;
+
+		// Calculate the tangent and binormal of that face.
+		CalculateTangentBinormal(vertex1, vertex2, vertex3, tangent, binormal);
+
+		// Calculate the new normal using the tangent and binormal.
+		CalculateNormal(tangent, binormal, normal);
+
+		// Store the normal, tangent, and binormal for this face back in the model structure.
+		m_model[index-1].nx = normal.x;
+		m_model[index-1].ny = normal.y;
+		m_model[index-1].nz = normal.z;
+		m_model[index-1].tx = tangent.x;
+		m_model[index-1].ty = tangent.y;
+		m_model[index-1].tz = tangent.z;
+		m_model[index-1].bx = binormal.x;
+		m_model[index-1].by = binormal.y;
+		m_model[index-1].bz = binormal.z;
+
+		m_model[index-2].nx = normal.x;
+		m_model[index-2].ny = normal.y;
+		m_model[index-2].nz = normal.z;
+		m_model[index-2].tx = tangent.x;
+		m_model[index-2].ty = tangent.y;
+		m_model[index-2].tz = tangent.z;
+		m_model[index-2].bx = binormal.x;
+		m_model[index-2].by = binormal.y;
+		m_model[index-2].bz = binormal.z;
+
+		m_model[index-3].nx = normal.x;
+		m_model[index-3].ny = normal.y;
+		m_model[index-3].nz = normal.z;
+		m_model[index-3].tx = tangent.x;
+		m_model[index-3].ty = tangent.y;
+		m_model[index-3].tz = tangent.z;
+		m_model[index-3].bx = binormal.x;
+		m_model[index-3].by = binormal.y;
+		m_model[index-3].bz = binormal.z;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The CalculateTangentBinormal function takes in three vertices and then calculates and returns the tangent and binormal of those three vertices.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void ModelClass::CalculateTangentBinormal(TempVertexType vertex1, TempVertexType vertex2, TempVertexType vertex3,
+					  VectorType&amp; tangent, VectorType&amp; binormal)
+{
+	float vector1[3], vector2[3];
+	float tuVector[2], tvVector[2];
+	float den;
+	float length;
+
+
+	// Calculate the two vectors for this face.
+	vector1[0] = vertex2.x - vertex1.x;
+	vector1[1] = vertex2.y - vertex1.y;
+	vector1[2] = vertex2.z - vertex1.z;
+
+	vector2[0] = vertex3.x - vertex1.x;
+	vector2[1] = vertex3.y - vertex1.y;
+	vector2[2] = vertex3.z - vertex1.z;
+
+	// Calculate the tu and tv texture space vectors.
+	tuVector[0] = vertex2.tu - vertex1.tu;
+	tvVector[0] = vertex2.tv - vertex1.tv;
+
+	tuVector[1] = vertex3.tu - vertex1.tu;
+	tvVector[1] = vertex3.tv - vertex1.tv;
+
+	// Calculate the denominator of the tangent/binormal equation.
+	den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
+
+	// Calculate the cross products and multiply by the coefficient to get the tangent and binormal.
+	tangent.x = (tvVector[1] * vector1[0] - tvVector[0] * vector2[0]) * den;
+	tangent.y = (tvVector[1] * vector1[1] - tvVector[0] * vector2[1]) * den;
+	tangent.z = (tvVector[1] * vector1[2] - tvVector[0] * vector2[2]) * den;
+
+	binormal.x = (tuVector[0] * vector2[0] - tuVector[1] * vector1[0]) * den;
+	binormal.y = (tuVector[0] * vector2[1] - tuVector[1] * vector1[1]) * den;
+	binormal.z = (tuVector[0] * vector2[2] - tuVector[1] * vector1[2]) * den;
+
+	// Calculate the length of this normal.
+	length = sqrt((tangent.x * tangent.x) + (tangent.y * tangent.y) + (tangent.z * tangent.z));
+			
+	// Normalize the normal and then store it
+	tangent.x = tangent.x / length;
+	tangent.y = tangent.y / length;
+	tangent.z = tangent.z / length;
+
+	// Calculate the length of this normal.
+	length = sqrt((binormal.x * binormal.x) + (binormal.y * binormal.y) + (binormal.z * binormal.z));
+			
+	// Normalize the normal and then store it
+	binormal.x = binormal.x / length;
+	binormal.y = binormal.y / length;
+	binormal.z = binormal.z / length;
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The CalculateNormal function takes in the tangent and binormal and then does a cross product to give back the normal vector.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void ModelClass::CalculateNormal(VectorType tangent, VectorType binormal, VectorType&amp; normal)
+{
+	float length;
+
+
+	// Calculate the cross product of the tangent and binormal which will give the normal vector.
+	normal.x = (tangent.y * binormal.z) - (tangent.z * binormal.y);
+	normal.y = (tangent.z * binormal.x) - (tangent.x * binormal.z);
+	normal.z = (tangent.x * binormal.y) - (tangent.y * binormal.x);
+
+	// Calculate the length of the normal.
+	length = sqrt((normal.x * normal.x) + (normal.y * normal.y) + (normal.z * normal.z));
+
+	// Normalize the normal.
+	normal.x = normal.x / length;
+	normal.y = normal.y / length;
+	normal.z = normal.z / length;
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new BumpMapShaderClass header file is included here in the GraphicsClass header.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">#include "bumpmapshaderclass.h"
+#include "lightclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+	bool Render();
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	ModelClass* m_Model;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new BumpMapShaderClass object is created here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	BumpMapShaderClass* m_BumpMapShader;
+	LightClass* m_Light;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_Model = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We initialize the BumpMapShaderClass object to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_BumpMapShader = 0;
+	m_Light = 0;
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+	D3DXMATRIX baseViewMatrix;
+
+		
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Initialize a base view matrix with the camera for 2D user interface rendering.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -1.0f);
+	m_Camera-&gt;Render();
+	m_Camera-&gt;GetViewMatrix(baseViewMatrix);
+
+	// Create the model object.
+	m_Model = new ModelClass;
+	if(!m_Model)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ModelClass object is initialized with the cube model, the stone01.dds color texture, and the bump01.dds normal map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the model object.
+	result = m_Model-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/cube.txt", L"../Engine/data/stone01.dds", 
+				     L"../Engine/data/bump01.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we create and initialize the BumpMapShaderClass object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the bump map shader object.
+	m_BumpMapShader = new BumpMapShaderClass;
+	if(!m_BumpMapShader)
+	{
+		return false;
+	}
+
+	// Initialize the bump map shader object.
+	result = m_BumpMapShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the bump map shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The light color is set to white and the light direction is set down the positive Z axis.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the light object.
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetDirection(0.0f, 0.0f, 1.0f);
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new BumpMapShaderClass is released here in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the bump map shader object.
+	if(m_BumpMapShader)
+	{
+		m_BumpMapShader-&gt;Shutdown();
+		delete m_BumpMapShader;
+		m_BumpMapShader = 0;
+	}
+
+	// Release the model object.
+	if(m_Model)
+	{
+		m_Model-&gt;Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Render()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
+	static float rotation = 0.0f;
+
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, projection, and ortho matrices from the camera and D3D objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+	m_D3D-&gt;GetOrthoMatrix(orthoMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Rotate the cube model each frame to show the effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Update the rotation variable each frame.
+	rotation += (float)D3DX_PI * 0.0025f;
+	if(rotation &gt; 360.0f)
+	{
+		rotation -= 360.0f;
+	}
+
+	// Rotate the world matrix by the rotation value.
+	D3DXMatrixRotationY(&amp;worldMatrix, rotation);
+
+	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model-&gt;Render(m_D3D-&gt;GetDeviceContext());
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Render the model using the bump map shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Render the model using the bump map shader.
+	m_BumpMapShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+				m_Model-&gt;GetTextureArray(), m_Light-&gt;GetDirection(), m_Light-&gt;GetDiffuseColor());
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With the bump map shader you can create very detailed scenes that look 3D with just two 2D textures.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 20_ Bump Mapping_files/pic0063.gif" width="400" height="400"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile and run the program. You should see a bump mapped rotating cube. Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Change the bump map effect from 2.5 to something smaller (like 1.0) and larger (like 5.0) in the shader to see the change in the bump depth.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Comment out the color = color * textureColor; line in the pixel shader to see just the bump lighting effect.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Move the camera and light position around to see the effect from different angles.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11src20.zip">dx11src20.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11exe20.zip">dx11exe20.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 20_ Bump Mapping_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 20_ Bump Mapping_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

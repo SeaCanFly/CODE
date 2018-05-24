@@ -1,0 +1,2774 @@
+
+<!-- saved from url=(0038)http://www.rastertek.com/tertut10.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 10: Sky Domes</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 10: Sky Domes
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 10_ Sky Domes_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This DirectX 11 terrain tutorial will cover how to implement sky domes so that we can generate a gradient colored sky that works well as a background to our terrain.
+The code in this tutorial builds off the color mapped terrain tutorial code.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To implement a sky dome you first need a sky dome model.  The easiest one to use is just a regular sphere.
+For this tutorial I went into Maya and created a sphere with a radius of 2.0 and 20 subdivisions.  
+I then triangulated it and exported it as a .obj formatted model.
+In the DirectX 11 tutorial section I cover loading and rendering basic .obj models from Maya so if you haven't seen those tutorials you may want to review them before
+proceeding.
+Also note that the radius of 2.0 is very important as the pixel shader is going to be dependent on that size value.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 10_ Sky Domes_files/pic0201.gif" width="600" height="400"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The next step to using a sky dome is that we need to render the sky dome around the camera position at all times.
+This way the sky dome is always surrounding the viewer regardless of where they move to.
+We do this by getting the camera position each frame and start the frame by translating the sky dome to be centered at the camera position and then render it there.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The third step is that we need to turn off back face culling when rendering the sky dome.
+Since we are inside the sky dome at all times the graphics card would cull the polygons since they are facing the wrong direction.
+So we turn off back face culling using a different raster state, render the sky dome, and then turn back face culling back on by re-enabling the original
+raster state.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The fourth step is that we also need to disable the Z buffer before rendering.
+If we don't turn it off we can't see anything outside the sky dome, only what is inside.
+Turning off the Z buffer before we render allows us to draw the sky dome entirely to the back buffer overwriting everything else regardless of distance.
+This is also the reason we need to render the sky dome before rendering the terrain or anything else.
+Once the sky dome is rendered we turn the Z buffer back on so that everything else is rendered according to depth again.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The fifth and final step is implemented in the shader.
+In the pixel shader we will pass in the current position of the pixel that we are rendering for the sky dome.
+We will treat the Y coordinate of this position as the height.
+And since the radius of the sphere was 2.0 this will be translated as +1.0f as the top of the sky dome and -1.0f as the bottom of the sky dome.
+And since we know the height is between +1.0 and -1.0 we can color the sky dome using the height as the interpolation value between two different colors 
+to create a sky color gradient.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now for the code section of this tutorial I have added two new classes called SkyDomeClass and SkyDomeShaderClass.  
+I have also added the skydome vertex and pixel shader HLSL programs.
+The SkyDomeClass basically encapsulates the sphere model of the sky dome as well as the two colors for the gradient.
+The SkyDomeShaderClass is used for rendering the sky dome model.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will start the code section now by examining the SkyDomeClass.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Skydomeclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SkyDomeClass is basically the ModelClass from the DirectX 11 tutorials re-written for the purposes of rendering a sky dome.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: skydomeclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SKYDOMECLASS_H_
+#define _SKYDOMECLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: SkyDomeClass
+////////////////////////////////////////////////////////////////////////////////
+class SkyDomeClass
+{
+private:
+	struct ModelType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The VertexType for the sky dome only requires position.
+We generate the colors based on the height of the sky dome.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct VertexType
+	{
+		D3DXVECTOR3 position;
+	};
+
+public:
+	SkyDomeClass();
+	SkyDomeClass(const SkyDomeClass&amp;);
+	~SkyDomeClass();
+
+	bool Initialize(ID3D11Device*);
+	void Shutdown();
+	void Render(ID3D11DeviceContext*);
+
+	int GetIndexCount();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetApexColor and GetCenterColor are the two helper functions that retrieve the two colors for the sky dome gradient during rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	D3DXVECTOR4 GetApexColor();
+	D3DXVECTOR4 GetCenterColor();
+
+private:
+	bool LoadSkyDomeModel(char*);
+	void ReleaseSkyDomeModel();
+
+	bool InitializeBuffers(ID3D11Device*);
+	void ReleaseBuffers();
+	void RenderBuffers(ID3D11DeviceContext*);
+
+private:
+	ModelType* m_model;
+	int m_vertexCount, m_indexCount;
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+	D3DXVECTOR4 m_apexColor, m_centerColor;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Skydomeclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: skydomeclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "skydomeclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor initializes the private member pointers to null.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">SkyDomeClass::SkyDomeClass()
+{
+	m_model = 0;
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+}
+
+
+SkyDomeClass::SkyDomeClass(const SkyDomeClass&amp; other)
+{
+}
+
+
+SkyDomeClass::~SkyDomeClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function first loads the sky dome model into the m_model structure.
+After that InitializeBuffers is called which loads the sky dome model into a vertex and index buffer that can be rendered by the video card.
+And finally we set the two colors of the sky dome.  The apex color is the color at the top of the sky dome.  
+The center color is the color at the horizon of the sky dome.
+In this tutorial everything below the horizon is set the be the same color as the horizon.
+So basically the gradient only goes from the top of the sky dome to the horizon.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool SkyDomeClass::Initialize(ID3D11Device* device)
+{
+	bool result;
+
+
+	// Load in the sky dome model.
+	result = LoadSkyDomeModel("../Engine/data/skydome.txt");
+	if(!result)
+	{
+		return false;
+	}
+
+	// Load the sky dome into a vertex and index buffer for rendering.
+	result = InitializeBuffers(device);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Set the color at the top of the sky dome.
+	m_apexColor = D3DXVECTOR4(0.0f, 0.15f, 0.66f, 1.0f);
+	
+	// Set the color at the center of the sky dome.
+	m_centerColor =  D3DXVECTOR4(0.81f, 0.38f, 0.66f, 1.0f);
+	
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function releases the sky dome model and the vertex and index buffers.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void SkyDomeClass::Shutdown()
+{
+	// Release the vertex and index buffer that were used for rendering the sky dome.
+	ReleaseBuffers();
+
+	// Release the sky dome model.
+	ReleaseSkyDomeModel();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function calls the RenderBuffers function to put the sky dome geometry on the graphics pipeline for rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void SkyDomeClass::Render(ID3D11DeviceContext* deviceContext)
+{
+	// Render the sky dome.
+	RenderBuffers(deviceContext);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetIndexCount returns the index count and is used for rendering the sky dome.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">int SkyDomeClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetApexColor returns the color of the sky dome at the very top.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">D3DXVECTOR4 SkyDomeClass::GetApexColor()
+{
+	return m_apexColor;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetCenterColor returns the color of the sky dome at the horizon (or 0.0f to be exact).
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">D3DXVECTOR4 SkyDomeClass::GetCenterColor()
+{
+	return m_centerColor;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The LoadSkyDomeModel function loads in the sky dome model from our file format which was created by converting the .obj formatted sphere model.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool SkyDomeClass::LoadSkyDomeModel(char* filename)
+{
+	ifstream fin;
+	char input;
+	int i;
+
+
+	// Open the model file.
+	fin.open(filename);
+	
+	// If it could not open the file then exit.
+	if(fin.fail())
+	{
+		return false;
+	}
+
+	// Read up to the value of vertex count.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+
+	// Read in the vertex count.
+	fin &gt;&gt; m_vertexCount;
+
+	// Set the number of indices to be the same as the vertex count.
+	m_indexCount = m_vertexCount;
+
+	// Create the model using the vertex count that was read in.
+	m_model = new ModelType[m_vertexCount];
+	if(!m_model)
+	{
+		return false;
+	}
+
+	// Read up to the beginning of the data.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+	fin.get(input);
+	fin.get(input);
+
+	// Read in the vertex data.
+	for(i=0; i&lt;m_vertexCount; i++)
+	{
+		fin &gt;&gt; m_model[i].x &gt;&gt; m_model[i].y &gt;&gt; m_model[i].z;
+		fin &gt;&gt; m_model[i].tu &gt;&gt; m_model[i].tv;
+		fin &gt;&gt; m_model[i].nx &gt;&gt; m_model[i].ny &gt;&gt; m_model[i].nz;
+	}
+
+	// Close the model file.
+	fin.close();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ReleaseSkyDomeModel function releases the sky dome model structure.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void SkyDomeClass::ReleaseSkyDomeModel()
+{
+	if(m_model)
+	{
+		delete [] m_model;
+		m_model = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The InitializeBuffers function loads the sky dome model structure into the vertex and index buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool SkyDomeClass::InitializeBuffers(ID3D11Device* device)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+	int i;
+
+	
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+
+	// Load the vertex array and index array with data.
+	for(i=0; i&lt;m_vertexCount; i++)
+	{
+		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
+		indices[i] = i;
+	}
+
+	// Set up the description of the vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now finally create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ReleaseBuffers function releases the vertex and index buffer that were used to render the sky dome.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void SkyDomeClass::ReleaseBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+RenderBuffers puts the sky dome geometry on the graphics pipe line for rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void SkyDomeClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType); 
+	offset = 0;
+    
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Skydome.vs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The sky dome vertex shader program is very simple.
+We send through the regular position as usual, however we also send the position through to the pixel shader unmodified in a second variable called domePosition.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: skydome.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float4 domePosition : TEXCOORD0;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType SkyDomeVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Send the unmodified position through to the pixel shader.
+    output.domePosition = input.position;
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Skydome.ps</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The pixel shader is where we do all the real work of rendering the sky dome.
+First the GradientBuffer will have had the apex and center color set so that we have the two colors to create the gradient from.
+In the pixel shader function we will take the height of the current pixel to determine where it is on the sky dome.
+We use that height as the interpolating value and then do an interpolation between the apex and the center color.
+The higher the height value the more the apex color will be present.
+The lower the height value the more the center color will be present.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Also remember that the radius of the sphere was 2.0 which gives us the -1.0f to +1.0f range in the pixel shader.
+If you use a different radius then you should change the values here or send them through in their own constant buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: skydome.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer GradientBuffer
+{
+    float4 apexColor;
+    float4 centerColor;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float4 domePosition : TEXCOORD0;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 SkyDomePixelShader(PixelInputType input) : SV_TARGET
+{
+    float height;
+    float4 outputColor;
+
+
+    // Determine the position on the sky dome where this pixel is located.
+    height = input.domePosition.y;
+
+    // The value ranges from -1.0f to +1.0f so change it to only positive values.
+    if(height &lt; 0.0)
+    {
+        height = 0.0f;
+    }
+
+    // Determine the gradient color by interpolating between the apex and center based on the height of the pixel in the sky dome.
+    outputColor = lerp(centerColor, apexColor, height);
+
+    return outputColor;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Skydomeshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SkyDomeShaderClass is used for rendering the sky dome.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: skydomeshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SKYDOMESHADERCLASS_H_
+#define _SKYDOMESHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: SkyDomeShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class SkyDomeShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We need a structure for the gradient constant buffer that is located in the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct GradientBufferType
+	{
+		D3DXVECTOR4 apexColor;
+		D3DXVECTOR4 centerColor;
+	};
+
+public:
+	SkyDomeShaderClass();
+	SkyDomeShaderClass(const SkyDomeShaderClass&amp;);
+	~SkyDomeShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXVECTOR4, D3DXVECTOR4);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXVECTOR4, D3DXVECTOR4);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11Buffer* m_matrixBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We also require a buffer variable so that the gradient colors can be set in the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11Buffer* m_gradientBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Skydomeshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: skydomeshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "skydomeshaderclass.h"
+
+
+SkyDomeShaderClass::SkyDomeShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_matrixBuffer = 0;
+	m_gradientBuffer = 0;
+}
+
+
+SkyDomeShaderClass::SkyDomeShaderClass(const SkyDomeShaderClass&amp; other)
+{
+}
+
+
+SkyDomeShaderClass::~SkyDomeShaderClass()
+{
+}
+
+
+bool SkyDomeShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load in the sky dome vertex and pixel shader programs.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/skydome.vs", L"../Engine/skydome.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void SkyDomeShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+
+
+bool SkyDomeShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+				D3DXMATRIX projectionMatrix, D3DXVECTOR4 apexColor, D3DXVECTOR4 centerColor)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, apexColor, centerColor);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool SkyDomeShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[1];
+	unsigned int numElements;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC gradientBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Compile and create the sky dome vertex and pixel shader programs.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "SkyDomeVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "SkyDomePixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The layout only requires a single element which is the position.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the vertex input layout description.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We setup the gradient constant buffer here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the description of the gradient constant buffer that is in the pixel shader.
+	gradientBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	gradientBufferDesc.ByteWidth = sizeof(GradientBufferType);
+	gradientBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	gradientBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	gradientBufferDesc.MiscFlags = 0;
+	gradientBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the pixel shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;gradientBufferDesc, NULL, &amp;m_gradientBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void SkyDomeShaderClass::ShutdownShader()
+{
+	// Release the gradient constant buffer.
+	if(m_gradientBuffer)
+	{
+		m_gradientBuffer-&gt;Release();
+		m_gradientBuffer = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void SkyDomeShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+
+
+bool SkyDomeShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix,
+					     D3DXMATRIX projectionMatrix, D3DXVECTOR4 apexColor, D3DXVECTOR4 centerColor)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* dataPtr;
+	GradientBufferType* dataPtr2;
+	unsigned int bufferNumber;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Finally set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This is were we set the apex and center color variables in the pixel shader.
+They are set in the gradient constant buffer and then will be accessible in the pixel shader for rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Lock the gradient constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_gradientBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (GradientBufferType*)mappedResource.pData;
+
+	// Copy the gradient color variables into the constant buffer.
+	dataPtr2-&gt;apexColor = apexColor;
+	dataPtr2-&gt;centerColor = centerColor;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_gradientBuffer, 0);
+
+	// Set the position of the gradient constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Finally set the gradient constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_gradientBuffer);
+
+	return true;
+}
+
+
+void SkyDomeShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render the triangles.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>D3dclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The D3DClass has been updated to allow turning back face culling on and off.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: d3dclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _D3DCLASS_H_
+#define _D3DCLASS_H_
+
+
+/////////////
+// LINKING //
+/////////////
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dx11.lib")
+#pragma comment(lib, "d3dx10.lib")
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;dxgi.h&gt;
+#include &lt;d3dcommon.h&gt;
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: D3DClass
+////////////////////////////////////////////////////////////////////////////////
+class D3DClass
+{
+public:
+	D3DClass();
+	D3DClass(const D3DClass&amp;);
+	~D3DClass();
+
+	bool Initialize(int, int, bool, HWND, bool, float, float);
+	void Shutdown();
+	
+	void BeginScene(float, float, float, float);
+	void EndScene();
+
+	ID3D11Device* GetDevice();
+	ID3D11DeviceContext* GetDeviceContext();
+
+	void GetProjectionMatrix(D3DXMATRIX&amp;);
+	void GetWorldMatrix(D3DXMATRIX&amp;);
+	void GetOrthoMatrix(D3DXMATRIX&amp;);
+
+	void GetVideoCardInfo(char*, int&amp;);
+
+	void TurnZBufferOn();
+	void TurnZBufferOff();
+	void TurnOnAlphaBlending();
+	void TurnOffAlphaBlending();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+These two functions are used for turning on and off back face culling.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	void TurnOnCulling();
+	void TurnOffCulling();</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	bool m_vsync_enabled;
+	int m_videoCardMemory;
+	char m_videoCardDescription[128];
+	IDXGISwapChain* m_swapChain;
+	ID3D11Device* m_device;
+	ID3D11DeviceContext* m_deviceContext;
+	ID3D11RenderTargetView* m_renderTargetView;
+	ID3D11Texture2D* m_depthStencilBuffer;
+	ID3D11DepthStencilState* m_depthStencilState;
+	ID3D11DepthStencilView* m_depthStencilView;
+	ID3D11RasterizerState* m_rasterState;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We also have a new rasterizer state for turning off back face culling.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	ID3D11RasterizerState* m_rasterStateNoCulling;</font><font face="arial" color="#aaffaa" size="2">
+	D3DXMATRIX m_projectionMatrix;
+	D3DXMATRIX m_worldMatrix;
+	D3DXMATRIX m_orthoMatrix;
+	ID3D11DepthStencilState* m_depthDisabledStencilState;
+	ID3D11BlendState* m_alphaEnableBlendingState;
+	ID3D11BlendState* m_alphaDisableBlendingState;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>D3dclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: d3dclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "d3dclass.h"
+
+
+D3DClass::D3DClass()
+{
+	m_swapChain = 0;
+	m_device = 0;
+	m_deviceContext = 0;
+	m_renderTargetView = 0;
+	m_depthStencilBuffer = 0;
+	m_depthStencilState = 0;
+	m_depthStencilView = 0;
+	m_rasterState = 0;</font><font face="arial" color="#aaaaff" size="2">
+	m_rasterStateNoCulling = 0;</font><font face="arial" color="#aaffaa" size="2">
+	m_depthDisabledStencilState = 0;
+	m_alphaEnableBlendingState = 0;
+	m_alphaDisableBlendingState = 0;
+}
+
+
+D3DClass::D3DClass(const D3DClass&amp; other)
+{
+}
+
+
+D3DClass::~D3DClass()
+{
+}
+
+
+bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, float screenDepth, float screenNear)
+{
+	HRESULT result;
+	IDXGIFactory* factory;
+	IDXGIAdapter* adapter;
+	IDXGIOutput* adapterOutput;
+	unsigned int numModes, i, numerator, denominator, stringLength;
+	DXGI_MODE_DESC* displayModeList;
+	DXGI_ADAPTER_DESC adapterDesc;
+	int error;
+	DXGI_SWAP_CHAIN_DESC swapChainDesc;
+	D3D_FEATURE_LEVEL featureLevel;
+	ID3D11Texture2D* backBufferPtr;
+	D3D11_TEXTURE2D_DESC depthBufferDesc;
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	D3D11_RASTERIZER_DESC rasterDesc;
+	D3D11_VIEWPORT viewport;
+	float fieldOfView, screenAspect;
+	D3D11_DEPTH_STENCIL_DESC depthDisabledStencilDesc;
+	D3D11_BLEND_DESC blendStateDescription;
+
+
+	// Store the vsync setting.
+	m_vsync_enabled = vsync;
+
+	// Create a DirectX graphics interface factory.
+	result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&amp;factory);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Use the factory to create an adapter for the primary graphics interface (video card).
+	result = factory-&gt;EnumAdapters(0, &amp;adapter);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Enumerate the primary adapter output (monitor).
+	result = adapter-&gt;EnumOutputs(0, &amp;adapterOutput);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM display format for the adapter output (monitor).
+	result = adapterOutput-&gt;GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &amp;numModes, NULL);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create a list to hold all the possible display modes for this monitor/video card combination.
+	displayModeList = new DXGI_MODE_DESC[numModes];
+	if(!displayModeList)
+	{
+		return false;
+	}
+
+	// Now fill the display mode list structures.
+	result = adapterOutput-&gt;GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &amp;numModes, displayModeList);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Now go through all the display modes and find the one that matches the screen width and height.
+	// When a match is found store the numerator and denominator of the refresh rate for that monitor.
+	for(i=0; i&lt;numModes; i++)
+	{
+		if(displayModeList[i].Width == (unsigned int)screenWidth)
+		{
+			if(displayModeList[i].Height == (unsigned int)screenHeight)
+			{
+				numerator = displayModeList[i].RefreshRate.Numerator;
+				denominator = displayModeList[i].RefreshRate.Denominator;
+			}
+		}
+	}
+
+	// Get the adapter (video card) description.
+	result = adapter-&gt;GetDesc(&amp;adapterDesc);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Store the dedicated video card memory in megabytes.
+	m_videoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
+
+	// Convert the name of the video card to a character array and store it.
+	error = wcstombs_s(&amp;stringLength, m_videoCardDescription, 128, adapterDesc.Description, 128);
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Release the display mode list.
+	delete [] displayModeList;
+	displayModeList = 0;
+
+	// Release the adapter output.
+	adapterOutput-&gt;Release();
+	adapterOutput = 0;
+
+	// Release the adapter.
+	adapter-&gt;Release();
+	adapter = 0;
+
+	// Release the factory.
+	factory-&gt;Release();
+	factory = 0;
+
+	// Initialize the swap chain description.
+	ZeroMemory(&amp;swapChainDesc, sizeof(swapChainDesc));
+
+	// Set to a single back buffer.
+	swapChainDesc.BufferCount = 1;
+
+	// Set the width and height of the back buffer.
+	swapChainDesc.BufferDesc.Width = screenWidth;
+	swapChainDesc.BufferDesc.Height = screenHeight;
+
+	// Set regular 32-bit surface for the back buffer.
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+	// Set the refresh rate of the back buffer.
+	if(m_vsync_enabled)
+	{
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = numerator;
+		swapChainDesc.BufferDesc.RefreshRate.Denominator = denominator;
+	}
+	else
+	{
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
+		swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+	}
+
+	// Set the usage of the back buffer.
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
+	// Set the handle for the window to render to.
+	swapChainDesc.OutputWindow = hwnd;
+
+	// Turn multisampling off.
+	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SampleDesc.Quality = 0;
+
+	// Set to full screen or windowed mode.
+	if(fullscreen)
+	{
+		swapChainDesc.Windowed = false;
+	}
+	else
+	{
+		swapChainDesc.Windowed = true;
+	}
+
+	// Set the scan line ordering and scaling to unspecified.
+	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+
+	// Discard the back buffer contents after presenting.
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+	// Don't set the advanced flags.
+	swapChainDesc.Flags = 0;
+
+	// Set the feature level to DirectX 11.
+	featureLevel = D3D_FEATURE_LEVEL_11_0;
+
+	// Create the swap chain, Direct3D device, and Direct3D device context.
+	result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &amp;featureLevel, 1, 
+					       D3D11_SDK_VERSION, &amp;swapChainDesc, &amp;m_swapChain, &amp;m_device, NULL, &amp;m_deviceContext);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get the pointer to the back buffer.
+	result = m_swapChain-&gt;GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&amp;backBufferPtr);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the render target view with the back buffer pointer.
+	result = m_device-&gt;CreateRenderTargetView(backBufferPtr, NULL, &amp;m_renderTargetView);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release pointer to the back buffer as we no longer need it.
+	backBufferPtr-&gt;Release();
+	backBufferPtr = 0;
+
+	// Initialize the description of the depth buffer.
+	ZeroMemory(&amp;depthBufferDesc, sizeof(depthBufferDesc));
+
+	// Set up the description of the depth buffer.
+	depthBufferDesc.Width = screenWidth;
+	depthBufferDesc.Height = screenHeight;
+	depthBufferDesc.MipLevels = 1;
+	depthBufferDesc.ArraySize = 1;
+	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBufferDesc.SampleDesc.Count = 1;
+	depthBufferDesc.SampleDesc.Quality = 0;
+	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBufferDesc.CPUAccessFlags = 0;
+	depthBufferDesc.MiscFlags = 0;
+
+	// Create the texture for the depth buffer using the filled out description.
+	result = m_device-&gt;CreateTexture2D(&amp;depthBufferDesc, NULL, &amp;m_depthStencilBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Initialize the description of the stencil state.
+	ZeroMemory(&amp;depthStencilDesc, sizeof(depthStencilDesc));
+
+	// Set up the description of the stencil state.
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing.
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing.
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Create the depth stencil state.
+	result = m_device-&gt;CreateDepthStencilState(&amp;depthStencilDesc, &amp;m_depthStencilState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set the depth stencil state.
+	m_deviceContext-&gt;OMSetDepthStencilState(m_depthStencilState, 1);
+
+	// Initialize the depth stencil view.
+	ZeroMemory(&amp;depthStencilViewDesc, sizeof(depthStencilViewDesc));
+
+	// Set up the depth stencil view description.
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	// Create the depth stencil view.
+	result = m_device-&gt;CreateDepthStencilView(m_depthStencilBuffer, &amp;depthStencilViewDesc, &amp;m_depthStencilView);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Bind the render target view and depth stencil buffer to the output render pipeline.
+	m_deviceContext-&gt;OMSetRenderTargets(1, &amp;m_renderTargetView, m_depthStencilView);
+
+	// Setup the raster description which will determine how and what polygons will be drawn.
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = false;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	// Create the rasterizer state from the description we just filled out.
+	result = m_device-&gt;CreateRasterizerState(&amp;rasterDesc, &amp;m_rasterState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Now set the rasterizer state.
+	m_deviceContext-&gt;RSSetState(m_rasterState);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we setup the rasterizer state for no back face culling.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Setup a raster description which turns off back face culling.
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = D3D11_CULL_NONE;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = false;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	// Create the no culling rasterizer state.
+	result = m_device-&gt;CreateRasterizerState(&amp;rasterDesc, &amp;m_rasterStateNoCulling);
+	if(FAILED(result))
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Setup the viewport for rendering.
+	viewport.Width = (float)screenWidth;
+	viewport.Height = (float)screenHeight;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+
+	// Create the viewport.
+	m_deviceContext-&gt;RSSetViewports(1, &amp;viewport);
+
+	// Setup the projection matrix.
+	fieldOfView = (float)D3DX_PI / 4.0f;
+	screenAspect = (float)screenWidth / (float)screenHeight;
+
+	// Create the projection matrix for 3D rendering.
+	D3DXMatrixPerspectiveFovLH(&amp;m_projectionMatrix, fieldOfView, screenAspect, screenNear, screenDepth);
+
+	// Initialize the world matrix to the identity matrix.
+	D3DXMatrixIdentity(&amp;m_worldMatrix);
+
+	// Create an orthographic projection matrix for 2D rendering.
+	D3DXMatrixOrthoLH(&amp;m_orthoMatrix, (float)screenWidth, (float)screenHeight, screenNear, screenDepth);
+
+	// Clear the second depth stencil state before setting the parameters.
+	ZeroMemory(&amp;depthDisabledStencilDesc, sizeof(depthDisabledStencilDesc));
+
+	// Now create a second depth stencil state which turns off the Z buffer for 2D rendering.  The only difference is 
+	// that DepthEnable is set to false, all other parameters are the same as the other depth stencil state.
+	depthDisabledStencilDesc.DepthEnable = false;
+	depthDisabledStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthDisabledStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthDisabledStencilDesc.StencilEnable = true;
+	depthDisabledStencilDesc.StencilReadMask = 0xFF;
+	depthDisabledStencilDesc.StencilWriteMask = 0xFF;
+	depthDisabledStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthDisabledStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	depthDisabledStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthDisabledStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Create the state using the device.
+	result = m_device-&gt;CreateDepthStencilState(&amp;depthDisabledStencilDesc, &amp;m_depthDisabledStencilState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Clear the blend state description.
+	ZeroMemory(&amp;blendStateDescription, sizeof(D3D11_BLEND_DESC));
+
+	// Create an alpha enabled blend state description.
+	blendStateDescription.RenderTarget[0].BlendEnable = TRUE;
+	blendStateDescription.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	blendStateDescription.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendStateDescription.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendStateDescription.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendStateDescription.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendStateDescription.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendStateDescription.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+
+	// Create the blend state using the description.
+	result = m_device-&gt;CreateBlendState(&amp;blendStateDescription, &amp;m_alphaEnableBlendingState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Modify the description to create an alpha disabled blend state description.
+	blendStateDescription.RenderTarget[0].BlendEnable = FALSE;
+
+	// Create the second blend state using the description.
+	result = m_device-&gt;CreateBlendState(&amp;blendStateDescription, &amp;m_alphaDisableBlendingState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void D3DClass::Shutdown()
+{
+	// Before shutting down set to windowed mode or when you release the swap chain it will throw an exception.
+	if(m_swapChain)
+	{
+		m_swapChain-&gt;SetFullscreenState(false, NULL);
+	}
+
+	if(m_alphaEnableBlendingState)
+	{
+		m_alphaEnableBlendingState-&gt;Release();
+		m_alphaEnableBlendingState = 0;
+	}
+
+	if(m_alphaDisableBlendingState)
+	{
+		m_alphaDisableBlendingState-&gt;Release();
+		m_alphaDisableBlendingState = 0;
+	}
+
+	if(m_depthDisabledStencilState)
+	{
+		m_depthDisabledStencilState-&gt;Release();
+		m_depthDisabledStencilState = 0;
+	}</font><font face="arial" color="#aaaaff" size="2">
+
+	if(m_rasterStateNoCulling)
+	{
+		m_rasterStateNoCulling-&gt;Release();
+		m_rasterStateNoCulling = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	if(m_rasterState)
+	{
+		m_rasterState-&gt;Release();
+		m_rasterState = 0;
+	}
+
+	if(m_depthStencilView)
+	{
+		m_depthStencilView-&gt;Release();
+		m_depthStencilView = 0;
+	}
+
+	if(m_depthStencilState)
+	{
+		m_depthStencilState-&gt;Release();
+		m_depthStencilState = 0;
+	}
+
+	if(m_depthStencilBuffer)
+	{
+		m_depthStencilBuffer-&gt;Release();
+		m_depthStencilBuffer = 0;
+	}
+
+	if(m_renderTargetView)
+	{
+		m_renderTargetView-&gt;Release();
+		m_renderTargetView = 0;
+	}
+
+	if(m_deviceContext)
+	{
+		m_deviceContext-&gt;Release();
+		m_deviceContext = 0;
+	}
+
+	if(m_device)
+	{
+		m_device-&gt;Release();
+		m_device = 0;
+	}
+
+	if(m_swapChain)
+	{
+		m_swapChain-&gt;Release();
+		m_swapChain = 0;
+	}
+
+	return;
+}
+
+
+void D3DClass::BeginScene(float red, float green, float blue, float alpha)
+{
+	float color[4];
+
+
+	// Setup the color to clear the buffer to.
+	color[0] = red;
+	color[1] = green;
+	color[2] = blue;
+	color[3] = alpha;
+
+	// Clear the back buffer.
+	m_deviceContext-&gt;ClearRenderTargetView(m_renderTargetView, color);
+    
+	// Clear the depth buffer.
+	m_deviceContext-&gt;ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	return;
+}
+
+
+void D3DClass::EndScene()
+{
+	// Present the back buffer to the screen since rendering is complete.
+	if(m_vsync_enabled)
+	{
+		// Lock to screen refresh rate.
+		m_swapChain-&gt;Present(1, 0);
+	}
+	else
+	{
+		// Present as fast as possible.
+		m_swapChain-&gt;Present(0, 0);
+	}
+
+	return;
+}
+
+
+ID3D11Device* D3DClass::GetDevice()
+{
+	return m_device;
+}
+
+
+ID3D11DeviceContext* D3DClass::GetDeviceContext()
+{
+	return m_deviceContext;
+}
+
+
+void D3DClass::GetProjectionMatrix(D3DXMATRIX&amp; projectionMatrix)
+{
+	projectionMatrix = m_projectionMatrix;
+	return;
+}
+
+
+void D3DClass::GetWorldMatrix(D3DXMATRIX&amp; worldMatrix)
+{
+	worldMatrix = m_worldMatrix;
+	return;
+}
+
+
+void D3DClass::GetOrthoMatrix(D3DXMATRIX&amp; orthoMatrix)
+{
+	orthoMatrix = m_orthoMatrix;
+	return;
+}
+
+
+void D3DClass::GetVideoCardInfo(char* cardName, int&amp; memory)
+{
+	strcpy_s(cardName, 128, m_videoCardDescription);
+	memory = m_videoCardMemory;
+	return;
+}
+
+
+void D3DClass::TurnZBufferOn()
+{
+	m_deviceContext-&gt;OMSetDepthStencilState(m_depthStencilState, 1);
+	return;
+}
+
+
+void D3DClass::TurnZBufferOff()
+{
+	m_deviceContext-&gt;OMSetDepthStencilState(m_depthDisabledStencilState, 1);
+	return;
+}
+
+
+void D3DClass::TurnOnAlphaBlending()
+{
+	float blendFactor[4];
+	
+
+	// Setup the blend factor.
+	blendFactor[0] = 0.0f;
+	blendFactor[1] = 0.0f;
+	blendFactor[2] = 0.0f;
+	blendFactor[3] = 0.0f;
+	
+	// Turn on the alpha blending.
+	m_deviceContext-&gt;OMSetBlendState(m_alphaEnableBlendingState, blendFactor, 0xffffffff);
+
+	return;
+}
+
+
+void D3DClass::TurnOffAlphaBlending()
+{
+	float blendFactor[4];
+	
+
+	// Setup the blend factor.
+	blendFactor[0] = 0.0f;
+	blendFactor[1] = 0.0f;
+	blendFactor[2] = 0.0f;
+	blendFactor[3] = 0.0f;
+	
+	// Turn off the alpha blending.
+	m_deviceContext-&gt;OMSetBlendState(m_alphaDisableBlendingState, blendFactor, 0xffffffff);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+These are the two new helper functions that allow us to turn on and off back face culling.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">void D3DClass::TurnOnCulling()
+{
+	// Set the culling rasterizer state.
+	m_deviceContext-&gt;RSSetState(m_rasterState);
+
+	return;
+}
+
+
+void D3DClass::TurnOffCulling()
+{
+	// Set the no back face culling rasterizer state.
+	m_deviceContext-&gt;RSSetState(m_rasterStateNoCulling);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _APPLICATIONCLASS_H_
+#define _APPLICATIONCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "inputclass.h"
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "terrainclass.h"
+#include "timerclass.h"
+#include "positionclass.h"
+#include "fpsclass.h"
+#include "cpuclass.h"
+#include "fontshaderclass.h"
+#include "textclass.h"
+#include "terrainshaderclass.h"
+#include "lightclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The two new header files for the SkyDomeClass and SkyDomeShaderClass are added here.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">#include "skydomeclass.h"
+#include "skydomeshaderclass.h"</font><font face="arial" color="#aaffaa" size="2">
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ApplicationClass
+////////////////////////////////////////////////////////////////////////////////
+class ApplicationClass
+{
+public:
+	ApplicationClass();
+	ApplicationClass(const ApplicationClass&amp;);
+	~ApplicationClass();
+
+	bool Initialize(HINSTANCE, HWND, int, int);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool HandleInput(float);
+	bool RenderGraphics();
+
+private:
+	InputClass* m_Input;
+	D3DClass* m_Direct3D;
+	CameraClass* m_Camera;
+	TerrainClass* m_Terrain;
+	TimerClass* m_Timer;
+	PositionClass* m_Position;
+	FpsClass* m_Fps;
+	CpuClass* m_Cpu;
+	FontShaderClass* m_FontShader;
+	TextClass* m_Text;
+	TerrainShaderClass* m_TerrainShader;
+	LightClass* m_Light;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We add the SkyDomeClass and SkyDomeShaderClass object pointers here.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	SkyDomeClass* m_SkyDome;
+	SkyDomeShaderClass* m_SkyDomeShader;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "applicationclass.h"
+
+
+ApplicationClass::ApplicationClass()
+{
+	m_Input = 0;
+	m_Direct3D = 0;
+	m_Camera = 0;
+	m_Terrain = 0;
+	m_Timer = 0;
+	m_Position = 0;
+	m_Fps = 0;
+	m_Cpu = 0;
+	m_FontShader = 0;
+	m_Text = 0;
+	m_TerrainShader = 0;
+	m_Light = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the new object pointers here in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_SkyDome = 0;
+	m_SkyDomeShader = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+ApplicationClass::ApplicationClass(const ApplicationClass&amp; other)
+{
+}
+
+
+ApplicationClass::~ApplicationClass()
+{
+}
+
+
+bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+{
+	bool result;
+	float cameraX, cameraY, cameraZ;
+	D3DXMATRIX baseViewMatrix;
+	char videoCard[128];
+	int videoMemory;
+
+	
+	// Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
+	m_Input = new InputClass;
+	if(!m_Input)
+	{
+		return false;
+	}
+
+	// Initialize the input object.
+	result = m_Input-&gt;Initialize(hinstance, hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the Direct3D object.
+	m_Direct3D = new D3DClass;
+	if(!m_Direct3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_Direct3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize DirectX 11.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Initialize a base view matrix with the camera for 2D user interface rendering.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -1.0f);
+	m_Camera-&gt;Render();
+	m_Camera-&gt;GetViewMatrix(baseViewMatrix);
+
+	// Set the initial position of the camera.
+	cameraX = 50.0f;
+	cameraY = 2.0f;
+	cameraZ = -7.0f;
+
+	m_Camera-&gt;SetPosition(cameraX, cameraY, cameraZ);
+
+	// Create the terrain object.
+	m_Terrain = new TerrainClass;
+	if(!m_Terrain)
+	{
+		return false;
+	}
+
+	// Initialize the terrain object.
+	result = m_Terrain-&gt;Initialize(m_Direct3D-&gt;GetDevice(), "../Engine/data/heightmap01.bmp", L"../Engine/data/dirt01.dds", "../Engine/data/colorm01.bmp");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the timer object.
+	m_Timer = new TimerClass;
+	if(!m_Timer)
+	{
+		return false;
+	}
+
+	// Initialize the timer object.
+	result = m_Timer-&gt;Initialize();
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the timer object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the position object.
+	m_Position = new PositionClass;
+	if(!m_Position)
+	{
+		return false;
+	}
+
+	// Set the initial position of the viewer to the same as the initial camera position.
+	m_Position-&gt;SetPosition(cameraX, cameraY, cameraZ);
+
+	// Create the fps object.
+	m_Fps = new FpsClass;
+	if(!m_Fps)
+	{
+		return false;
+	}
+
+	// Initialize the fps object.
+	m_Fps-&gt;Initialize();
+
+	// Create the cpu object.
+	m_Cpu = new CpuClass;
+	if(!m_Cpu)
+	{
+		return false;
+	}
+
+	// Initialize the cpu object.
+	m_Cpu-&gt;Initialize();
+
+	// Create the font shader object.
+	m_FontShader = new FontShaderClass;
+	if(!m_FontShader)
+	{
+		return false;
+	}
+
+	// Initialize the font shader object.
+	result = m_FontShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the font shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the text object.
+	m_Text = new TextClass;
+	if(!m_Text)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	result = m_Text-&gt;Initialize(m_Direct3D-&gt;GetDevice(), m_Direct3D-&gt;GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Retrieve the video card information.
+	m_Direct3D-&gt;GetVideoCardInfo(videoCard, videoMemory);
+
+	// Set the video card information in the text object.
+	result = m_Text-&gt;SetVideoCardInfo(videoCard, videoMemory, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not set video card info in the text object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the terrain shader object.
+	m_TerrainShader = new TerrainShaderClass;
+	if(!m_TerrainShader)
+	{
+		return false;
+	}
+
+	// Initialize the terrain shader object.
+	result = m_TerrainShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetAmbientColor(0.05f, 0.05f, 0.05f, 1.0f);
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetDirection(-0.5f, -1.0f, 0.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize both the SkyDomeClass and SkyDomeShaderClass objects here.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the sky dome object.
+	m_SkyDome = new SkyDomeClass;
+	if(!m_SkyDome)
+	{
+		return false;
+	}
+
+	// Initialize the sky dome object.
+	result = m_SkyDome-&gt;Initialize(m_Direct3D-&gt;GetDevice());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sky dome object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the sky dome shader object.
+	m_SkyDomeShader = new SkyDomeShaderClass;
+	if(!m_SkyDomeShader)
+	{
+		return false;
+	}
+
+	// Initialize the sky dome shader object.
+	result = m_SkyDomeShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sky dome shader object.", L"Error", MB_OK);
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void ApplicationClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Release the SkyDomeClass and SkyDomeShaderClass objects here in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Release the sky dome shader object.
+	if(m_SkyDomeShader)
+	{
+		m_SkyDomeShader-&gt;Shutdown();
+		delete m_SkyDomeShader;
+		m_SkyDomeShader = 0;
+	}
+
+	// Release the sky dome object.
+	if(m_SkyDome)
+	{
+		m_SkyDome-&gt;Shutdown();
+		delete m_SkyDome;
+		m_SkyDome = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the terrain shader object.
+	if(m_TerrainShader)
+	{
+		m_TerrainShader-&gt;Shutdown();
+		delete m_TerrainShader;
+		m_TerrainShader = 0;
+	}
+
+	// Release the text object.
+	if(m_Text)
+	{
+		m_Text-&gt;Shutdown();
+		delete m_Text;
+		m_Text = 0;
+	}
+
+	// Release the font shader object.
+	if(m_FontShader)
+	{
+		m_FontShader-&gt;Shutdown();
+		delete m_FontShader;
+		m_FontShader = 0;
+	}
+
+	// Release the cpu object.
+	if(m_Cpu)
+	{
+		m_Cpu-&gt;Shutdown();
+		delete m_Cpu;
+		m_Cpu = 0;
+	}
+
+	// Release the fps object.
+	if(m_Fps)
+	{
+		delete m_Fps;
+		m_Fps = 0;
+	}
+
+	// Release the position object.
+	if(m_Position)
+	{
+		delete m_Position;
+		m_Position = 0;
+	}
+
+	// Release the timer object.
+	if(m_Timer)
+	{
+		delete m_Timer;
+		m_Timer = 0;
+	}
+
+	// Release the terrain object.
+	if(m_Terrain)
+	{
+		m_Terrain-&gt;Shutdown();
+		delete m_Terrain;
+		m_Terrain = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the Direct3D object.
+	if(m_Direct3D)
+	{
+		m_Direct3D-&gt;Shutdown();
+		delete m_Direct3D;
+		m_Direct3D = 0;
+	}
+
+	// Release the input object.
+	if(m_Input)
+	{
+		m_Input-&gt;Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+
+	return;
+}
+
+
+bool ApplicationClass::Frame()
+{
+	bool result;
+
+
+	// Read the user input.
+	result = m_Input-&gt;Frame();
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Check if the user pressed escape and wants to exit the application.
+	if(m_Input-&gt;IsEscapePressed() == true)
+	{
+		return false;
+	}
+
+	// Update the system stats.
+	m_Timer-&gt;Frame();
+	m_Fps-&gt;Frame();
+	m_Cpu-&gt;Frame();
+
+	// Update the FPS value in the text object.
+	result = m_Text-&gt;SetFps(m_Fps-&gt;GetFps(), m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Update the CPU usage value in the text object.
+	result = m_Text-&gt;SetCpu(m_Cpu-&gt;GetCpuPercentage(), m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Do the frame input processing.
+	result = HandleInput(m_Timer-&gt;GetTime());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the graphics.
+	result = RenderGraphics();
+	if(!result)
+	{
+		return false;
+	}
+
+	return result;
+}
+
+
+bool ApplicationClass::HandleInput(float frameTime)
+{
+	bool keyDown, result;
+	float posX, posY, posZ, rotX, rotY, rotZ;
+
+
+	// Set the frame time for calculating the updated position.
+	m_Position-&gt;SetFrameTime(frameTime);
+
+	// Handle the input.
+	keyDown = m_Input-&gt;IsLeftPressed();
+	m_Position-&gt;TurnLeft(keyDown);
+
+	keyDown = m_Input-&gt;IsRightPressed();
+	m_Position-&gt;TurnRight(keyDown);
+
+	keyDown = m_Input-&gt;IsUpPressed();
+	m_Position-&gt;MoveForward(keyDown);
+
+	keyDown = m_Input-&gt;IsDownPressed();
+	m_Position-&gt;MoveBackward(keyDown);
+
+	keyDown = m_Input-&gt;IsAPressed();
+	m_Position-&gt;MoveUpward(keyDown);
+
+	keyDown = m_Input-&gt;IsZPressed();
+	m_Position-&gt;MoveDownward(keyDown);
+
+	keyDown = m_Input-&gt;IsPgUpPressed();
+	m_Position-&gt;LookUpward(keyDown);
+
+	keyDown = m_Input-&gt;IsPgDownPressed();
+	m_Position-&gt;LookDownward(keyDown);
+	
+	// Get the view point position/rotation.
+	m_Position-&gt;GetPosition(posX, posY, posZ);
+	m_Position-&gt;GetRotation(rotX, rotY, rotZ);
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(posX, posY, posZ);
+	m_Camera-&gt;SetRotation(rotX, rotY, rotZ);
+
+	// Update the position values in the text object.
+	result = m_Text-&gt;SetCameraPosition(posX, posY, posZ, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Update the rotation values in the text object.
+	result = m_Text-&gt;SetCameraRotation(rotX, rotY, rotZ, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool ApplicationClass::RenderGraphics()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;</font><font face="arial" color="#aaaaff" size="2">
+	D3DXVECTOR3 cameraPosition;</font><font face="arial" color="#aaffaa" size="2">
+	bool result;
+
+
+	// Clear the scene.
+	m_Direct3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_Direct3D-&gt;GetProjectionMatrix(projectionMatrix);
+	m_Direct3D-&gt;GetOrthoMatrix(orthoMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we get the position of the camera and then translate our sky dome to be centered around the camera position.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Get the position of the camera.
+	cameraPosition = m_Camera-&gt;GetPosition();
+
+	// Translate the sky dome to be centered around the camera position.
+	D3DXMatrixTranslation(&amp;worldMatrix, cameraPosition.x, cameraPosition.y, cameraPosition.z);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Before rendering the sky dome we turn off both back face culling and the Z buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Turn off back face culling.
+	m_Direct3D-&gt;TurnOffCulling();
+
+	// Turn off the Z buffer.
+	m_Direct3D-&gt;TurnZBufferOff();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We then render the sky dome using the sky dome shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Render the sky dome using the sky dome shader.
+	m_SkyDome-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+	m_SkyDomeShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_SkyDome-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+				m_SkyDome-&gt;GetApexColor(), m_SkyDome-&gt;GetCenterColor());
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Once rendering is complete we turn back face culling and the Z buffer on again and resume rendering the rest of the scene as normal.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Turn back face culling back on.
+	m_Direct3D-&gt;TurnOnCulling();
+
+	// Turn the Z buffer back on.
+	m_Direct3D-&gt;TurnZBufferOn();
+
+	// Reset the world matrix.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);</font><font face="arial" color="#aaffaa" size="2">
+	
+	// Render the terrain buffers.
+	m_Terrain-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+
+	// Render the terrain using the terrain shader.
+	result = m_TerrainShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+					 m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor(), m_Light-&gt;GetDirection(), m_Terrain-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_Direct3D-&gt;TurnZBufferOff();
+		
+	// Turn on the alpha blending before rendering the text.
+	m_Direct3D-&gt;TurnOnAlphaBlending();
+
+	// Render the text user interface elements.
+	result = m_Text-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_FontShader, worldMatrix, orthoMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn off alpha blending after rendering the text.
+	m_Direct3D-&gt;TurnOffAlphaBlending();
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D-&gt;TurnZBufferOn();
+
+	// Present the rendered scene to the screen.
+	m_Direct3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now have a colored sky background for the terrain using a very simple shader and a low polygon sphere object.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 10_ Sky Domes_files/pic0200.gif" width="500" height="282"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Compile the code and run the program.  Use the page up and page down keys to look at the sky dome color gradient.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Change the apex and center color in the skydomeclass.cpp file inside the Initialize function to see the effect it has on the color gradient.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Set the fill mode in the no back face culling raster state to D3D11_FILL_WIREFRAME to see how the sky dome moves with the camera.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Create multiple gradients in the sky dome.  For example have a gradient from +1.0 to +0.5, and then one from +0.25 to +0.0, and one from 0.0 and below.
+Do this by creating multiple "if" statements using the height variable and then supply several gradient colors to the pixel shader by expanding the GradientBuffer
+constant buffer.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Modify the pixel shader so the gradient goes from east to west.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+6. Create a list of gradient colors for each hour in the day.  Then create a system that keeps track of the time and updates your shader with the current gradient
+for that time of the day.  Speed up the time so you can see the transitions.  Note you may need to do a 30 second transition/interpolation at each hour point 
+to prevent the popping effect created by the sudden gradient transition.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+7. Increase and decrease the polygon count of the sphere used for the sky dome.  Observe the effect it has on the look of the gradient and the dome.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/tersrc10.zip">tersrc10.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/terexe10.zip">terexe10.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 10_ Sky Domes_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutterr.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 10_ Sky Domes_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

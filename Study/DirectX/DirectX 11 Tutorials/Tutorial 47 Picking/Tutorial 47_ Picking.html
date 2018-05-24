@@ -1,0 +1,854 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut47.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 47: Picking</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 47: Picking
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 47_ Picking_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In most 3D applications the user will need to click on the screen with the mouse to select or interact with one of the 3D objects in the scene.
+This process is usually referred to as selection or picking.
+This tutorial will cover how to implement picking using DirectX 11.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The process of picking involves translating a 2D mouse coordinate position into a vector that is in world space.
+That vector is then used for intersection checks with all the visible 3D objects.
+Once the 3D object is determined the test can be further refined to determine exactly which polygon was selected on that 3D object.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For this tutorial we will use a single sphere and do a ray-sphere intersection test whenever the user presses the left mouse button.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _APPLICATIONCLASS_H_
+#define _APPLICATIONCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "inputclass.h"
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+#include "textureshaderclass.h"
+#include "lightshaderclass.h"
+#include "lightclass.h"
+#include "textclass.h"
+#include "bitmapclass.h"
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ApplicationClass
+////////////////////////////////////////////////////////////////////////////////
+class ApplicationClass
+{
+public:
+	ApplicationClass();
+	ApplicationClass(const ApplicationClass&amp;);
+	~ApplicationClass();
+
+	bool Initialize(HINSTANCE, HWND, int, int);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool HandleInput();
+	bool Render();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have two new functions here.
+The first one is the general intersection check that forms the vector for checking the intersection and then calls the specific type of intersection check required.
+The second function is the ray-sphere intersection check function; this function is called by TestIntersection.
+For other intersection tests such as ray-triangle, ray-rectangle, and so forth you would add them here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	void TestIntersection(int, int);
+	bool RaySphereIntersect(D3DXVECTOR3, D3DXVECTOR3, float);
+
+private:
+	InputClass* m_Input;
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The model we will be loading into this object will be a sphere.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ModelClass* m_Model;
+	TextureShaderClass* m_TextureShader;
+	LightShaderClass* m_LightShader;
+	LightClass* m_Light;
+	TextClass* m_Text;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The bitmap will be used to draw a mouse cursor so that the user knows where they are clicking on the screen.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	BitmapClass* m_Bitmap;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The m_beginCheck variable is used to determine if the user has clicked on the screen or not.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	bool m_beginCheck;
+	int m_screenWidth, m_screenHeight;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "applicationclass.h"
+
+
+ApplicationClass::ApplicationClass()
+{
+	m_Input = 0;
+	m_D3D = 0;
+	m_Camera = 0;
+	m_Model = 0;
+	m_TextureShader = 0;
+	m_LightShader = 0;
+	m_Light = 0;
+	m_Text = 0;
+	m_Bitmap = 0;
+}
+
+
+ApplicationClass::ApplicationClass(const ApplicationClass&amp; other)
+{
+}
+
+
+ApplicationClass::~ApplicationClass()
+{
+}
+
+
+bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+{
+	bool result;
+	D3DXMATRIX baseViewMatrix;
+
+
+	// Store the screen width and height.
+	m_screenWidth = screenWidth;
+	m_screenHeight = screenHeight;
+
+	// Create the input object.
+	m_Input = new InputClass;
+	if(!m_Input)
+	{
+		return false;
+	}
+
+	// Initialize the input object.
+	result = m_Input-&gt;Initialize(hinstance, hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	m_Camera-&gt;Render();
+	m_Camera-&gt;GetViewMatrix(baseViewMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We load the sphere model here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the model object.
+	m_Model = new ModelClass;
+	if(!m_Model)
+	{
+		return false;
+	}
+
+	// Initialize the model object.
+	result = m_Model-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/sphere.txt", L"../Engine/data/blue.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+	if(!m_TextureShader)
+	{
+		return false;
+	}
+
+	// Initialize the texture shader object.
+	result = m_TextureShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light shader object.
+	m_LightShader = new LightShaderClass;
+	if(!m_LightShader)
+	{
+		return false;
+	}
+
+	// Initialize the light shader object.
+	result = m_LightShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetDirection(0.0f, 0.0f, 1.0f);
+
+	// Create the text object.
+	m_Text = new TextClass;
+	if(!m_Text)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	result = m_Text-&gt;Initialize(m_D3D-&gt;GetDevice(), m_D3D-&gt;GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We load the mouse cursor here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the bitmap object.
+	m_Bitmap = new BitmapClass;
+	if(!m_Bitmap)
+	{
+		return false;
+	}
+
+	// Initialize the bitmap object.
+	result = m_Bitmap-&gt;Initialize(m_D3D-&gt;GetDevice(), screenWidth, screenHeight, L"../Engine/data/mouse.dds", 32, 32);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the bitmap object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Initialize that the user has not clicked on the screen to try an intersection test yet.
+	m_beginCheck = false;
+
+	return true;
+}
+
+
+void ApplicationClass::Shutdown()
+{
+	// Release the bitmap object.
+	if(m_Bitmap)
+	{
+		m_Bitmap-&gt;Shutdown();
+		delete m_Bitmap;
+		m_Bitmap = 0;
+	}
+
+	// Release the text object.
+	if(m_Text)
+	{
+		m_Text-&gt;Shutdown();
+		delete m_Text;
+		m_Text = 0;
+	}
+
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the light shader object.
+	if(m_LightShader)
+	{
+		m_LightShader-&gt;Shutdown();
+		delete m_LightShader;
+		m_LightShader = 0;
+	}
+
+	// Release the texture shader object.
+	if(m_TextureShader)
+	{
+		m_TextureShader-&gt;Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
+	}
+
+	// Release the model object.
+	if(m_Model)
+	{
+		m_Model-&gt;Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	// Release the input object.
+	if(m_Input)
+	{
+		m_Input-&gt;Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+
+	return;
+}
+
+
+bool ApplicationClass::Frame()
+{
+	bool result;
+
+
+	// Handle the input processing.
+	result = HandleInput();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the graphics scene.
+	result = Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool ApplicationClass::HandleInput()
+{
+	bool result;
+	int mouseX, mouseY;
+
+
+	// Do the input frame processing.
+	result = m_Input-&gt;Frame();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Check if the user pressed escape and wants to exit the application.
+	if(m_Input-&gt;IsEscapePressed() == true)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the input handling that is called each frame we now check to see if the user has pressed or released the left mouse button.
+If they have pressed the left mouse button then we perform the intersection check with the sphere using the current 2D mouse coordinates.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Check if the left mouse button has been pressed.
+	if(m_Input-&gt;IsLeftMouseButtonDown() == true)
+	{
+		// If they have clicked on the screen with the mouse then perform an intersection test.
+		if(m_beginCheck == false)
+		{
+			m_beginCheck = true;
+			m_Input-&gt;GetMouseLocation(mouseX, mouseY);
+			TestIntersection(mouseX, mouseY);
+		}
+	}
+
+	// Check if the left mouse button has been released.
+	if(m_Input-&gt;IsLeftMouseButtonDown() == false)
+	{
+		m_beginCheck = false;
+	}
+
+	return true;
+}
+
+
+bool ApplicationClass::Render()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix, translateMatrix;
+	bool result;
+	int mouseX, mouseY;
+
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+	m_D3D-&gt;GetOrthoMatrix(orthoMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We translate to the position of the sphere and then render it.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Translate to the location of the sphere.
+	D3DXMatrixTranslation(&amp;translateMatrix, -5.0f, 1.0f, 5.0f);
+	D3DXMatrixMultiply(&amp;worldMatrix, &amp;worldMatrix, &amp;translateMatrix); 
+
+	// Render the model using the light shader.
+	m_Model-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_LightShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model-&gt;GetTexture(), m_Light-&gt;GetDirection());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Turn on alpha blending.
+	m_D3D-&gt;EnableAlphaBlending();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we get the position of the mouse and then render the bitmap of the mouse cursor using the 2D coordinates from the m_Input object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Get the location of the mouse from the input object,
+	m_Input-&gt;GetMouseLocation(mouseX, mouseY);
+
+	// Render the mouse cursor with the texture shader.
+	result = m_Bitmap-&gt;Render(m_D3D-&gt;GetDeviceContext(), mouseX, mouseY);  if(!result) { return false; }
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Bitmap-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_Bitmap-&gt;GetTexture());
+
+	// Render the text strings.
+	result = m_Text-&gt;Render(m_D3D-&gt;GetDeviceContext(), worldMatrix, orthoMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn of alpha blending.
+	m_D3D-&gt;DisableAlphaBlending();
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The TestIntersection function is pretty much the entire focus of this tutorial.
+It takes as input the 2D mouse coordinates and then forms a vector in 3D space which it uses to then check for an intersection with the sphere.
+That vector is called the picking ray.
+The picking ray has an origin and a direction.
+With the 3D coordinate (origin) and 3D vector/normal (direction) we can create a line in 3D space and find out what it collides with.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the other HLSL tutorials we are very used to a vertex shader that takes a 3D point (vertice) and moves it from 3D space onto the 2D screen so it can be rendered as a pixel.
+Well now we are doing the exact opposite and moving a 2D point from the screen into 3D space.
+So what we need to do is just reverse our usual process.
+So where we would usually take a 3D point from world to view to projection to make a 2D point, we will now instead take a 2D point and go from projection to view to world and turn it into a 3D point.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To do the reverse process we first start by taking the mouse coordinates and moving them into the -1 to +1 range on both axis.
+When we have that we then divide by the screen aspect using the projection matrix.
+With that value we can then multiply it by the inverse view matrix (inverse because we are going in reverse direction) to get the direction vector in view space.
+We can set the origin of the vector in view space to just be the location of the camera.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With the direction vector and origin in view space we can now complete the final process of moving it into 3D world space.
+To do so we first need to get the world matrix and translate it by the position of the sphere.
+With the updated world matrix we once again need to invert it (since the process is going in the opposite direction) and then we can multiply the origin and direction by the inverted world matrix.
+We also normalize the direction after the multiplication.
+This gives us the origin and direction of the vector in 3D world space so that we can do tests with other objects that are also in 3D world space.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that we have the origin of the vector and the direction of the vector we can perform an intersection test.
+In this tutorial we perform a ray-sphere intersection test, but you could perform any kind of intersection test now that you have the vector in 3D world space.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void ApplicationClass::TestIntersection(int mouseX, int mouseY)
+{
+	float pointX, pointY;
+	D3DXMATRIX projectionMatrix, viewMatrix, inverseViewMatrix, worldMatrix, translateMatrix, inverseWorldMatrix;
+	D3DXVECTOR3 direction, origin, rayOrigin, rayDirection;
+	bool intersect, result;
+
+
+	// Move the mouse cursor coordinates into the -1 to +1 range.
+	pointX = ((2.0f * (float)mouseX) / (float)m_screenWidth) - 1.0f;
+	pointY = (((2.0f * (float)mouseY) / (float)m_screenHeight) - 1.0f) * -1.0f;
+		
+	// Adjust the points using the projection matrix to account for the aspect ratio of the viewport.
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+	pointX = pointX / projectionMatrix._11;
+	pointY = pointY / projectionMatrix._22;
+
+	// Get the inverse of the view matrix.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	D3DXMatrixInverse(&amp;inverseViewMatrix, NULL, &amp;viewMatrix);
+
+	// Calculate the direction of the picking ray in view space.
+	direction.x = (pointX * inverseViewMatrix._11) + (pointY * inverseViewMatrix._21) + inverseViewMatrix._31;
+	direction.y = (pointX * inverseViewMatrix._12) + (pointY * inverseViewMatrix._22) + inverseViewMatrix._32;
+	direction.z = (pointX * inverseViewMatrix._13) + (pointY * inverseViewMatrix._23) + inverseViewMatrix._33;
+
+	// Get the origin of the picking ray which is the position of the camera.
+	origin = m_Camera-&gt;GetPosition();
+
+	// Get the world matrix and translate to the location of the sphere.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	D3DXMatrixTranslation(&amp;translateMatrix, -5.0f, 1.0f, 5.0f);
+	D3DXMatrixMultiply(&amp;worldMatrix, &amp;worldMatrix, &amp;translateMatrix); 
+
+	// Now get the inverse of the translated world matrix.
+	D3DXMatrixInverse(&amp;inverseWorldMatrix, NULL, &amp;worldMatrix);
+
+	// Now transform the ray origin and the ray direction from view space to world space.
+	D3DXVec3TransformCoord(&amp;rayOrigin, &amp;origin, &amp;inverseWorldMatrix);
+	D3DXVec3TransformNormal(&amp;rayDirection, &amp;direction, &amp;inverseWorldMatrix);
+
+	// Normalize the ray direction.
+	D3DXVec3Normalize(&amp;rayDirection, &amp;rayDirection);
+
+	// Now perform the ray-sphere intersection test.
+	intersect = RaySphereIntersect(rayOrigin, rayDirection, 1.0f);
+	
+	if(intersect == true)
+	{
+		// If it does intersect then set the intersection to "yes" in the text string that is displayed to the screen.
+		result = m_Text-&gt;SetIntersection(true, m_D3D-&gt;GetDeviceContext());
+	}
+	else
+	{
+		// If not then set the intersection to "No".
+		result = m_Text-&gt;SetIntersection(false, m_D3D-&gt;GetDeviceContext());
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function performs the math of a basic ray-sphere intersection test.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool ApplicationClass::RaySphereIntersect(D3DXVECTOR3 rayOrigin, D3DXVECTOR3 rayDirection, float radius)
+{
+	float a, b, c, discriminant;
+
+
+	// Calculate the a, b, and c coefficients.
+	a = (rayDirection.x * rayDirection.x) + (rayDirection.y * rayDirection.y) + (rayDirection.z * rayDirection.z);
+	b = ((rayDirection.x * rayOrigin.x) + (rayDirection.y * rayOrigin.y) + (rayDirection.z * rayOrigin.z)) * 2.0f;
+	c = ((rayOrigin.x * rayOrigin.x) + (rayOrigin.y * rayOrigin.y) + (rayOrigin.z * rayOrigin.z)) - (radius * radius);
+
+	// Find the discriminant.
+	discriminant = (b * b) - (4 * a * c);
+
+	// if discriminant is negative the picking ray missed the sphere, otherwise it intersected the sphere.
+	if (discriminant &lt; 0.0f)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We can now perform basic intersection tests with 3D objects in the scene using picking.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 47_ Picking_files/pic0282.gif" width="285" height="285"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Compile and run the program.  Use the mouse to move the cursor and left click on the sphere or the empty space to test intersections.  Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Add a cube, triangle, and rectangle model to the scene.  Also add intersection test functions for the new three types.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Now that you have "bounding box" tests further refine it so that if the line intersects the sphere it then does a second check for all the triangles in the sphere and highlights the selected triangle.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Do the same as number three expect for rectangles and cubes.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Place two objects in front of each other, make sure you intersection test returns only the one closest to the camera and ignores the objects behind it if the intersection test returns multiple intersections.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11src47.zip">dx11src47.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11exe47.zip">dx11exe47.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 47_ Picking_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutdx11.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 47_ Picking_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

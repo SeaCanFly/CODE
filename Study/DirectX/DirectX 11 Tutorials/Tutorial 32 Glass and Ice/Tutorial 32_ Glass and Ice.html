@@ -1,0 +1,1649 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut32.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 32: Glass and Ice</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 32: Glass and Ice
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover how to implement a glass and ice shader in DirectX 11 using HLSL and C++.
+The code in this tutorial is based on the previous tutorials.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Glass and ice are both implemented in a shader the same way.
+A normal map is used to "bend" how light travels through the glass or ice.
+Each pixel in the normal map is used to offset sampling of any pixel behind the glass or ice surface.
+This creates the bending of light effect which closely simulates how light moves through glass and ice surfaces and then illuminates the objects behind them.
+We call this bending effect perturbation.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The difference between glass and ice is minimal in terms of how we code the shader.
+Both the glass and ice will use different color textures for representing the color of the surface so in the shader it is simply a different texture input for color.
+The normal map for glass and ice will also have different characteristics common to each surface type, 
+but once again for the shader it is just a different texture input to be used as a look up table for normal vectors.
+The final difference is the amount of perturbation used.  
+For perturbation amount we use a scaling variable we call refractionScale.
+This variable allows us to manually reduce the perturbation of light for glass surfaces and to also increase it to simulate the more aggressive perturbation of light that occurs in ice.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now if you read and understood the water shader tutorial you will realize the technique in this tutorial is just a subset of the water rendering technique and works in the same fashion without the reflection.
+However note that you can add a very slight reflection to create an even more realistic glass or ice surface.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will now go over the basic algorithm this shader uses and then see some step by step image examples of both glass and ice.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shader Algorithm</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Step 1: Render the scene that is behind the glass to a texture, this is called the refraction.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Step 2: Project the refraction texture onto the glass surface.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Step 3: Perturb the texture coordinates of the refraction texture using a normal map to simulate light traveling through glass.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Step 4: Combine the perturbed refraction texture with a glass color texture for the final result.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will now examine how to implement each step for both glass and ice.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glass</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+So first we need to render our entire scene that is viewable behind the glass to a texture.
+And then we project that render to texture onto the glass surface so it appears that the glass is 
+just a see through view of the scene although it is really a 2D texture rendered onto two triangles.
+We use render to texture and texture projection to do this which was covered in previous tutorials.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To simplify the example instead of having a complicated scene with numerous objects we will just say that our scene is a single square with a texture on it.
+So rendering the scene to texture and then projecting it onto the glass model produces the following refraction result:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0139.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+If the scene were more complex your window would actually become invisible and everything would look the same.
+The reason being is that if the texture is perfectly projected it would just cover the same 3D scene section with a 2D texture of the same scene 
+making the resulting glass model a perfectly clear see through glass with no way to differentiate it from the 3D scene itself.
+To even determine what is your glass model and what is the scene you will 
+need to dim or brighten the glass texture to see that it actually is still there for debugging purposes.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that the scene is projected onto a texture you need a normal map so you can eventually perturb the refraction texture to make it look like it is behind glass.
+We will use the following normal map which will give a stripped faceted look to the glass:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0140.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that we have a normal map we can use each individual pixel in the normal map as a look up for how to modify what pixel in the refraction texture is sampled.
+This allows us to sample the refraction texture slightly above, beside, and below to simulate light not traveling straight through but instead being bent slightly such as it is in glass.
+The scale of light being bent is controlled by the refractionScale variable which we set fairly low for glass, in this example it was set to 0.01.
+Note that this is entirely dependent on the normal map used as the normals can vary little or greatly in the normal map which prevents us from really having a scale value
+that will always work.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+So now if we sample the refraction texture using the normal map texture as a lookup with the scale being 0.01 we get the following image:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0141.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The basic effect is mostly complete now.
+However most glass has a tint or color associated with it and sometimes other markings.
+For the glass in this example we will use the following color texture:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0142.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We take the color texture and the perturbed refraction and combine them to get the final glass effect:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0143.gif" width="256" height="256"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Ice</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Ice works exactly the same as glass with just different inputs into the shader.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To start with we have the same scene of the textured square projected onto the ice surface model:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0139.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+However with ice we want a different look to the final surface so we will use a different color texture:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0144.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Also the normal map will need to be different to simulate all the tiny bumps all over the surface with ice.
+Fortunately the color texture has just the right amount of noise in it to be used to make a ice normal map.
+Simply take the color texture above and use the Nivida normal map filter in Photoshop with a Scale of 5 and it creates the following normal map:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0145.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now if we use that normal map and a stronger refractionScale such as 0.1 for ice (instead of how we used 0.01 for glass) we get the following heavily perturbed refraction image:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0146.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Finally if we combine the perturbed refraction texture with the ice color texture the resulting image is very realistic:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0147.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+One final comment before we get into the code is that when you see these shaders working on surfaces that have motion behind them (such as a spinning cube behind the glass or ice) they look incredibly real.
+Make sure you at least run the executable for this tutorial to see what I'm talking about.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frame work for this tutorial is similar to the previous tutorials.  
+The only new class added is the GlassShaderClass which handles the glass and ice shading.
+The RenderTextureClass is used in this tutorial for rendering the 3D scene to a texture.
+Also the TextureShaderClass is used to render the spinning cube model for the regular scene that will be behind the glass object.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0148.gif" width="645" height="242"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will start the code section by examining the HLSL code for the glass shader.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glass.vs</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: glass.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PixelInputType structure has a new refractionPosition variable for the refraction vertex coordinates that will be passed into the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float4 refractionPosition : TEXCOORD1;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType GlassVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    matrix viewProjectWorld;
+
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create the matrix used for transforming the input vertex coordinates to the projected coordinates.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Create the view projection world matrix for refraction.
+    viewProjectWorld = mul(viewMatrix, projectionMatrix);
+    viewProjectWorld = mul(worldMatrix, viewProjectWorld);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Transform the input vertex coordinates to the projected values and pass it into the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Calculate the input position against the viewProjectWorld matrix.
+    output.refractionPosition = mul(input.position, viewProjectWorld);
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glass.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: glass.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+SamplerState SampleType;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The glass shader uses three different textures. The colorTexture is the basic surface color used for the glass. 
+The normalTexture is the normal map look up table containing all the normal vectors. 
+And finally the refractionTexture contains the 3D scene that is behind the glass rendered to a 2D texture. 
+You will also notice I have used the direct register assignments.
+This helps clarify which texture is bound to which register instead of relying on the order they are placed in the HLSL file.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Texture2D colorTexture : register(t0);
+Texture2D normalTexture : register(t1);
+Texture2D refractionTexture : register(t2);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GlassBuffer is used for setting the refractionScale.
+The refractionScale variable is used for scaling the amount of perturbation to the refraction texture. 
+This is generally low for glass and higher for ice.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer GlassBuffer
+{
+    float refractionScale;
+    float3 padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float4 refractionPosition : TEXCOORD1;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 GlassPixelShader(PixelInputType input) : SV_TARGET
+{
+    float2 refractTexCoord;
+    float4 normalMap;
+    float3 normal;
+    float4 refractionColor;
+    float4 textureColor;
+    float4 color;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First convert the input projected homogenous coordinates (-1, +1) to (0, 1) texture coordinates.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Calculate the projected refraction texture coordinates.
+    refractTexCoord.x = input.refractionPosition.x / input.refractionPosition.w / 2.0f + 0.5f;
+    refractTexCoord.y = -input.refractionPosition.y / input.refractionPosition.w / 2.0f + 0.5f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next sample the normal map and move it from (0, 1) texture coordinates to (-1, 1) coordinates.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Sample the normal from the normal map texture.
+    normalMap = normalTexture.Sample(SampleType, input.tex);
+
+    // Expand the range of the normal from (0,1) to (-1,+1).
+    normal = (normalMap.xyz * 2.0f) - 1.0f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now perturb the refraction texture sampling location by the normals that were calculated. 
+Also multiply the normal by the refraction scale to increase or decrease the perturbation.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Re-position the texture coordinate sampling position by the normal map value to simulate light distortion through glass.
+    refractTexCoord = refractTexCoord + (normal.xy * refractionScale);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next sample the refraction texture using the perturbed coordinates and sample the color texture using the normal input texture coordinates.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Sample the texture pixel from the refraction texture using the perturbed texture coordinates.
+    refractionColor = refractionTexture.Sample(SampleType, refractTexCoord);
+
+    // Sample the texture pixel from the glass color texture.
+    textureColor = colorTexture.Sample(SampleType, input.tex);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Finally combine the refraction and color texture for the final result.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Evenly combine the glass color and refraction value for the final color.
+    color = lerp(refractionColor, textureColor, 0.5f);
+
+    return color;
+}
+
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glassshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GlassShaderClass is based on the TextureShaderClass with slight changes for glass shading.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: glassshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GLASSSHADERCLASS_H_
+#define _GLASSSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GlassShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class GlassShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a new structure type used for setting the refraction scale in the constant buffer inside the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct GlassBufferType
+	{
+		float refractionScale;
+		D3DXVECTOR3 padding;
+	};
+
+
+public:
+	GlassShaderClass();
+	GlassShaderClass(const GlassShaderClass&amp;);
+	~GlassShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*,
+		    ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, float);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, 
+				 ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, float);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleState;
+	ID3D11Buffer* m_matrixBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The glass shader needs a refraction scale value which the m_glassBuffer pointer provides an interface to.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11Buffer* m_glassBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glassshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: glassshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "glassshaderclass.h"
+
+
+GlassShaderClass::GlassShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleState = 0;
+	m_matrixBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the glass buffer to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_glassBuffer = 0;
+}
+
+
+GlassShaderClass::GlassShaderClass(const GlassShaderClass&amp; other)
+{
+}
+
+
+GlassShaderClass::~GlassShaderClass()
+{
+}
+
+
+bool GlassShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the glass shader with the new glass.vs and glass.ps HLSL files.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/glass.vs", L"../Engine/glass.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void GlassShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function now takes as input the color texture, normal map texture, refraction texture, and refraction scale value. 
+These values are set in the shader first using the SetShaderParameters function before the rendering occurs in the RenderShader function which is called afterward.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GlassShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+			      D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* colorTexture, 
+			      ID3D11ShaderResourceView* normalTexture, ID3D11ShaderResourceView* refractionTexture, 
+			      float refractionScale)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, colorTexture, 
+				     normalTexture, refractionTexture, refractionScale);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool GlassShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC glassBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the glass vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "GlassVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the glass pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "GlassPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, 
+					    &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, 
+					   &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	// This setup needs to match the VertexType stucture in the ModelClass and in the shader.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), 
+					   vertexShaderBuffer-&gt;GetBufferSize(), &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the matrix dynamic constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Setup the description and create the glass buffer which will be used to set the refraction scale in the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the description of the glass dynamic constant buffer that is in the pixel shader.
+	glassBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	glassBufferDesc.ByteWidth = sizeof(GlassBufferType);
+	glassBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	glassBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	glassBufferDesc.MiscFlags = 0;
+	glassBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the pixel shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;glassBufferDesc, NULL, &amp;m_glassBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void GlassShaderClass::ShutdownShader()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Release the new glass buffer in the ShutdownShader function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the glass constant buffer.
+	if(m_glassBuffer)
+	{
+		m_glassBuffer-&gt;Release();
+		m_glassBuffer = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void GlassShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+
+
+bool GlassShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+					   D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* colorTexture, 
+					   ID3D11ShaderResourceView* normalTexture, ID3D11ShaderResourceView* refractionTexture,
+					   float refractionScale)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* dataPtr;
+	GlassBufferType* dataPtr2;
+	unsigned int bufferNumber;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the matrix constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the matrix constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the matrix constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the matrix constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the matrix constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the matrix constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The color, normal, and refraction textures are set in the pixel shader here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the three shader texture resources in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;colorTexture);
+	deviceContext-&gt;PSSetShaderResources(1, 1, &amp;normalTexture);
+	deviceContext-&gt;PSSetShaderResources(2, 1, &amp;refractionTexture);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The glass buffer is locked and then the refractionScale value is copied into the glass buffer and then set in the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Lock the glass constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_glassBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the glass constant buffer.
+	dataPtr2 = (GlassBufferType*)mappedResource.pData;
+
+	// Copy the variables into the glass constant buffer.
+	dataPtr2-&gt;refractionScale = refractionScale;
+	dataPtr2-&gt;padding = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+
+	// Unlock the glass constant buffer.
+	deviceContext-&gt;Unmap(m_glassBuffer, 0);
+
+	// Set the position of the glass constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Now set the glass constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_glassBuffer);
+
+	return true;
+}
+
+
+void GlassShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+#include "rendertextureclass.h"
+#include "textureshaderclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new GlassShaderClass header file is included now.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">#include "glassshaderclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool RenderToTexture(float);
+	bool Render(float);
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We create a model for the spinning cube and the glass window.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ModelClass* m_Model;
+	ModelClass* m_WindowModel;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We need a render to texture object to render the spinning cube part of the scene.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	RenderTextureClass* m_RenderTexture;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The texture shader is used to render the normal scene.
+The glass shader is used to render the glass window model.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	TextureShaderClass* m_TextureShader;
+	GlassShaderClass* m_GlassShader;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_Model = 0;
+	m_WindowModel = 0;
+	m_RenderTexture = 0;
+	m_TextureShader = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new GlassShaderClass object is initialized to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_GlassShader = 0;
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+		
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create a model for the cube that will be spinning behind the glass window. 
+It has a normal map associated with it but is not used so you can ignore the last parameter of the Initialize. 
+I did this just to make the function generic.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the model object.
+	m_Model = new ModelClass;
+	if(!m_Model)
+	{
+		return false;
+	}
+
+	// Initialize the model object.
+	result = m_Model-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/cube.txt", L"../Engine/data/seafloor.dds", L"../Engine/data/bump03.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create a model for the glass window. 
+It uses the square .obj model since the window will just be two triangles that make up a square. 
+It also uses a texture called glass01.dds for the glass color and a normal map called bump03.dds for the perturbation of the glass refraction.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the window model object.
+	m_WindowModel = new ModelClass;
+	if(!m_WindowModel)
+	{
+		return false;
+	}
+
+	// Initialize the window model object.
+	result = m_WindowModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/square.txt", L"../Engine/data/glass01.dds", L"../Engine/data/bump03.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the window model object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The render to texture object will be used to render the refraction of the scene to a texture and then passed into the glass shader as input.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the render to texture object.
+	m_RenderTexture = new RenderTextureClass;
+	if(!m_RenderTexture)
+	{
+		return false;
+	}
+
+	// Initialize the render to texture object.
+	result = m_RenderTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), screenWidth, screenHeight);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The texture shader is used to render the spinning cube.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+	if(!m_TextureShader)
+	{
+		return false;
+	}
+
+	// Initialize the texture shader object.
+	result = m_TextureShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This is where the new glass shader is created and initialized.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the glass shader object.
+	m_GlassShader = new GlassShaderClass;
+	if(!m_GlassShader)
+	{
+		return false;
+	}
+
+	// Initialize the glass shader object.
+	result = m_GlassShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the glass shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new glass shader is released here in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the glass shader object.
+	if(m_GlassShader)
+	{
+		m_GlassShader-&gt;Shutdown();
+		delete m_GlassShader;
+		m_GlassShader = 0;
+	}
+
+	// Release the texture shader object.
+	if(m_TextureShader)
+	{
+		m_TextureShader-&gt;Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
+	}
+
+	// Release the render to texture object.
+	if(m_RenderTexture)
+	{
+		m_RenderTexture-&gt;Shutdown();
+		delete m_RenderTexture;
+		m_RenderTexture = 0;
+	}
+
+	// Release the window model object.
+	if(m_WindowModel)
+	{
+		m_WindowModel-&gt;Shutdown();
+		delete m_WindowModel;
+		m_WindowModel = 0;
+	}
+
+	// Release the model object.
+	if(m_Model)
+	{
+		m_Model-&gt;Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the Direct3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame()
+{
+	static float rotation = 0.0f;
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We update the rotation of the cube each frame and send the same value into both the RenderToTexture and Render function to keep the rotation in sync.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Update the rotation variable each frame.
+	rotation += (float)D3DX_PI * 0.005f;
+	if(rotation &gt; 360.0f)
+	{
+		rotation -= 360.0f;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The position of the camera is set here also.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First we render the 3D scene to a texture so the glass shader will have a refraction texture as input.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Render the scene to texture first.
+	result = RenderToTexture(rotation);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Then we render the scene again normally and render the glass over top of it with the perturbed and colored refraction texture rendered on the glass model.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Render the scene.
+	result = Render(rotation);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The RenderToTexture function just renders the 3D spinning cube scene to a texture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::RenderToTexture(float rotation)
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_RenderTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext(), m_D3D-&gt;GetDepthStencilView());
+
+	// Clear the render to texture.
+	m_RenderTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), m_D3D-&gt;GetDepthStencilView(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Multiply the world matrix by the rotation.
+	D3DXMatrixRotationY(&amp;worldMatrix, rotation);
+
+	// Put the cube model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the cube model using the texture shader.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	return true;
+}
+
+
+bool GraphicsClass::Render(float rotation)
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	float refractionScale;
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First set the refraction scale to modify how much perturbation occurs in the glass.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the refraction scale for the glass shader.
+	refractionScale = 0.01f;
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Then render the 3D spinning cube scene as normal.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Multiply the world matrix by the rotation.
+	D3DXMatrixRotationY(&amp;worldMatrix, rotation);
+
+	// Put the cube model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the cube model using the texture shader.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+					 m_Model-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now render the window model using the glass shader with the color texture, normal map, refraction render to texture, and refraction scale as input.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Translate to back where the window model will be rendered.
+	D3DXMatrixTranslation(&amp;worldMatrix, 0.0f, 0.0f, -1.5f);
+
+	// Put the window model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_WindowModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the window model using the glass shader.
+	result = m_GlassShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_WindowModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+				       m_WindowModel-&gt;GetTexture(), m_WindowModel-&gt;GetNormalMap(), m_RenderTexture-&gt;GetShaderResourceView(), 
+				       refractionScale);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We can now render both glass and ice effects through the use of refraction and a normal map for perturbation.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0137.gif" width="325" height="325"></p>
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic0138.gif" width="744" height="744"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile and run the program.  You should get a spinning cube behind green perturbed glass.  Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. To see the ice effect change the following function in GraphicsClass::Initialize from:
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	result = m_WindowModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/square.txt", L"../Engine/data/glass01.dds", L"../Engine/data/bump03.dds");
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To:
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	result = m_WindowModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/square.txt", L"../Engine/data/ice01.dds", L"../Engine/data/icebump01.dds");
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And change the refractionScale to 0.1f and move the camera closer:
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_Camera-&gt;SetPosition(0.0f, 0.0f, -5.0f);
+	refractionScale = 0.1f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now recompile and run the program with those three changes to see the ice effect.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Change the value of the refractionScale to see how it affects the perturbation.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Modify the combination of the color texture and the perturbed refraction texture in the pixel shader to get different output results.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Make your own glass color texture and normal map and get your own personal glass shader effect to work (also modify the refractionScale so it looks right for your normal map).
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2008 Project: <a href="http://www.rastertek.com/dx11tut32.zip">dx11tut32.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src32.zip">dx11src32.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe32.zip">dx11exe32.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 32_ Glass and Ice_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 32_ Glass and Ice_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

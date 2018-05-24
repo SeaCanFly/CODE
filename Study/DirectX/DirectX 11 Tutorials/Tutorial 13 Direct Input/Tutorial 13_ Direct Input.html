@@ -1,0 +1,1074 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut13.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 13: Direct Input</title><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 13: Direct Input
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 13_ Direct Input_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover using Direct Input in DirectX 11. The code in this tutorial will be based on the previous font tutorial code. 
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Direct Input is the high speed method of interfacing with input devices that the DirectX API provides.
+In DirectX 11 the Direct Input portion of the API has not changed from previous versions, it is still version 8. 
+However Direct Input was implemented very well in the first place (similar to direct sound) so there hasn't been any need to update it.
+Direct Input provides incredible speed over the regular windows input system. 
+Any high performance application that requires highly responsive input devices should be using Direct Input. 
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will focus on how to implement Direct Input for keyboard and mouse devices.
+We will also use the TextClass to display the current location of the mouse pointer.
+As the previous tutorials already had an InputClass we will just re-write it using Direct Input instead of the Windows methods that were previously used.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Inputclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: inputclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _INPUTCLASS_H_
+#define _INPUTCLASS_H_
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+You need to define the version of Direct Input you are using in the header or the compiler will generate annoying messages that it is defaulting to version 8. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////
+// PRE-PROCESSING DIRECTIVES //
+///////////////////////////////
+#define DIRECTINPUT_VERSION 0x0800
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The following two libraries need to be linked for Direct Input to work.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">/////////////
+// LINKING //
+/////////////
+#pragma comment(lib, "dinput8.lib")
+#pragma comment(lib, "dxguid.lib")
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This is the required header for Direct Input.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">//////////////
+// INCLUDES //
+//////////////
+#include &lt;dinput.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: InputClass
+////////////////////////////////////////////////////////////////////////////////
+class InputClass
+{
+public:
+	InputClass();
+	InputClass(const InputClass&amp;);
+	~InputClass();
+
+	bool Initialize(HINSTANCE, HWND, int, int);
+	void Shutdown();
+	bool Frame();
+
+	bool IsEscapePressed();
+	void GetMouseLocation(int&amp;, int&amp;);
+
+private:
+	bool ReadKeyboard();
+	bool ReadMouse();
+	void ProcessInput();
+
+private:
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The first three private member variables are the interfaces to Direct Input, the keyboard device, and the mouse device.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	IDirectInput8* m_directInput;
+	IDirectInputDevice8* m_keyboard;
+	IDirectInputDevice8* m_mouse;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The next two private member variables are used for recording the current state of the keyboard and mouse devices.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	unsigned char m_keyboardState[256];
+	DIMOUSESTATE m_mouseState;
+
+	int m_screenWidth, m_screenHeight;
+	int m_mouseX, m_mouseY;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Inputclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: inputclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "inputclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor initializes the Direct Input interface variables to null.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">InputClass::InputClass()
+{
+	m_directInput = 0;
+	m_keyboard = 0;
+	m_mouse = 0;
+}
+
+
+InputClass::InputClass(const InputClass&amp; other)
+{
+}
+
+
+InputClass::~InputClass()
+{
+}
+
+
+bool InputClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+{
+	HRESULT result;
+
+
+	// Store the screen size which will be used for positioning the mouse cursor.
+	m_screenWidth = screenWidth;
+	m_screenHeight = screenHeight;
+
+	// Initialize the location of the mouse on the screen.
+	m_mouseX = 0;
+	m_mouseY = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function call will initialize the interface to Direct Input. 
+Once you have a Direct Input object you can initialize other input devices.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the main direct input interface.
+	result = DirectInput8Create(hinstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&amp;m_directInput, NULL);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The first input device we will initialize will be the keyboard.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the direct input interface for the keyboard.
+	result = m_directInput-&gt;CreateDevice(GUID_SysKeyboard, &amp;m_keyboard, NULL);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set the data format.  In this case since it is a keyboard we can use the predefined data format.
+	result = m_keyboard-&gt;SetDataFormat(&amp;c_dfDIKeyboard);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Setting the cooperative level of the keyboard is important in both what it does and how you use the device from that point forward. 
+In this case we will set it to not share with other programs (DISCL_EXCLUSIVE).
+This way if you press a key only your application can see that input and no other application will have access to it.
+However if you want other applications to have access to keyboard input while your program is running you can set it to non-exclusive (DISCL_NONEXCLUSIVE).
+Now the print screen key works again and other running applications can be controlled by the keyboard and so forth.  
+Just remember that if it is non-exclusive and you are running in a windowed mode then
+you will need to check for when the device loses focus and when it re-gains that focus so it can re-acquire the device for use again.
+This focus loss generally happens when other windows become the main focus over your window or your window is minimized.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the cooperative level of the keyboard to not share with other programs.
+	result = m_keyboard-&gt;SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Once they keyboard is setup we then call Acquire to finally get access to the keyboard for use from this point forward.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Now acquire the keyboard.
+	result = m_keyboard-&gt;Acquire();
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The next input device we setup is the mouse.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the direct input interface for the mouse.
+	result = m_directInput-&gt;CreateDevice(GUID_SysMouse, &amp;m_mouse, NULL);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set the data format for the mouse using the pre-defined mouse data format.
+	result = m_mouse-&gt;SetDataFormat(&amp;c_dfDIMouse);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We use non-exclusive cooperative settings for the mouse. 
+We will have to check for when it goes in and out of focus and re-acquire it each time.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the cooperative level of the mouse to share with other programs.
+	result = m_mouse-&gt;SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Once the mouse is setup we acquire it so that we can begin using it.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Acquire the mouse.
+	result = m_mouse-&gt;Acquire();
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function releases the two devices and the interface to Direct Input. 
+Notice that the devices are always un-acquired first and then released.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void InputClass::Shutdown()
+{
+	// Release the mouse.
+	if(m_mouse)
+	{
+		m_mouse-&gt;Unacquire();
+		m_mouse-&gt;Release();
+		m_mouse = 0;
+	}
+
+	// Release the keyboard.
+	if(m_keyboard)
+	{
+		m_keyboard-&gt;Unacquire();
+		m_keyboard-&gt;Release();
+		m_keyboard = 0;
+	}
+
+	// Release the main interface to direct input.
+	if(m_directInput)
+	{
+		m_directInput-&gt;Release();
+		m_directInput = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Frame function for the InputClass will read the current state of the devices into state buffers we setup. 
+After the state of each device is read it then processes the changes. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool InputClass::Frame()
+{
+	bool result;
+
+
+	// Read the current state of the keyboard.
+	result = ReadKeyboard();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Read the current state of the mouse.
+	result = ReadMouse();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Process the changes in the mouse and keyboard.
+	ProcessInput();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+ReadKeyboard will read the state of the keyboard into the m_keyboardState variable. 
+The state will show any keys that are currently pressed or not pressed. 
+If it fails reading the keyboard then it can be for one of five different reasons. 
+The only two that we want to recover from are if the focus is lost or if it becomes un-acquired. 
+If this is the case we call acquire each frame until we do get control back. 
+The window may be minimized in which case Acquire will fail, 
+but once the window comes to the foreground again then Acquire will succeed and we will be able to read the keyboard state. 
+The other three error types I don't want to recover from in this tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool InputClass::ReadKeyboard()
+{
+	HRESULT result;
+
+
+	// Read the keyboard device.
+	result = m_keyboard-&gt;GetDeviceState(sizeof(m_keyboardState), (LPVOID)&amp;m_keyboardState);
+	if(FAILED(result))
+	{
+		// If the keyboard lost focus or was not acquired then try to get control back.
+		if((result == DIERR_INPUTLOST) || (result == DIERR_NOTACQUIRED))
+		{
+			m_keyboard-&gt;Acquire();
+		}
+		else
+		{
+			return false;
+		}
+	}
+		
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+ReadMouse will read the state of the mouse similar to how ReadKeyboard read in the state of the keyboard. 
+However the state of the mouse is just changes in the position of the mouse from the last frame. 
+So for example updates will look like the mouse has moved 5 units to the right, but it will not give you the actual position of the mouse on the screen. 
+This delta information is very useful for different purposes and we can maintain the position of the mouse on the screen ourselves.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool InputClass::ReadMouse()
+{
+	HRESULT result;
+
+
+	// Read the mouse device.
+	result = m_mouse-&gt;GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&amp;m_mouseState);
+	if(FAILED(result))
+	{
+		// If the mouse lost focus or was not acquired then try to get control back.
+		if((result == DIERR_INPUTLOST) || (result == DIERR_NOTACQUIRED))
+		{
+			m_mouse-&gt;Acquire();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ProcessInput function is where we deal with the changes that have happened in the input devices since the last frame. 
+For this tutorial we will just do a simple mouse location update similar to how Windows keeps track of where the mouse cursor is. 
+To do so we use the m_mouseX and m_mouseY variables that were initialized to zero and simply add the changes in the mouse position to these two variables. 
+This will maintain the position of the mouse based on the user moving the mouse around.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Note that we do check to make sure the mouse location never goes off the screen. 
+Even if the user keeps moving the mouse to the left we will just keep the cursor at the zero position until they start moving it to the right again.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void InputClass::ProcessInput()
+{
+	// Update the location of the mouse cursor based on the change of the mouse location during the frame.
+	m_mouseX += m_mouseState.lX;
+	m_mouseY += m_mouseState.lY;
+
+	// Ensure the mouse location doesn't exceed the screen width or height.
+	if(m_mouseX &lt; 0)  { m_mouseX = 0; }
+	if(m_mouseY &lt; 0)  { m_mouseY = 0; }
+	
+	if(m_mouseX &gt; m_screenWidth)  { m_mouseX = m_screenWidth; }
+	if(m_mouseY &gt; m_screenHeight) { m_mouseY = m_screenHeight; }
+	
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I have added a function to the InputClass called IsEscapePressed. 
+This shows how to utilize the keyboard to check if specific keys are currently being pressed. 
+You can write other functions to check for any other keys that are of interest to your application. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool InputClass::IsEscapePressed()
+{
+	// Do a bitwise and on the keyboard state to check if the escape key is currently being pressed.
+	if(m_keyboardState[DIK_ESCAPE] &amp; 0x80)
+	{
+		return true;
+	}
+
+	return false;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetMouseLocation is a helper function I wrote which returns the location of the mouse.
+GraphicsClass can get this info and then use TextClass to render the mouse X and Y position to the screen.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void InputClass::GetMouseLocation(int&amp; mouseX, int&amp; mouseY)
+{
+	mouseX = m_mouseX;
+	mouseY = m_mouseY;
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Systemclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will just cover the functions that changed with the removal of the Windows Input system and addition of the DirectX Input system.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: systemclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "systemclass.h"
+
+
+bool SystemClass::Initialize()
+{
+	int screenWidth, screenHeight;
+	bool result;
+
+
+	// Initialize the width and height of the screen to zero before sending the variables into the function.
+	screenWidth = 0;
+	screenHeight = 0;
+
+	// Initialize the windows api.
+	InitializeWindows(screenWidth, screenHeight);
+
+	// Create the input object.  This object will be used to handle reading the keyboard input from the user.
+	m_Input = new InputClass;
+	if(!m_Input)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialization of the Input object is now different as it requires handles to the window, instance, and the screen size variables. 
+It also returns a boolean value to indicate if it was successful or not in starting Direct Input. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the input object.
+	result = m_Input-&gt;Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(m_hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the graphics object.  This object will handle rendering all the graphics for this application.
+	m_Graphics = new GraphicsClass;
+	if(!m_Graphics)
+	{
+		return false;
+	}
+
+	// Initialize the graphics object.
+	result = m_Graphics-&gt;Initialize(screenWidth, screenHeight, m_hwnd);
+	if(!result)
+	{
+		return false;
+	}
+	
+	return true;
+}
+
+
+void SystemClass::Shutdown()
+{
+	// Release the graphics object.
+	if(m_Graphics)
+	{
+		m_Graphics-&gt;Shutdown();
+		delete m_Graphics;
+		m_Graphics = 0;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Releasing the Input object now requires a Shutdown call previous to deleting the object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the input object.
+	if(m_Input)
+	{
+		m_Input-&gt;Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+
+	// Shutdown the window.
+	ShutdownWindows();
+	
+	return;
+}
+
+
+void SystemClass::Run()
+{
+	MSG msg;
+	bool done, result;
+
+
+	// Initialize the message structure.
+	ZeroMemory(&amp;msg, sizeof(MSG));
+	
+	// Loop until there is a quit message from the window or the user.
+	done = false;
+	while(!done)
+	{
+		// Handle the windows messages.
+		if(PeekMessage(&amp;msg, NULL, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&amp;msg);
+			DispatchMessage(&amp;msg);
+		}
+
+		// If windows signals to end the application then exit out.
+		if(msg.message == WM_QUIT)
+		{
+			done = true;
+		}
+		else
+		{
+			// Otherwise do the frame processing.  If frame processing fails then exit.
+			result = Frame();
+			if(!result)
+			{
+				MessageBox(m_hwnd, L"Frame Processing Failed", L"Error", MB_OK);
+				done = true;
+			}
+		}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The check for the escape key in the Run function is now done slightly different by checking the return value of the helper function in the InputClass.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">		// Check if the user pressed escape and wants to quit.
+		if(m_Input-&gt;IsEscapePressed() == true)
+		{
+			done = true;
+		}
+	}
+
+	return;
+}
+
+
+bool SystemClass::Frame()
+{
+	bool result;
+	int mouseX, mouseY;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+During the Frame function we call the Input object's own Frame function to update the states of the keyboard and mouse. 
+This call can fail so we need to check the return value.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Do the input frame processing.
+	result = m_Input-&gt;Frame();
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+After the input device updates have been read we update the GraphicsClass with the location of the mouse so it can render that in text on the screen.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Get the location of the mouse from the input object,
+	m_Input-&gt;GetMouseLocation(mouseX, mouseY);
+
+	// Do the frame processing for the graphics object.
+	result = m_Graphics-&gt;Frame(mouseX, mouseY);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Finally render the graphics to the screen.
+	result = m_Graphics-&gt;Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have removed the Windows keyboard reads from the MessageHandler function.  
+Direct Input handles all of this for us now.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
+{
+	return DefWindowProc(hwnd, umsg, wparam, lparam);
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "textclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Frame function now takes two integers for the mouse position updates each frame.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	bool Frame(int, int);
+	bool Render();
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	TextClass* m_Text;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will just cover the functions that have changed since the previous tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Frame function now takes in the mouse X and Y position and then has the TextClass object update the text strings that will write the position onto the screen.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::Frame(int mouseX, int mouseY)
+{
+	bool result;
+
+
+	// Set the location of the mouse.
+	result = m_Text-&gt;SetMousePosition(mouseX, mouseY, m_D3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Textclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: textclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _TEXTCLASS_H_
+#define _TEXTCLASS_H_
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "fontclass.h"
+#include "fontshaderclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: TextClass
+////////////////////////////////////////////////////////////////////////////////
+class TextClass
+{
+private:
+	struct SentenceType
+	{
+		ID3D11Buffer *vertexBuffer, *indexBuffer;
+		int vertexCount, indexCount, maxLength;
+		float red, green, blue;
+	};
+
+	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
+	};
+
+public:
+	TextClass();
+	TextClass(const TextClass&amp;);
+	~TextClass();
+
+	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, HWND, int, int, D3DXMATRIX);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+TextClass now has a new function for setting the location of the mouse.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	bool SetMousePosition(int, int, ID3D11DeviceContext*);
+
+private:
+	bool InitializeSentence(SentenceType**, int, ID3D11Device*);
+	bool UpdateSentence(SentenceType*, char*, int, int, float, float, float, ID3D11DeviceContext*);
+	void ReleaseSentence(SentenceType**);
+	bool RenderSentence(ID3D11DeviceContext*, SentenceType*, D3DXMATRIX, D3DXMATRIX);
+
+private:
+	FontClass* m_Font;
+	FontShaderClass* m_FontShader;
+	int m_screenWidth, m_screenHeight;
+	D3DXMATRIX m_baseViewMatrix;
+	SentenceType* m_sentence1;
+	SentenceType* m_sentence2;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Textclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will just cover the functions that have changed since the previous tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: textclass.cpp
+///////////////////////////////////////////////////////////////////////////////
+#include "textclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now have a new function in the TextClass which converts the mouse X and Y position into two strings and then updates
+the two sentences so that the position of the mouse can be rendered to the screen. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool TextClass::SetMousePosition(int mouseX, int mouseY, ID3D11DeviceContext* deviceContext)
+{
+	char tempString[16];
+	char mouseString[16];
+	bool result;
+
+
+	// Convert the mouseX integer to string format.
+	_itoa_s(mouseX, tempString, 10);
+
+	// Setup the mouseX string.
+	strcpy_s(mouseString, "Mouse X: ");
+	strcat_s(mouseString, tempString);
+
+	// Update the sentence vertex buffer with the new string information.
+	result = UpdateSentence(m_sentence1, mouseString, 20, 20, 1.0f, 1.0f, 1.0f, deviceContext);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Convert the mouseY integer to string format.
+	_itoa_s(mouseY, tempString, 10);
+
+	// Setup the mouseY string.
+	strcpy_s(mouseString, "Mouse Y: ");
+	strcat_s(mouseString, tempString);
+
+	// Update the sentence vertex buffer with the new string information.
+	result = UpdateSentence(m_sentence2, mouseString, 20, 40, 1.0f, 1.0f, 1.0f, deviceContext);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+As you can see setting up Direct Input in DirectX 11 is very simple and it gives us high speed access to information from the input devices. 
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 13_ Direct Input_files/pic0037.gif" width="128" height="128"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile and run the program. Move the mouse around the screen and watch the text position update.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Use the information from the 2D Rendering tutorial and combine it with this one to create your own mouse cursor that moves with the mouse movement.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Implement a function that reads the keyboard buffer and displays what you type on the screen.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2008 Project: <a href="http://www.rastertek.com/dx11tut13.zip">dx11tut13.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src13.zip">dx11src13.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe13.zip">dx11exe13.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 13_ Direct Input_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 13_ Direct Input_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

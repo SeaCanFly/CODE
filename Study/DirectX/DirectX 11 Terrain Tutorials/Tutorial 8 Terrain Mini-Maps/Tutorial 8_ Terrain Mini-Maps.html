@@ -1,0 +1,1340 @@
+
+<!-- saved from url=(0038)http://www.rastertek.com/tertut08.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 8: Terrain Mini-Maps</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 8: Terrain Mini-Maps
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 8_ Terrain Mini-Maps_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Mini-maps are small 2D maps in the user interface that help the user locate their current position on the terrain.
+Most commonly they will be the color map that is used for the terrain with additional markings for points of interest and such.
+As the previous tutorial covered color maps this tutorial builds on that information.
+We will take the color map from the previous tutorial and use that as a bitmap that will be rendered in 2D as part of the user interface.
+We will also use a 3x3 green pixel bitmap to indicate where the user is currently located on the mini-map.
+And finally we will just put a white border around the color map to make it look more professional.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The code in this tutorial will include the TextureShaderClass and BitmapClass from the DirectX 11 tutorials to facilitate rendering the mini-map.
+The new class in this tutorial that encapsulates the mini-map functionality is called MiniMapClass.
+We will start the tutorial by examining the MiniMapClass first.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Minimapclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: minimapclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _MINIMAPCLASS_H_
+#define _MINIMAPCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "bitmapclass.h"
+#include "textureshaderclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: MiniMapClass
+////////////////////////////////////////////////////////////////////////////////
+class MiniMapClass
+{
+public:
+	MiniMapClass();
+	MiniMapClass(const MiniMapClass&amp;);
+	~MiniMapClass();
+
+	bool Initialize(ID3D11Device*, HWND, int, int, D3DXMATRIX, float, float);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, TextureShaderClass*);
+	
+	void PositionUpdate(float, float);
+
+private:
+	int m_mapLocationX, m_mapLocationY, m_pointLocationX, m_pointLocationY;
+	float m_mapSizeX, m_mapSizeY, m_terrainWidth, m_terrainHeight;
+	D3DXMATRIX m_viewMatrix;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The three bitmaps defined here are used for the mini-map (which is the color map in .dds form), 
+the location pointer (which is a 3x3 green pixel), and then a white border bitmap which surrounds the mini-map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	BitmapClass *m_MiniMapBitmap, *m_Border, *m_Point;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Minimapclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: minimapclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "minimapclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the three bitmaps to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">MiniMapClass::MiniMapClass()
+{
+	m_MiniMapBitmap = 0;
+	m_Border = 0;
+	m_Point = 0;
+}
+
+
+MiniMapClass::MiniMapClass(const MiniMapClass&amp; other)
+{
+}
+
+
+MiniMapClass::~MiniMapClass()
+{
+}
+
+
+bool MiniMapClass::Initialize(ID3D11Device* device, HWND hwnd, int screenWidth, int screenHeight, D3DXMATRIX viewMatrix, float terrainWidth, 
+			      float terrainHeight)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function starts by storing the location of the mini-map, its size, the base view matrix for rendering, and the actual size of the terrain mesh.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the location of the mini-map on the screen.
+	m_mapLocationX = 150;
+	m_mapLocationY = 75;
+
+	// Set the size of the mini-map.
+	m_mapSizeX = 150.0f;
+	m_mapSizeY = 150.0f;
+
+	// Store the base view matrix.
+	m_viewMatrix = viewMatrix;
+
+	// Store the terrain size.
+	m_terrainWidth = terrainWidth;
+	m_terrainHeight = terrainHeight;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next we create the mini-map from the color map .dds file.
+Even thought the color map is 256x256 we have shrunk it down to 150x150 so that displaying it does not take up too much of the screen.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the mini-map bitmap object.
+	m_MiniMapBitmap = new BitmapClass;
+	if(!m_MiniMapBitmap)
+	{
+		return false;
+	}
+
+	// Initialize the mini-map bitmap object.
+	result = m_MiniMapBitmap-&gt;Initialize(device, screenWidth, screenHeight, L"../Engine/data/colorm01.dds", 150, 150);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the mini-map object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+After that we load the white border which will surround the mini-map so the edges are clearly defined.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the border bitmap object.
+	m_Border = new BitmapClass;
+	if(!m_Border)
+	{
+		return false;
+	}
+
+	// Initialize the border bitmap object.
+	result = m_Border-&gt;Initialize(device, screenWidth, screenHeight, L"../Engine/data/border01.dds", 154, 154);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the border object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And finally we load the point indicator.
+It is a 3x3 green pixel that we will use and constantly update to show where the user currently is located on the mini-map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the point bitmap object.
+	m_Point = new BitmapClass;
+	if(!m_Point)
+	{
+		return false;
+	}
+
+	// Initialize the point bitmap object.
+	result = m_Point-&gt;Initialize(device, screenWidth, screenHeight, L"../Engine/data/point01.dds", 3, 3);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the point object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function releases the three bitmap objects that were used for rendering the mini-map elements.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void MiniMapClass::Shutdown()
+{
+	// Release the point bitmap object.
+	if(m_Point)
+	{
+		m_Point-&gt;Shutdown();
+		delete m_Point;
+		m_Point = 0;
+	}
+
+	// Release the border bitmap object.
+	if(m_Border)
+	{
+		m_Border-&gt;Shutdown();
+		delete m_Border;
+		m_Border = 0;
+	}
+
+	// Release the mini-map bitmap object.
+	if(m_MiniMapBitmap)
+	{
+		m_MiniMapBitmap-&gt;Shutdown();
+		delete m_MiniMapBitmap;
+		m_MiniMapBitmap = 0;
+	}
+
+	return;
+}
+
+
+bool MiniMapClass::Render(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX orthoMatrix, TextureShaderClass* textureShader)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The first thing we render is the border for the mini-map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Put the border bitmap vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	result = m_Border-&gt;Render(deviceContext, (m_mapLocationX - 2), (m_mapLocationY - 2));
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the border bitmap using the texture shader.
+	textureShader-&gt;Render(deviceContext, m_Border-&gt;GetIndexCount(), worldMatrix, m_viewMatrix, orthoMatrix, m_Border-&gt;GetTexture());
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+After that the color map is rendered as the actual mini-map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Put the mini-map bitmap vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	result = m_MiniMapBitmap-&gt;Render(deviceContext, m_mapLocationX, m_mapLocationY);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the mini-map bitmap using the texture shader.
+	textureShader-&gt;Render(deviceContext, m_MiniMapBitmap-&gt;GetIndexCount(), worldMatrix, m_viewMatrix, orthoMatrix, m_MiniMapBitmap-&gt;GetTexture());
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And finally the point indicator is rendered on the mini-map according the where the user is currently located on the 3D terrain mesh.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Put the point bitmap vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	result = m_Point-&gt;Render(deviceContext, m_pointLocationX, m_pointLocationY);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the point bitmap using the texture shader.
+	textureShader-&gt;Render(deviceContext, m_Point-&gt;GetIndexCount(), worldMatrix, m_viewMatrix, orthoMatrix, m_Point-&gt;GetTexture());
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PositionUpdate function is used for updating where the 3x3 green pixel point indicator should be located on the mini-map.
+It converts the 3D float position of the camera on the terrain into a 2D position on the bitmap.
+It also makes sure the indicator never goes past the borders of the mini-map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void MiniMapClass::PositionUpdate(float positionX, float positionZ)
+{
+	float percentX, percentY;
+
+
+	// Ensure the point does not leave the minimap borders even if the camera goes past the terrain borders.
+	if(positionX &lt; 0)
+	{
+		positionX = 0;
+	}
+
+	if(positionZ &lt; 0)
+	{
+		positionZ = 0;
+	}
+
+	if(positionX &gt; m_terrainWidth)
+	{
+		positionX = m_terrainWidth;
+	}
+
+	if(positionZ &gt; m_terrainHeight)
+	{
+		positionZ = m_terrainHeight;
+	}
+
+	// Calculate the position of the camera on the minimap in terms of percentage.
+	percentX = positionX / m_terrainWidth;
+	percentY = 1.0f - (positionZ / m_terrainHeight);
+
+	// Determine the pixel location of the point on the mini-map.
+	m_pointLocationX = m_mapLocationX + (int)(percentX * m_mapSizeX);
+	m_pointLocationY = m_mapLocationY + (int)(percentY * m_mapSizeY);
+
+	// Subtract one from the location to center the point on the mini-map according to the 3x3 point pixel image size.
+	m_pointLocationX = m_pointLocationX - 1;
+	m_pointLocationY = m_pointLocationY - 1;
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The TerrainClass has been modified slightly to assist the mini-map functionality.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _TERRAINCLASS_H_
+#define _TERRAINCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;stdio.h&gt;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "textureclass.h"
+
+
+/////////////
+// GLOBALS //
+/////////////
+const int TEXTURE_REPEAT = 8;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: TerrainClass
+////////////////////////////////////////////////////////////////////////////////
+class TerrainClass
+{
+private:
+	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
+		D3DXVECTOR3 normal;
+		D3DXVECTOR4 color;
+	};
+
+	struct HeightMapType 
+	{ 
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+		float r, g, b;
+	};
+
+	struct VectorType 
+	{ 
+		float x, y, z;
+	};
+
+public:
+	TerrainClass();
+	TerrainClass(const TerrainClass&amp;);
+	~TerrainClass();
+
+	bool Initialize(ID3D11Device*, char*, WCHAR*, char*);
+	void Shutdown();
+	void Render(ID3D11DeviceContext*);
+
+	int GetIndexCount();
+	ID3D11ShaderResourceView* GetTexture();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GetTerrainSize function is new and will be used to provide the mini-map with access to the size of the terrain.
+This information is then used to calculate where to position the user's location on the mini-map.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	void GetTerrainSize(int&amp;, int&amp;);</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	bool LoadHeightMap(char*);
+	void NormalizeHeightMap();
+	bool CalculateNormals();
+	void ShutdownHeightMap();
+
+	void CalculateTextureCoordinates();
+	bool LoadTexture(ID3D11Device*, WCHAR*);
+	void ReleaseTexture();
+
+	bool LoadColorMap(char*);
+
+	bool InitializeBuffers(ID3D11Device*);
+	void ShutdownBuffers();
+	void RenderBuffers(ID3D11DeviceContext*);
+	
+private:
+	int m_terrainWidth, m_terrainHeight;
+	int m_vertexCount, m_indexCount;
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+	HeightMapType* m_heightMap;
+	TextureClass* m_Texture;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will just cover the single additional function to the TerrainClass.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "terrainclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new GetTerrainSize function returns the width and height(length) of the terrain.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">void TerrainClass::GetTerrainSize(int&amp; width, int&amp; height)
+{
+	// Return the width and height of the terrain.
+	width = m_terrainWidth;
+	height = m_terrainHeight;
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _APPLICATIONCLASS_H_
+#define _APPLICATIONCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "inputclass.h"
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "terrainclass.h"
+#include "timerclass.h"
+#include "positionclass.h"
+#include "fpsclass.h"
+#include "cpuclass.h"
+#include "fontshaderclass.h"
+#include "textclass.h"
+#include "terrainshaderclass.h"
+#include "lightclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now include the TextureShaderClass and MiniMapClass header files.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">#include "textureshaderclass.h"
+#include "minimapclass.h"</font><font face="arial" color="#aaffaa" size="2">
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ApplicationClass
+////////////////////////////////////////////////////////////////////////////////
+class ApplicationClass
+{
+public:
+	ApplicationClass();
+	ApplicationClass(const ApplicationClass&amp;);
+	~ApplicationClass();
+
+	bool Initialize(HINSTANCE, HWND, int, int);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool HandleInput(float);
+	bool RenderGraphics();
+
+private:
+	InputClass* m_Input;
+	D3DClass* m_Direct3D;
+	CameraClass* m_Camera;
+	TerrainClass* m_Terrain;
+	TimerClass* m_Timer;
+	PositionClass* m_Position;
+	FpsClass* m_Fps;
+	CpuClass* m_Cpu;
+	FontShaderClass* m_FontShader;
+	TextClass* m_Text;
+	TerrainShaderClass* m_TerrainShader;
+	LightClass* m_Light;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The TextureShaderClass and MiniMapClass private objects are defined here.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	TextureShaderClass* m_TextureShader;
+	MiniMapClass* m_MiniMap;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "applicationclass.h"
+
+
+ApplicationClass::ApplicationClass()
+{
+	m_Input = 0;
+	m_Direct3D = 0;
+	m_Camera = 0;
+	m_Terrain = 0;
+	m_Timer = 0;
+	m_Position = 0;
+	m_Fps = 0;
+	m_Cpu = 0;
+	m_FontShader = 0;
+	m_Text = 0;
+	m_TerrainShader = 0;
+	m_Light = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the texture shader and mini-map object to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_TextureShader = 0;
+	m_MiniMap = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+ApplicationClass::ApplicationClass(const ApplicationClass&amp; other)
+{
+}
+
+
+ApplicationClass::~ApplicationClass()
+{
+}
+
+
+bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+{
+	bool result;
+	float cameraX, cameraY, cameraZ;
+	D3DXMATRIX baseViewMatrix;
+	char videoCard[128];
+	int videoMemory;</font><font face="arial" color="#aaaaff" size="2">
+	int terrainWidth, terrainHeight;</font><font face="arial" color="#aaffaa" size="2">
+
+	
+	// Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
+	m_Input = new InputClass;
+	if(!m_Input)
+	{
+		return false;
+	}
+
+	// Initialize the input object.
+	result = m_Input-&gt;Initialize(hinstance, hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the Direct3D object.
+	m_Direct3D = new D3DClass;
+	if(!m_Direct3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_Direct3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize DirectX 11.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Initialize a base view matrix with the camera for 2D user interface rendering.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -1.0f);
+	m_Camera-&gt;Render();
+	m_Camera-&gt;GetViewMatrix(baseViewMatrix);
+
+	// Set the initial position of the camera.
+	cameraX = 50.0f;
+	cameraY = 2.0f;
+	cameraZ = -7.0f;
+
+	m_Camera-&gt;SetPosition(cameraX, cameraY, cameraZ);
+
+	// Create the terrain object.
+	m_Terrain = new TerrainClass;
+	if(!m_Terrain)
+	{
+		return false;
+	}
+
+	// Initialize the terrain object.
+	result = m_Terrain-&gt;Initialize(m_Direct3D-&gt;GetDevice(), "../Engine/data/heightmap01.bmp", L"../Engine/data/dirt01.dds", "../Engine/data/colorm01.bmp");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the timer object.
+	m_Timer = new TimerClass;
+	if(!m_Timer)
+	{
+		return false;
+	}
+
+	// Initialize the timer object.
+	result = m_Timer-&gt;Initialize();
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the timer object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the position object.
+	m_Position = new PositionClass;
+	if(!m_Position)
+	{
+		return false;
+	}
+
+	// Set the initial position of the viewer to the same as the initial camera position.
+	m_Position-&gt;SetPosition(cameraX, cameraY, cameraZ);
+
+	// Create the fps object.
+	m_Fps = new FpsClass;
+	if(!m_Fps)
+	{
+		return false;
+	}
+
+	// Initialize the fps object.
+	m_Fps-&gt;Initialize();
+
+	// Create the cpu object.
+	m_Cpu = new CpuClass;
+	if(!m_Cpu)
+	{
+		return false;
+	}
+
+	// Initialize the cpu object.
+	m_Cpu-&gt;Initialize();
+
+	// Create the font shader object.
+	m_FontShader = new FontShaderClass;
+	if(!m_FontShader)
+	{
+		return false;
+	}
+
+	// Initialize the font shader object.
+	result = m_FontShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the font shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the text object.
+	m_Text = new TextClass;
+	if(!m_Text)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	result = m_Text-&gt;Initialize(m_Direct3D-&gt;GetDevice(), m_Direct3D-&gt;GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Retrieve the video card information.
+	m_Direct3D-&gt;GetVideoCardInfo(videoCard, videoMemory);
+
+	// Set the video card information in the text object.
+	result = m_Text-&gt;SetVideoCardInfo(videoCard, videoMemory, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not set video card info in the text object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the terrain shader object.
+	m_TerrainShader = new TerrainShaderClass;
+	if(!m_TerrainShader)
+	{
+		return false;
+	}
+
+	// Initialize the terrain shader object.
+	result = m_TerrainShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetAmbientColor(0.05f, 0.05f, 0.05f, 1.0f);
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetDirection(-0.5f, -1.0f, 0.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the texture shader which will be used to render the elements of the mini-map.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+	if(!m_TextureShader)
+	{
+		return false;
+	}
+
+	// Initialize the texture shader object.
+	result = m_TextureShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Get the size of the terrain mesh from the terrain object.
+This will be needed as input to the creation of the mini-map.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Get the size of the terrain as the minimap will require this information.
+	m_Terrain-&gt;GetTerrainSize(terrainWidth, terrainHeight);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now create and initialize the mini-map object.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the mini map object.
+	m_MiniMap = new MiniMapClass;
+	if(!m_MiniMap)
+	{
+		return false;
+	}
+
+	// Initialize the mini map object.
+	result = m_MiniMap-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd, screenWidth, screenHeight, baseViewMatrix, (float)(terrainWidth - 1), 
+				       (float)(terrainHeight - 1));
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the mini map object.", L"Error", MB_OK);
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void ApplicationClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Release the mini-map and terrain shader objects in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Release the mini map object.
+	if(m_MiniMap)
+	{
+		m_MiniMap-&gt;Shutdown();
+		delete m_MiniMap;
+		m_MiniMap = 0;
+	}
+
+	// Release the texture shader object.
+	if(m_TextureShader)
+	{
+		m_TextureShader-&gt;Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the terrain shader object.
+	if(m_TerrainShader)
+	{
+		m_TerrainShader-&gt;Shutdown();
+		delete m_TerrainShader;
+		m_TerrainShader = 0;
+	}
+
+	// Release the text object.
+	if(m_Text)
+	{
+		m_Text-&gt;Shutdown();
+		delete m_Text;
+		m_Text = 0;
+	}
+
+	// Release the font shader object.
+	if(m_FontShader)
+	{
+		m_FontShader-&gt;Shutdown();
+		delete m_FontShader;
+		m_FontShader = 0;
+	}
+
+	// Release the cpu object.
+	if(m_Cpu)
+	{
+		m_Cpu-&gt;Shutdown();
+		delete m_Cpu;
+		m_Cpu = 0;
+	}
+
+	// Release the fps object.
+	if(m_Fps)
+	{
+		delete m_Fps;
+		m_Fps = 0;
+	}
+
+	// Release the position object.
+	if(m_Position)
+	{
+		delete m_Position;
+		m_Position = 0;
+	}
+
+	// Release the timer object.
+	if(m_Timer)
+	{
+		delete m_Timer;
+		m_Timer = 0;
+	}
+
+	// Release the terrain object.
+	if(m_Terrain)
+	{
+		m_Terrain-&gt;Shutdown();
+		delete m_Terrain;
+		m_Terrain = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the Direct3D object.
+	if(m_Direct3D)
+	{
+		m_Direct3D-&gt;Shutdown();
+		delete m_Direct3D;
+		m_Direct3D = 0;
+	}
+
+	// Release the input object.
+	if(m_Input)
+	{
+		m_Input-&gt;Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+
+	return;
+}
+
+
+bool ApplicationClass::Frame()
+{
+	bool result;
+
+
+	// Read the user input.
+	result = m_Input-&gt;Frame();
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Check if the user pressed escape and wants to exit the application.
+	if(m_Input-&gt;IsEscapePressed() == true)
+	{
+		return false;
+	}
+
+	// Update the system stats.
+	m_Timer-&gt;Frame();
+	m_Fps-&gt;Frame();
+	m_Cpu-&gt;Frame();
+
+	// Update the FPS value in the text object.
+	result = m_Text-&gt;SetFps(m_Fps-&gt;GetFps(), m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Update the CPU usage value in the text object.
+	result = m_Text-&gt;SetCpu(m_Cpu-&gt;GetCpuPercentage(), m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Do the frame input processing.
+	result = HandleInput(m_Timer-&gt;GetTime());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the graphics.
+	result = RenderGraphics();
+	if(!result)
+	{
+		return false;
+	}
+
+	return result;
+}
+
+
+bool ApplicationClass::HandleInput(float frameTime)
+{
+	bool keyDown, result;
+	float posX, posY, posZ, rotX, rotY, rotZ;
+
+
+	// Set the frame time for calculating the updated position.
+	m_Position-&gt;SetFrameTime(frameTime);
+
+	// Handle the input.
+	keyDown = m_Input-&gt;IsLeftPressed();
+	m_Position-&gt;TurnLeft(keyDown);
+
+	keyDown = m_Input-&gt;IsRightPressed();
+	m_Position-&gt;TurnRight(keyDown);
+
+	keyDown = m_Input-&gt;IsUpPressed();
+	m_Position-&gt;MoveForward(keyDown);
+
+	keyDown = m_Input-&gt;IsDownPressed();
+	m_Position-&gt;MoveBackward(keyDown);
+
+	keyDown = m_Input-&gt;IsAPressed();
+	m_Position-&gt;MoveUpward(keyDown);
+
+	keyDown = m_Input-&gt;IsZPressed();
+	m_Position-&gt;MoveDownward(keyDown);
+
+	keyDown = m_Input-&gt;IsPgUpPressed();
+	m_Position-&gt;LookUpward(keyDown);
+
+	keyDown = m_Input-&gt;IsPgDownPressed();
+	m_Position-&gt;LookDownward(keyDown);
+	
+	// Get the view point position/rotation.
+	m_Position-&gt;GetPosition(posX, posY, posZ);
+	m_Position-&gt;GetRotation(rotX, rotY, rotZ);
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(posX, posY, posZ);
+	m_Camera-&gt;SetRotation(rotX, rotY, rotZ);
+
+	// Update the position values in the text object.
+	result = m_Text-&gt;SetCameraPosition(posX, posY, posZ, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Update the rotation values in the text object.
+	result = m_Text-&gt;SetCameraRotation(rotX, rotY, rotZ, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+As we have already retrieved the position of the camera in the HandleInput function we can send that information into the mini-map.
+The position of the user on the mini-map will then be accurately reflected each frame.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Update the location of the camera on the mini map.
+	m_MiniMap-&gt;PositionUpdate(posX, posZ);</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+bool ApplicationClass::RenderGraphics()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
+	bool result;
+
+
+	// Clear the scene.
+	m_Direct3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_Direct3D-&gt;GetProjectionMatrix(projectionMatrix);
+	m_Direct3D-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Render the terrain buffers.
+	m_Terrain-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+
+	// Render the terrain using the terrain shader.
+	result = m_TerrainShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+					 m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor(), m_Light-&gt;GetDirection(), m_Terrain-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_Direct3D-&gt;TurnZBufferOff();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Render the 2D mini-map elements.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Render the mini map.
+	result = m_MiniMap-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), worldMatrix, orthoMatrix, m_TextureShader);
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Turn on the alpha blending before rendering the text.
+	m_Direct3D-&gt;TurnOnAlphaBlending();
+
+	// Render the text user interface elements.
+	result = m_Text-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_FontShader, worldMatrix, orthoMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn off alpha blending after rendering the text.
+	m_Direct3D-&gt;TurnOffAlphaBlending();
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D-&gt;TurnZBufferOn();
+
+	// Present the rendered scene to the screen.
+	m_Direct3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now have a mini-map implemented with a green pixel indicator which reflects the user's current position on the 3D terrain.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 8_ Terrain Mini-Maps_files/pic0186.gif" width="500" height="282"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile and run the program.  Move around the terrain and you will notice the green pixel shows your current location on the mini-map.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Move the mini-map 2D rendering to a different location on the screen.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Create your own border and indicator for the mini-map.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2010 Project: <a href="http://www.rastertek.com/tertut08.zip">tertut08.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/tersrc08.zip">tersrc08.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/terexe08.zip">terexe08.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 8_ Terrain Mini-Maps_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 8_ Terrain Mini-Maps_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

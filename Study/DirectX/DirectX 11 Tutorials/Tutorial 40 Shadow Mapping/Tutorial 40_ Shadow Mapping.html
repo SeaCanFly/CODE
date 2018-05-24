@@ -1,0 +1,1996 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut40.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 40: Shadow Mapping</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 40: Shadow Mapping
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 40_ Shadow Mapping_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover how to implement shadow mapping in DirectX 11 using C++ and HLSL.
+Before proceeding with this tutorial you should first have a clear understanding of the following concepts:
+Render to Texture (Tutorial 22), Projective Texturing (Tutorial 27), and Depth Buffers (Tutorial 35).
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Shadow mapping is one of the fastest and CPU/GPU efficient methods for rendering shadows in small to medium sized scenes.
+It is also one of the simpler methods that gives highly realistic results.
+To understand how shadow mapping works we will start with a basic scene that is illuminated with a single light:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 40_ Shadow Mapping_files/pic0224.gif" width="500" height="282"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The light that is illuminating the scene is originating from behind and to the right of our current camera position.
+The light position is very important as the next step is that we will render the scene from the point of view of the light.
+When we render from the light's point of view we will render just the depth buffer information into a render to texture.
+This render to texture filled with depth information is called the Shadow Map and looks like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 40_ Shadow Mapping_files/pic0225.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that we have the depth information of all the objects in the scene that could possibly cast a shadow we can now figure out where the shadows should occur.
+When we render the scene we will project the shadow map texture back onto the scene to get the depth of any objects that cast shadows and compare
+it with the position of the light on a per pixel basis in the pixel shader.
+If we find the light is closer to the camera then we light the pixel.  If we find the object is closer to the camera then we shadow the pixel.
+Doing so produces the following image:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 40_ Shadow Mapping_files/pic0226.gif" width="500" height="282"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will start the code section of the shadow map tutorial by examining the HLSL shaders first.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadow.vs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The shadow shaders are basic single point light shaders modified to handle shadowing. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadow.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The vertex shader will require two light matrices to transform the vertex based on the light's view point which have been added to the MatrixBuffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+    matrix lightViewMatrix;
+    matrix lightProjectionMatrix;
+};
+
+
+//////////////////////
+// CONSTANT BUFFERS //
+//////////////////////
+cbuffer LightBuffer2
+{
+    float3 lightPosition;
+    float padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PixelInputType has lightViewPosition for sending the light perspective transformed vertex into the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float4 lightViewPosition : TEXCOORD1;
+    float3 lightPos : TEXCOORD2;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType ShadowVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    float4 worldPosition;
+    
+    
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we transform the vertex based on the light's perspective.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Calculate the position of the vertice as viewed by the light source.
+    output.lightViewPosition = mul(input.position, worldMatrix);
+    output.lightViewPosition = mul(output.lightViewPosition, lightViewMatrix);
+    output.lightViewPosition = mul(output.lightViewPosition, lightProjectionMatrix);
+
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+    
+    // Calculate the normal vector against the world matrix only.
+    output.normal = mul(input.normal, (float3x3)worldMatrix);
+	
+    // Normalize the normal vector.
+    output.normal = normalize(output.normal);
+
+    // Calculate the position of the vertex in the world.
+    worldPosition = mul(input.position, worldMatrix);
+
+    // Determine the light position based on the position of the light and the position of the vertex in the world.
+    output.lightPos = lightPosition.xyz - worldPosition.xyz;
+
+    // Normalize the light position vector.
+    output.lightPos = normalize(output.lightPos);
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadow.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadow.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////
+// TEXTURES //
+//////////////
+Texture2D shaderTexture : register(t0);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The depthMapTexture is the shadow map. This texture contains the scene depth buffer rendered from the light's perspective.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Texture2D depthMapTexture : register(t1);
+
+
+///////////////////
+// SAMPLE STATES //
+///////////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We require a clamp based sampler when sampling the depth buffer so that it doesn't wrap around and sample incorrect information.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">SamplerState SampleTypeClamp : register(s0);
+SamplerState SampleTypeWrap  : register(s1);
+
+
+//////////////////////
+// CONSTANT BUFFERS //
+//////////////////////
+cbuffer LightBuffer
+{
+    float4 ambientColor;
+    float4 diffuseColor;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float4 lightViewPosition : TEXCOORD1;
+    float3 lightPos : TEXCOORD2;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 ShadowPixelShader(PixelInputType input) : SV_TARGET
+{
+    float bias;
+    float4 color;
+    float2 projectTexCoord;
+    float depthValue;
+    float lightDepthValue;
+    float lightIntensity;
+    float4 textureColor;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Shadow mapping requires a bias adjustment when comparing the depth of the light and the depth of the 
+object due to the low floating point precision of the depth map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Set the bias value for fixing the floating point precision issues.
+    bias = 0.001f;
+
+    // Set the default output color to the ambient light value for all pixels.
+    color = ambientColor;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Calculate the projected texture coordinates for sampling the shadow map (depth buffer texture) based on the light's viewing position.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Calculate the projected texture coordinates.
+    projectTexCoord.x =  input.lightViewPosition.x / input.lightViewPosition.w / 2.0f + 0.5f;
+    projectTexCoord.y = -input.lightViewPosition.y / input.lightViewPosition.w / 2.0f + 0.5f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Check if the projected coordinates are in the view of the light, if not then the pixel gets just an ambient value.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Determine if the projected coordinates are in the 0 to 1 range.  If so then this pixel is in the view of the light.
+    if((saturate(projectTexCoord.x) == projectTexCoord.x) &amp;&amp; (saturate(projectTexCoord.y) == projectTexCoord.y))
+    {
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that we are in the view of the light we will retrieve the depth value from the shadow map (depthMapTexture).
+We only sample the red component since this is a grey scale texture.
+The depth value we get from the texture translates into the distance to the nearest object.
+This is important since objects are what cast the shadows and hence why it is called a shadow map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">        // Sample the shadow map depth value from the depth texture using the sampler at the projected texture coordinate location.
+        depthValue = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord).r;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that we have the depth of the object for this pixel we need the depth of the light to determine if it is in front or behind the object.
+We get this from the lightViewPosition. Note that we need to subtract the bias from this or we will get the floating point precision issue.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">        // Calculate the depth of the light.
+        lightDepthValue = input.lightViewPosition.z / input.lightViewPosition.w;
+
+        // Subtract the bias from the lightDepthValue.
+        lightDepthValue = lightDepthValue - bias;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now we perform the comparison between the light depth and the object depth. If the light is closer to us then no shadow.
+But if the light is behind an object in the shadow map then it gets shadowed.
+Note that a shadow just means we only apply ambient light, we don't color it black or anything.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">        // Compare the depth of the shadow map value and the depth of the light to determine whether to shadow or to light this pixel.
+        // If the light is in front of the object then light the pixel, if not then shadow this pixel since an object (occluder) is casting a shadow on it.
+        if(lightDepthValue &lt; depthValue)
+        {
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+If the light was in front of the object then there is no shadow and we do regular lighting.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">            // Calculate the amount of light on this pixel.
+            lightIntensity = saturate(dot(input.normal, input.lightPos));
+
+            if(lightIntensity &gt; 0.0f)
+            {
+                // Determine the final diffuse color based on the diffuse color and the amount of light intensity.
+                color += (diffuseColor * lightIntensity);
+
+                // Saturate the final light color.
+                color = saturate(color);
+            }
+        }
+    }
+
+    // Sample the pixel color from the texture using the sampler at this texture coordinate location.
+    textureColor = shaderTexture.Sample(SampleTypeWrap, input.tex);
+
+    // Combine the light and texture color.
+    color = color * textureColor;
+
+    return color;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadowshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ShadowShaderClass is just the LightShaderClass modified for shadows.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadowshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SHADOWSHADERCLASS_H_
+#define _SHADOWSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ShadowShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class ShadowShaderClass
+{
+private:
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The MatrixBufferType has been expanded to hold the view and projection matrix of the light.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+		D3DXMATRIX lightView;
+		D3DXMATRIX lightProjection;
+	};
+
+	struct LightBufferType
+	{
+		D3DXVECTOR4 ambientColor;
+		D3DXVECTOR4 diffuseColor;
+	};
+
+	struct LightBufferType2
+	{
+		D3DXVECTOR3 lightPosition;
+		float padding;
+	};
+
+public:
+	ShadowShaderClass();
+	ShadowShaderClass(const ShadowShaderClass&amp;);
+	~ShadowShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, 
+		    ID3D11ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4, D3DXVECTOR4);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, 
+				 ID3D11ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4, D3DXVECTOR4);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleStateWrap;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now have a second clamp based sampler state.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11SamplerState* m_sampleStateClamp;
+	ID3D11Buffer* m_matrixBuffer;
+	ID3D11Buffer* m_lightBuffer;
+	ID3D11Buffer* m_lightBuffer2;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadowshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadowshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "shadowshaderclass.h"
+
+
+ShadowShaderClass::ShadowShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleStateWrap = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the new sampler state to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_sampleStateClamp = 0;
+	m_matrixBuffer = 0;
+	m_lightBuffer = 0;
+	m_lightBuffer2 = 0;
+}
+
+
+ShadowShaderClass::ShadowShaderClass(const ShadowShaderClass&amp; other)
+{
+}
+
+
+ShadowShaderClass::~ShadowShaderClass()
+{
+}
+
+
+bool ShadowShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We load the shadow HLSL shader files here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/shadow.vs", L"../Engine/shadow.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ShadowShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The shadow map texture is sent in as input into the Render function. 
+We then send it into the SetShaderParameters to set it in the shader before rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool ShadowShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+			       D3DXMATRIX projectionMatrix, D3DXMATRIX lightViewMatrix, D3DXMATRIX lightProjectionMatrix, 
+			       ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* depthMapTexture, D3DXVECTOR3 lightPosition, 
+			       D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, lightViewMatrix, lightProjectionMatrix, texture, 
+				     depthMapTexture, lightPosition, ambientColor, diffuseColor);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool ShadowShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC lightBufferDesc;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There is a new description for the second clamp sampler state used in the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	D3D11_BUFFER_DESC lightBufferDesc2;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the shadow vertex shader program.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "ShadowVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the shadow pixel shader program.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "ShadowPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	polygonLayout[2].SemanticName = "NORMAL";
+	polygonLayout[2].SemanticIndex = 0;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[2].InputSlot = 0;
+	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[2].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a wrap texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleStateWrap);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create the new clamp based sampler state here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create a clamp texture sampler state description.
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleStateClamp);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the pixel shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;lightBufferDesc, NULL, &amp;m_lightBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the light dynamic constant buffer that is in the vertex shader.
+	lightBufferDesc2.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc2.ByteWidth = sizeof(LightBufferType2);
+	lightBufferDesc2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc2.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc2.MiscFlags = 0;
+	lightBufferDesc2.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;lightBufferDesc2, NULL, &amp;m_lightBuffer2);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ShadowShaderClass::ShutdownShader()
+{
+	// Release the light constant buffers.
+	if(m_lightBuffer)
+	{
+		m_lightBuffer-&gt;Release();
+		m_lightBuffer = 0;
+	}
+
+	if(m_lightBuffer2)
+	{
+		m_lightBuffer2-&gt;Release();
+		m_lightBuffer2 = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler states.
+	if(m_sampleStateWrap)
+	{
+		m_sampleStateWrap-&gt;Release();
+		m_sampleStateWrap = 0;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Release the new clamp sampler state here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	if(m_sampleStateClamp)
+	{
+		m_sampleStateClamp-&gt;Release();
+		m_sampleStateClamp = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void ShadowShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+
+
+bool ShadowShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix,
+					    D3DXMATRIX projectionMatrix, D3DXMATRIX lightViewMatrix, D3DXMATRIX lightProjectionMatrix, 
+					    ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* depthMapTexture, D3DXVECTOR3 lightPosition,
+					    D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	unsigned int bufferNumber;
+	MatrixBufferType* dataPtr;
+	LightBufferType* dataPtr2;
+	LightBufferType2* dataPtr3;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Transpose the light matrices before sending them into the vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	D3DXMatrixTranspose(&amp;lightViewMatrix, &amp;lightViewMatrix);
+	D3DXMatrixTranspose(&amp;lightProjectionMatrix, &amp;lightProjectionMatrix);
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Copy the light matrices into the matrix constant buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	dataPtr-&gt;lightView = lightViewMatrix;
+	dataPtr-&gt;lightProjection = lightProjectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+
+	// Set shader texture resource in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;texture);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The shadow map texture is set in the pixel shader here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	deviceContext-&gt;PSSetShaderResources(1, 1, &amp;depthMapTexture);
+
+	// Lock the light constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (LightBufferType*)mappedResource.pData;
+
+	// Copy the lighting variables into the constant buffer.
+	dataPtr2-&gt;ambientColor = ambientColor;
+	dataPtr2-&gt;diffuseColor = diffuseColor;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_lightBuffer, 0);
+
+	// Set the position of the light constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_lightBuffer);
+
+	// Lock the second light constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_lightBuffer2, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr3 = (LightBufferType2*)mappedResource.pData;
+
+	// Copy the lighting variables into the constant buffer.
+	dataPtr3-&gt;lightPosition = lightPosition;
+	dataPtr3-&gt;padding = 0.0f;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_lightBuffer2, 0);
+
+	// Set the position of the light constant buffer in the vertex shader.
+	bufferNumber = 1;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_lightBuffer2);
+
+	return true;
+}
+
+
+void ShadowShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new clamp sampler state is set in the pixel shader here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the sampler states in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleStateClamp);
+	deviceContext-&gt;PSSetSamplers(1, 1, &amp;m_sampleStateWrap);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Lightclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The LightClass was modified for this tutorial so that lights can have their own view and projection matrices associated with them.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: lightclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _LIGHTCLASS_H_
+#define _LIGHTCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: LightClass
+////////////////////////////////////////////////////////////////////////////////
+class LightClass
+{
+public:
+	LightClass();
+	LightClass(const LightClass&amp;);
+	~LightClass();
+
+	void SetAmbientColor(float, float, float, float);
+	void SetDiffuseColor(float, float, float, float);
+	void SetPosition(float, float, float);
+	void SetLookAt(float, float, float);
+
+	D3DXVECTOR4 GetAmbientColor();
+	D3DXVECTOR4 GetDiffuseColor();
+	D3DXVECTOR3 GetPosition();
+
+	void GenerateViewMatrix();
+	void GenerateProjectionMatrix(float, float);
+
+	void GetViewMatrix(D3DXMATRIX&amp;);
+	void GetProjectionMatrix(D3DXMATRIX&amp;);
+
+private:
+	D3DXVECTOR4 m_ambientColor;
+	D3DXVECTOR4 m_diffuseColor;
+	D3DXVECTOR3 m_position;
+	D3DXVECTOR3 m_lookAt;
+	D3DXMATRIX m_viewMatrix;
+	D3DXMATRIX m_projectionMatrix;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Lightclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: lightclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "lightclass.h"
+
+
+LightClass::LightClass()
+{
+}
+
+
+LightClass::LightClass(const LightClass&amp; other)
+{
+}
+
+
+LightClass::~LightClass()
+{
+}
+
+
+void LightClass::SetAmbientColor(float red, float green, float blue, float alpha)
+{
+	m_ambientColor = D3DXVECTOR4(red, green, blue, alpha);
+	return;
+}
+
+
+void LightClass::SetDiffuseColor(float red, float green, float blue, float alpha)
+{
+	m_diffuseColor = D3DXVECTOR4(red, green, blue, alpha);
+	return;
+}
+
+
+void LightClass::SetPosition(float x, float y, float z)
+{
+	m_position = D3DXVECTOR3(x, y, z);
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetLookAt function sets the m_lookAt vector so that we can set where the light is looking at.
+This vector is used to build the light's view matrix.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void LightClass::SetLookAt(float x, float y, float z)
+{
+	m_lookAt.x = x;
+	m_lookAt.y = y;
+	m_lookAt.z = z;
+	return;
+}
+
+
+D3DXVECTOR4 LightClass::GetAmbientColor()
+{
+	return m_ambientColor;
+}
+
+
+D3DXVECTOR4 LightClass::GetDiffuseColor()
+{
+	return m_diffuseColor;
+}
+
+
+D3DXVECTOR3 LightClass::GetPosition()
+{
+	return m_position;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The view matrix for the light is built using the up vector, the lookAt vector, and the position of the light.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void LightClass::GenerateViewMatrix()
+{
+	D3DXVECTOR3 up;
+
+
+	// Setup the vector that points upwards.
+	up.x = 0.0f;
+	up.y = 1.0f;
+	up.z = 0.0f;
+
+	// Create the view matrix from the three vectors.
+	D3DXMatrixLookAtLH(&amp;m_viewMatrix, &amp;m_position, &amp;m_lookAt, &amp;up);
+	
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The projection matrix for the light is built using the field of view, viewing aspect ratio, and the near and far plane of the light range.
+The light we are projecting is more of a square spotlight than a true point light, but this is necessary since we need to align with the sampling
+from a square shadow map texture. That is why the field of view and aspect ratio are setup for a square projection.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void LightClass::GenerateProjectionMatrix(float screenDepth, float screenNear)
+{
+	float fieldOfView, screenAspect;
+
+
+	// Setup field of view and screen aspect for a square light source.
+	fieldOfView = (float)D3DX_PI / 2.0f;
+	screenAspect = 1.0f;
+
+	// Create the projection matrix for the light.
+	D3DXMatrixPerspectiveFovLH(&amp;m_projectionMatrix, fieldOfView, screenAspect, screenNear, screenDepth);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We also have two new functions to return the view and projection matrices.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void LightClass::GetViewMatrix(D3DXMATRIX&amp; viewMatrix)
+{
+	viewMatrix = m_viewMatrix;
+	return;
+}
+
+
+void LightClass::GetProjectionMatrix(D3DXMATRIX&amp; projectionMatrix)
+{
+	projectionMatrix = m_projectionMatrix;
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+#include "lightclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have included headers for the render to texture, depth shader, and shadow shader classes.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">#include "rendertextureclass.h"
+#include "depthshaderclass.h"
+#include "shadowshaderclass.h"
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 100.0f;
+const float SCREEN_NEAR = 1.0f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We also added a new define for the shadow map size so it can be easily tweaked.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">const int SHADOWMAP_WIDTH = 1024;
+const int SHADOWMAP_HEIGHT = 1024;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame(float, float, float, float, float, float);
+
+private:
+	bool RenderSceneToTexture();
+	bool Render();
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will use a cube, a sphere, and a ground model for the scene.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ModelClass *m_CubeModel, *m_GroundModel, *m_SphereModel;
+	LightClass* m_Light;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new render to texture, depth shader, and shadow shader objects are defined here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	RenderTextureClass* m_RenderTexture;
+	DepthShaderClass* m_DepthShader;
+	ShadowShaderClass* m_ShadowShader;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_CubeModel = 0;
+	m_GroundModel = 0;
+	m_SphereModel = 0;
+	m_Light = 0;
+	m_RenderTexture = 0;
+	m_DepthShader = 0;	
+	m_ShadowShader = 0;
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We setup the cube model here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the cube model object.
+	m_CubeModel = new ModelClass;
+	if(!m_CubeModel)
+	{
+		return false;
+	}
+
+	// Initialize the cube model object.
+	result = m_CubeModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/cube.txt", L"../Engine/data/wall01.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the cube model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Set the position for the cube model.
+	m_CubeModel-&gt;SetPosition(-2.0f, 2.0f, 0.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We setup the sphere model here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the sphere model object.
+	m_SphereModel = new ModelClass;
+	if(!m_SphereModel)
+	{
+		return false;
+	}
+
+	// Initialize the sphere model object.
+	result = m_SphereModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/sphere.txt", L"../Engine/data/ice.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sphere model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Set the position for the sphere model.
+	m_SphereModel-&gt;SetPosition(2.0f, 2.0f, 0.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We setup the ground model here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the ground model object.
+	m_GroundModel = new ModelClass;
+	if(!m_GroundModel)
+	{
+		return false;
+	}
+
+	// Initialize the ground model object.
+	result = m_GroundModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/plane01.txt", L"../Engine/data/metal001.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the ground model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Set the position for the ground model.
+	m_GroundModel-&gt;SetPosition(0.0f, 1.0f, 0.0f);
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The lookAt is now set in the light object and then we can generate the projection matrix that this light will have.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_Light-&gt;SetLookAt(0.0f, 0.0f, 0.0f);
+	m_Light-&gt;GenerateProjectionMatrix(SCREEN_DEPTH, SCREEN_NEAR);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We create a render to texture object that will be used as the shadow map.
+The depth buffer of the scene will be rendered from the light's perspective onto this render to texture object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the render to texture object.
+	m_RenderTexture = new RenderTextureClass;
+	if(!m_RenderTexture)
+	{
+		return false;
+	}
+
+	// Initialize the render to texture object.
+	result = m_RenderTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The depth shader object is created and initialized here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the depth shader object.
+	m_DepthShader = new DepthShaderClass;
+	if(!m_DepthShader)
+	{
+		return false;
+	}
+
+	// Initialize the depth shader object.
+	result = m_DepthShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the depth shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The shadow shader object is created and initialized here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the shadow shader object.
+	m_ShadowShader = new ShadowShaderClass;
+	if(!m_ShadowShader)
+	{
+		return false;
+	}
+
+	// Initialize the shadow shader object.
+	result = m_ShadowShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the shadow shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+	// Release the shadow shader object.
+	if(m_ShadowShader)
+	{
+		m_ShadowShader-&gt;Shutdown();
+		delete m_ShadowShader;
+		m_ShadowShader = 0;
+	}
+
+	// Release the depth shader object.
+	if(m_DepthShader)
+	{
+		m_DepthShader-&gt;Shutdown();
+		delete m_DepthShader;
+		m_DepthShader = 0;
+	}
+
+	// Release the render to texture object.
+	if(m_RenderTexture)
+	{
+		m_RenderTexture-&gt;Shutdown();
+		delete m_RenderTexture;
+		m_RenderTexture = 0;
+	}
+
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the ground model object.
+	if(m_GroundModel)
+	{
+		m_GroundModel-&gt;Shutdown();
+		delete m_GroundModel;
+		m_GroundModel = 0;
+	}
+
+	// Release the sphere model object.
+	if(m_SphereModel)
+	{
+		m_SphereModel-&gt;Shutdown();
+		delete m_SphereModel;
+		m_SphereModel = 0;
+	}
+
+	// Release the cube model object.
+	if(m_CubeModel)
+	{
+		m_CubeModel-&gt;Shutdown();
+		delete m_CubeModel;
+		m_CubeModel = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame(float posX, float posY, float posZ, float rotX, float rotY, float rotZ)
+{
+	bool result;
+	static float lightPositionX = -5.0f;
+
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(posX, posY, posZ);
+	m_Camera-&gt;SetRotation(rotX, rotY, rotZ);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+During the frame we move the light from left to right to see the shadows move in accordance with the light's position.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Update the position of the light each frame.
+	lightPositionX += 0.05f;
+	if(lightPositionX &gt; 5.0f)
+	{
+		lightPositionX = -5.0f;
+	}
+
+	// Update the position of the light.
+	m_Light-&gt;SetPosition(lightPositionX, 8.0f, -5.0f);
+
+	// Render the graphics scene.
+	result = Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The RenderSceneToTexture function is called at the beginning of the frame rendering.
+We basically render the depth buffer of the scene from the perspective of the light into the render to texture object which then becomes our shadow map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::RenderSceneToTexture()
+{
+	D3DXMATRIX worldMatrix, lightViewMatrix, lightProjectionMatrix, translateMatrix;
+	float posX, posY, posZ;
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the render to texture to be the rendering target.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the render target to be the render to texture.
+	m_RenderTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_RenderTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Generate the view matrix of the light.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Generate the light view matrix based on the light's position.
+	m_Light-&gt;GenerateViewMatrix();
+
+	// Get the world matrix from the d3d object.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Get the view and orthographic matrices from the light object.
+	m_Light-&gt;GetViewMatrix(lightViewMatrix);
+	m_Light-&gt;GetProjectionMatrix(lightProjectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Render all the objects in the scene using the depth shader and the light view and projection matrices.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the translation matrix for the cube model.
+	m_CubeModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the cube model with the depth shader.
+	m_CubeModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_DepthShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_CubeModel-&gt;GetIndexCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the sphere model.
+	m_SphereModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the sphere model with the depth shader.
+	m_SphereModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_DepthShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SphereModel-&gt;GetIndexCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the ground model.
+	m_GroundModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the ground model with the depth shader.
+	m_GroundModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_DepthShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_GroundModel-&gt;GetIndexCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the rendering target back to normal.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+
+
+bool GraphicsClass::Render()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, translateMatrix;
+	D3DXMATRIX lightViewMatrix, lightProjectionMatrix;
+	bool result;
+	float posX, posY, posZ;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First render the depth information to the render to texture object to get our shadow map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// First render the scene to a texture.
+	result = RenderSceneToTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Generate a light view matrix.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Generate the light view matrix based on the light's position.
+	m_Light-&gt;GenerateViewMatrix();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Retrieve the two matrices for the light.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Get the light's view and projection matrices from the light object.
+	m_Light-&gt;GetViewMatrix(lightViewMatrix);
+	m_Light-&gt;GetProjectionMatrix(lightProjectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now render each model using the shadow map shader, the light matrices, and the shadow map texture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the translation matrix for the cube model.
+	m_CubeModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+	
+	// Put the cube model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_CubeModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the model using the shadow shader.
+	result = m_ShadowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_CubeModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, lightViewMatrix, 
+					lightProjectionMatrix, m_CubeModel-&gt;GetTexture(), m_RenderTexture-&gt;GetShaderResourceView(), m_Light-&gt;GetPosition(),
+					m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the sphere model.
+	m_SphereModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_SphereModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_ShadowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SphereModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, lightViewMatrix, 
+					lightProjectionMatrix, m_SphereModel-&gt;GetTexture(), m_RenderTexture-&gt;GetShaderResourceView(), m_Light-&gt;GetPosition(), 
+					m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the ground model.
+	m_GroundModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the ground model using the shadow shader.
+	m_GroundModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_ShadowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_GroundModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, lightViewMatrix,
+					lightProjectionMatrix, m_GroundModel-&gt;GetTexture(), m_RenderTexture-&gt;GetShaderResourceView(), m_Light-&gt;GetPosition(), 
+					m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We can now add shadows to any of our scenes using a render to texture of the depth information from the light's perspective.
+The variable inputs and same checks can be used with any other shader program to add shadows.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 40_ Shadow Mapping_files/pic0223.gif" width="500" height="350"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Compile the code and run the program.  Use the arrow keys, A, Z, PgUp, and PgDn keys to navigate around the scene and examine the shadows.  Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Set the bias to 0.0f in the pixel shader to see the effect when no bias is set.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Set the bias to a higher value such as 0.3f to see how it moves the shadows away from their expected position.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Set the SHADOWMAP_WIDTH and SHADOWMAP_HEIGHT to a lower value such as 256 to see the effect a low resolution shadow map produces.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Move the sphere closer to the cube to see that they shadow each other.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11src40.zip">dx11src40.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11exe40.zip">dx11exe40.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 40_ Shadow Mapping_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutdx11.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 40_ Shadow Mapping_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

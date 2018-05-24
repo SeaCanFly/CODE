@@ -1,0 +1,1636 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut33.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 33: Fire</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 33: Fire
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover how to implement a fire shader in DirectX 11 using HLSL and C++. 
+The code in this tutorial is based on the previous tutorials.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+One of the most realistic ways to create a fire effect in DirectX is to use a noise texture and to perturb the sampling of that texture
+in the same way we have for water, glass, and ice.
+The only major difference is in the manipulation of the noise texture and the specific way we perturb the texture coordinates.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First start with a grey scale noise texture such as follows:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic0150.gif" width="128" height="128"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+These noise textures can be procedurally generated with several different graphics manipulation programs.
+The key is to produce one that has noise properties specific to a good looking fire.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The second texture needed for fire effect will be a texture composed of fire colored noise and a flame outline.
+For example the following texture is composed of a texture that uses perlin noise with fire colors and a texture of a small flame.
+If you look closely at the middle bottom part of the texture you can see the umbra and penumbra of the flame:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic0151.gif" width="128" height="128"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And finally you will need an alpha texture for transparency of the flame so that the final shape is very close to that of a small flame.
+This can be rough as the perturbation will take care of making it take shape of a good flame:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic0152.gif" width="128" height="128"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that we have the three textures required for the fire effect we can explain how the shader works.
+The first thing we do is take the noise texture and create three separate textures from it.
+The three separate textures are all based on the original noise texture except that they are scaled differently.
+These scales are called octaves as they are simply repeated tiles of the original noise texture to create numerous more detailed noise textures.
+The following three noise textures are scaled (tiled) by 1, 2, and 3:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic0153.gif" width="128" height="128"></p>
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic0154.gif" width="128" height="128"></p>
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic0155.gif" width="128" height="128"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We are also going to scroll all three noise textures upwards to create an upward moving noise which will correlate with a fire that burns upwards.
+The scroll speed will be set differently for all three so that each moves at a different rate.
+We will eventually combine the three noise textures so having them move at different rates adds dimension to the fire.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The next step is to convert the three noise textures from the (0, 1) range into the (-1, +1) range.
+This has the effect of removing some of the noise and creating noise that looks closer to fire.
+For example the first noise texture now looks like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic0156.gif" width="128" height="128"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With all three noise textures in the (-1, +1) range we can now add distortion to each texture along the x and y coordinates.
+The distortion modifies the noise textures by scaling down the noise similar to how the refraction scale in the water, glass, and ice shaders did so.
+Once each noise texture is distorted we can then combine all three noise textures to produce a final noise texture.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Note that the distortion here is only applied to the x and y coordinates since we will be using them as a look up table for the x and y texture sampling
+just like we do with normal maps.
+The z coordinate is ignored as it has no use when sampling textures in 2D.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Remember also that each frame the three noise textures are scrolling upwards at different rates so combining them creates an almost organized flowing noise
+that looks like fire.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now the next very important step is to perturb the original fire color texture.
+In other shaders such as water, glass, and ice we usually use a normal map at this point to perturb the texture sampling coordinates.
+However in fire we use the noise as our perturbed texture sampling coordinates.
+But before we do that we want to also perturb the noise itself.  
+We will use a distortion scale and bias to distort the noise higher at the top of the texture and less at the bottom of the texture
+to create a solid flame at the base and flame licks at the top.  
+In other words we perturb the noise along the Y axis using an increased amount of distortion as we go up the noise texture from the bottom.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now use the perturbed final noise texture as our look up table for texture sampling coordinates that will be used to sample the fire color texture.
+Note that we use Clamp instead of Wrap for the fire color texture or we will get flame licks wrapping around to the bottom which would ruin the look.
+The fire color texture sampled using the perturbed noise now looks like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic0158.gif" width="128" height="128"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that we have an animated burning square that looks fairly realistic we need a way of shaping it into more of a flame.
+To do so we turn on blending and use the alpha texture we created earlier.
+The trick is to sample the alpha texture using the same perturbed noise to make the alpha look like a burning flame.
+We also need to use Clamp instead of Wrap for sampling to prevent the flames from wrapping around to the bottom.
+When we do so we get the following result from the sampled perturbed alpha: 
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic0159.gif" width="128" height="128"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To complete the effect we set the perturbed alpha value to be the alpha channel of the perturbed fire color texture and the blending takes care of the rest:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic0160.gif" width="128" height="128"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+When you see this animated it looks very realistic.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frame work has one new class called FireShaderClass which is just the TextureShaderClass updated for the fire effect.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic0161.gif" width="368" height="238"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will start the code section by examining the HLSL fire shader.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Fire.vs</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: fire.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For the vertex shader we create a new constant buffer that will contain the values needed for calculations each frame.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The first variable called frameTime is updated each frame so the shader has access to an incremental time that is used for scrolling the different noise textures.
+The second variable scrollSpeeds is a 3 float array that contains three different scrolling speeds. 
+The x value is the scroll speed for the first noise texture. 
+The y value is the scroll speed for the second noise texture. 
+And the z value is the scroll speed for the third noise texture. 
+The third variable scales is a 3 float array that contains three different scales (or octaves) for the three different noise textures. 
+The x, y, and z values of scales is generally set to 1, 2, and 3. 
+This will make the first noise texture a single tile. 
+It also makes the second noise texture tiled twice in both directions. 
+And finally it makes the third noise texture tiled three times in both directions.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The last variable is called padding.  It is a single float that is used to make the NoiseBuffer a size that is divisible by 16.
+Padding will generally just be set to 0.0f.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer NoiseBuffer
+{
+    float frameTime;
+    float3 scrollSpeeds;
+    float3 scales;
+    float padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PixelInputType structure has been changed to take three different texture coordinates. 
+We use it for sampling the same noise texture in three different ways to basically create three different noise textures from one.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float2 texCoords1 : TEXCOORD1;
+    float2 texCoords2 : TEXCOORD2;
+    float2 texCoords3 : TEXCOORD3;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType FireVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we create three different texture sampling values so that the same noise texture can be used to create three different noise textures. 
+For each texture coordinate we first scale it by the scale value which then tiles the texture a number of times depending on the value in the scales array. 
+After that we scroll the three different y coordinates upwards using the frame time and the value in the scrollSpeeds array. 
+The scroll speed for all three will be different which gives the fire dimension.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Compute texture coordinates for first noise texture using the first scale and upward scrolling speed values.
+    output.texCoords1 = (input.tex * scales.x);
+    output.texCoords1.y = output.texCoords1.y + (frameTime * scrollSpeeds.x);
+
+    // Compute texture coordinates for second noise texture using the second scale and upward scrolling speed values.
+    output.texCoords2 = (input.tex * scales.y);
+    output.texCoords2.y = output.texCoords2.y + (frameTime * scrollSpeeds.y);
+
+    // Compute texture coordinates for third noise texture using the third scale and upward scrolling speed values.
+    output.texCoords3 = (input.tex * scales.z);
+    output.texCoords3.y = output.texCoords3.y + (frameTime * scrollSpeeds.z);
+	
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Fire.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: fire.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The three textures for the fire effect are the fire color texture, the noise texture, and the alpha texture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Texture2D fireTexture : register(t0);
+Texture2D noiseTexture : register(t1);
+Texture2D alphaTexture : register(t2);
+SamplerState SampleType;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We add a second sample state that uses Clamp. 
+The Wrap used in the first sample state would cause the fire to wrap around which ruins the effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">SamplerState SampleType2;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The pixel shader has a constant buffer called DistorionBuffer which contains the values needed by the pixel shader to create the fire effect.
+The three distortion arrays in the buffer contain a x and y value for distorting the three different noise textures by individual x and y parameters.
+The distortion scale and bias values in the DistortionBuffer are used for perturbing the final combined noise texture to make it take the shape of a flame.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer DistortionBuffer
+{
+    float2 distortion1;
+    float2 distortion2;
+    float2 distortion3;
+    float distortionScale;
+    float distortionBias;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float2 texCoords1 : TEXCOORD1;
+    float2 texCoords2 : TEXCOORD2;
+    float2 texCoords3 : TEXCOORD3;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 FirePixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 noise1;
+    float4 noise2;
+    float4 noise3;
+    float4 finalNoise;
+    float perturb;
+    float2 noiseCoords;
+    float4 fireColor;
+    float4 alphaColor;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First create three different noise values by sampling the noise texture three different ways. Afterward move the texture pixel value into the (-1, +1) range.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Sample the same noise texture using the three different texture coordinates to get three different noise scales.
+    noise1 = noiseTexture.Sample(SampleType, input.texCoords1);
+    noise2 = noiseTexture.Sample(SampleType, input.texCoords2);
+    noise3 = noiseTexture.Sample(SampleType, input.texCoords3);
+
+    // Move the noise from the (0, 1) range to the (-1, +1) range.
+    noise1 = (noise1 - 0.5f) * 2.0f;
+    noise2 = (noise2 - 0.5f) * 2.0f;
+    noise3 = (noise3 - 0.5f) * 2.0f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now scale down the x and y sampling coordinates by the distortion amount. 
+After they are distorted all three texture values are combined into a single value which represents the final noise value for this pixel.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Distort the three noise x and y coordinates by the three different distortion x and y values.
+    noise1.xy = noise1.xy * distortion1.xy;
+    noise2.xy = noise2.xy * distortion2.xy;
+    noise3.xy = noise3.xy * distortion3.xy;
+
+    // Combine all three distorted noise results into a single noise result.
+    finalNoise = noise1 + noise2 + noise3;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now perturb the final noise result to create a fire look to the overall noise texture. 
+Note that we perturb it more at the top and less as it moves to the bottom. 
+This creates a flickering flame at the top and as it progresses downwards it creates a more solid flame base.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Perturb the input texture Y coordinates by the distortion scale and bias values.  
+    // The perturbation gets stronger as you move up the texture which creates the flame flickering at the top effect.
+    perturb = ((1.0f - input.tex.y) * distortionScale) + distortionBias;
+
+    // Now create the perturbed and distorted texture sampling coordinates that will be used to sample the fire color texture.
+    noiseCoords.xy = (finalNoise.xy * perturb) + input.tex.xy;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Sample both the fire color texture and the alpha texture by the perturbed noise sampling coordinates to create the fire effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Sample the color from the fire texture using the perturbed and distorted texture sampling coordinates.
+    // Use the clamping sample state instead of the wrap sample state to prevent flames wrapping around.
+    fireColor = fireTexture.Sample(SampleType2, noiseCoords.xy);
+
+    // Sample the alpha value from the alpha texture using the perturbed and distorted texture sampling coordinates.
+    // This will be used for transparency of the fire.
+    // Use the clamping sample state instead of the wrap sample state to prevent flames wrapping around.
+    alphaColor = alphaTexture.Sample(SampleType2, noiseCoords.xy);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Combine the alpha and the fire color to create the transparent blended final fire effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Set the alpha blending of the fire to the perturbed and distored alpha texture value.
+    fireColor.a = alphaColor;
+	
+    return fireColor;
+}
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Fireshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The FireShaderClass is just the TextureShaderClass modified for the fire effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: fireshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _FIRESHADERCLASS_H_
+#define _FIRESHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: FireShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class FireShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The vertex shader has a constant buffer with variables for calculating noise so we need to create a structure that mirrors it so that we can set those values.
+This structure contains the frame speed, the three different scroll speeds, and the three different noise scales.
+The structure also has a padding variable that is used to make the structure a multiple of 16 which is a requirement for when the noise buffer is created. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct NoiseBufferType
+	{
+		float frameTime;
+		D3DXVECTOR3 scrollSpeeds;
+		D3DXVECTOR3 scales;
+		float padding;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The pixel shader also has a constant buffer with variables used for distorting the noise values to create the fire effect.
+This new structure is used in conjunction with a buffer to set the values in the pixel shader.
+The structure contains the three distortion arrays and the distortion scale and bias.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct DistortionBufferType
+	{
+		D3DXVECTOR2 distortion1;
+		D3DXVECTOR2 distortion2;
+		D3DXVECTOR2 distortion3;
+		float distortionScale;
+		float distortionBias;
+	};
+
+public:
+	FireShaderClass();
+	FireShaderClass(const FireShaderClass&amp;);
+	~FireShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, 
+		    ID3D11ShaderResourceView*, float, D3DXVECTOR3, D3DXVECTOR3, D3DXVECTOR2, D3DXVECTOR2, D3DXVECTOR2, float, float);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, 
+				 ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, float, D3DXVECTOR3, D3DXVECTOR3, D3DXVECTOR2, 
+				 D3DXVECTOR2, D3DXVECTOR2, float, float);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11Buffer* m_matrixBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a new buffer for the noise constant buffer in the vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11Buffer* m_noiseBuffer;
+	ID3D11SamplerState* m_sampleState;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There is a new sampler state which will use Clamp instead of Wrap for the fire effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11SamplerState* m_sampleState2;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Also there is a new distortion buffer for the distortion constant buffer in the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11Buffer* m_distortionBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Fireshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: fireshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "fireshaderclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+All the private pointers in the class are initialized to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">FireShaderClass::FireShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_matrixBuffer = 0;
+	m_noiseBuffer = 0;
+	m_sampleState = 0;
+	m_sampleState2 = 0;
+	m_distortionBuffer = 0;
+}
+
+
+FireShaderClass::FireShaderClass(const FireShaderClass&amp; other)
+{
+}
+
+
+FireShaderClass::~FireShaderClass()
+{
+}
+
+
+bool FireShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The fire.vs and fire.ps HLSL files are loaded here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/fire.vs", L"../Engine/fire.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void FireShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function takes in all the numerous input variables that are used to render and tweak the look of the fire. 
+They are first set in the shader using the SetShaderParameters function. 
+Once all the values are set the shader is used for rendering by then calling the RenderShader function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool FireShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+			     D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
+			     ID3D11ShaderResourceView* noiseTexture, ID3D11ShaderResourceView* alphaTexture, float frameTime,
+			     D3DXVECTOR3 scrollSpeeds, D3DXVECTOR3 scales, D3DXVECTOR2 distortion1, D3DXVECTOR2 distortion2,
+			     D3DXVECTOR2 distortion3, float distortionScale, float distortionBias)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, fireTexture, noiseTexture, alphaTexture, 
+				     frameTime, scrollSpeeds, scales, distortion1, distortion2, distortion3, distortionScale, 
+				     distortionBias);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool FireShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	unsigned int numElements;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC noiseBufferDesc;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_SAMPLER_DESC samplerDesc2;
+	D3D11_BUFFER_DESC distortionBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the fire vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "FireVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the fire pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "FirePixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, 
+					    &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, 
+					   &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	// This setup needs to match the VertexType stucture in the ModelClass and in the shader.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), 
+					   vertexShaderBuffer-&gt;GetBufferSize(), &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the matrix buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Setup and create the new noise buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the description of the dynamic noise constant buffer that is in the vertex shader.
+	noiseBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	noiseBufferDesc.ByteWidth = sizeof(NoiseBufferType);
+	noiseBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	noiseBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	noiseBufferDesc.MiscFlags = 0;
+	noiseBufferDesc.StructureByteStride = 0;
+
+	// Create the noise buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;noiseBufferDesc, NULL, &amp;m_noiseBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Setup and create the new sampler state that uses CLAMP instead of WRAP.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create a second texture sampler state description for a Clamp sampler.
+	samplerDesc2.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc2.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc2.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc2.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc2.MipLODBias = 0.0f;
+	samplerDesc2.MaxAnisotropy = 1;
+	samplerDesc2.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc2.BorderColor[0] = 0;
+	samplerDesc2.BorderColor[1] = 0;
+	samplerDesc2.BorderColor[2] = 0;
+	samplerDesc2.BorderColor[3] = 0;
+	samplerDesc2.MinLOD = 0;
+	samplerDesc2.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc2, &amp;m_sampleState2);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Setup and create the new distortion buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the description of the dynamic distortion constant buffer that is in the pixel shader.
+	distortionBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	distortionBufferDesc.ByteWidth = sizeof(DistortionBufferType);
+	distortionBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	distortionBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	distortionBufferDesc.MiscFlags = 0;
+	distortionBufferDesc.StructureByteStride = 0;
+
+	// Create the distortion buffer pointer so we can access the pixel shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;distortionBufferDesc, NULL, &amp;m_distortionBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void FireShaderClass::ShutdownShader()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ShutdownShader function releases all the pointers that were used to access values inside the fire shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the distortion constant buffer.
+	if(m_distortionBuffer)
+	{
+		m_distortionBuffer-&gt;Release();
+		m_distortionBuffer = 0;
+	}
+
+	// Release the second sampler state.
+	if(m_sampleState2)
+	{
+		m_sampleState2-&gt;Release();
+		m_sampleState2 = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the noise constant buffer.
+	if(m_noiseBuffer)
+	{
+		m_noiseBuffer-&gt;Release();
+		m_noiseBuffer = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void FireShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+
+
+bool FireShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix,
+					  D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
+					  ID3D11ShaderResourceView* noiseTexture, ID3D11ShaderResourceView* alphaTexture, 
+					  float frameTime, D3DXVECTOR3 scrollSpeeds, D3DXVECTOR3 scales, D3DXVECTOR2 distortion1, 
+					  D3DXVECTOR2 distortion2, D3DXVECTOR2 distortion3, float distortionScale, 
+					  float distortionBias)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* dataPtr;
+	NoiseBufferType* dataPtr2;
+	DistortionBufferType* dataPtr3;
+	unsigned int bufferNumber;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the matrix buffer in the vertex shader as usual.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Lock the matrix constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the matrix constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the matrix constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the matrix constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the matrix constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the matrix constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the new noise buffer in the vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Lock the noise constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_noiseBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the noise constant buffer.
+	dataPtr2 = (NoiseBufferType*)mappedResource.pData;
+
+	// Copy the data into the noise constant buffer.
+	dataPtr2-&gt;frameTime = frameTime;
+	dataPtr2-&gt;scrollSpeeds = scrollSpeeds;
+	dataPtr2-&gt;scales = scales;
+	dataPtr2-&gt;padding = 0.0f;
+
+	// Unlock the noise constant buffer.
+	deviceContext-&gt;Unmap(m_noiseBuffer, 0);
+
+	// Set the position of the noise constant buffer in the vertex shader.
+	bufferNumber = 1;
+
+	// Now set the noise constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_noiseBuffer);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the three textures in the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the three shader texture resources in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;fireTexture);
+	deviceContext-&gt;PSSetShaderResources(1, 1, &amp;noiseTexture);
+	deviceContext-&gt;PSSetShaderResources(2, 1, &amp;alphaTexture);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the new distortion buffer in the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Lock the distortion constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_distortionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the distortion constant buffer.
+	dataPtr3 = (DistortionBufferType*)mappedResource.pData;
+
+	// Copy the data into the distortion constant buffer.
+	dataPtr3-&gt;distortion1 = distortion1;
+	dataPtr3-&gt;distortion2 = distortion2;
+	dataPtr3-&gt;distortion3 = distortion3;
+	dataPtr3-&gt;distortionScale = distortionScale;
+	dataPtr3-&gt;distortionBias = distortionBias;
+
+	// Unlock the distortion constant buffer.
+	deviceContext-&gt;Unmap(m_distortionBuffer, 0);
+
+	// Set the position of the distortion constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Now set the distortion constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_distortionBuffer);
+
+	return true;
+}
+
+
+void FireShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler states in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the new sampler state that use CLAMP in the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	deviceContext-&gt;PSSetSamplers(1, 1, &amp;m_sampleState2);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We add the header for the new FireShaderClass.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">#include "fireshaderclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool Render();
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	ModelClass* m_Model;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The private FireShaderClass object is added here also.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	FireShaderClass* m_FireShader;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_Model = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the new fire shader object to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_FireShader = 0;
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+		
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Create the model object.
+	m_Model = new ModelClass;
+	if(!m_Model)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load a square model for the fire. 
+Also load the three textures that will be used to create the fire effect for this model.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the model object.
+	result = m_Model-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/square.txt", L"../Engine/data/fire01.dds", 
+				     L"../Engine/data/noise01.dds", L"../Engine/data/alpha01.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the new fire shader object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the fire shader object.
+	m_FireShader = new FireShaderClass;
+	if(!m_FireShader)
+	{
+		return false;
+	}
+
+	// Initialize the fire shader object.
+	result = m_FireShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the fire shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Shutdown and release the new fire shader object in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the fire shader object.
+	if(m_FireShader)
+	{
+		m_FireShader-&gt;Shutdown();
+		delete m_FireShader;
+		m_FireShader = 0;
+	}
+
+	// Release the model object.
+	if(m_Model)
+	{
+		m_Model-&gt;Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the Direct3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame()
+{
+	bool result;
+
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+
+	// Render the scene.
+	result = Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool GraphicsClass::Render()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+	D3DXVECTOR3 scrollSpeeds, scales;
+	D3DXVECTOR2 distortion1, distortion2, distortion3;
+	float distortionScale, distortionBias;
+	static float frameTime = 0.0f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Each frame increment the time. 
+This is used to scroll the three different noise textures in the shader. 
+Note that if you don't lock the FPS to 60 then you will need to determine the difference of time each frame 
+and update a timer to keep the fire burning at a consistent speed regardless of the FPS.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Increment the frame time counter.
+	frameTime += 0.01f;
+	if(frameTime &gt; 1000.0f)
+	{
+		frameTime = 0.0f;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the three scroll speeds, scales, and distortion values for the three different noise textures.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the three scrolling speeds for the three different noise textures.
+	scrollSpeeds = D3DXVECTOR3(1.3f, 2.1f, 2.3f);
+
+	// Set the three scales which will be used to create the three different noise octave textures.
+	scales = D3DXVECTOR3(1.0f, 2.0f, 3.0f);
+
+	// Set the three different x and y distortion factors for the three different noise textures.
+	distortion1 = D3DXVECTOR2(0.1f, 0.2f);
+	distortion2 = D3DXVECTOR2(0.1f, 0.3f);
+	distortion3 = D3DXVECTOR2(0.1f, 0.1f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the bias and scale that are used for perturbing the noise texture into a flame form.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// The the scale and bias of the texture coordinate sampling perturbation.
+	distortionScale = 0.8f;
+	distortionBias = 0.5f;
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This shader requires blending as we use a perturbed alpha texture for sampling and creating see through parts of the final fire effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Turn on alpha blending for the fire transparency.
+	m_D3D-&gt;TurnOnAlphaBlending();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Put the square model on the graphics pipeline.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Put the square model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model-&gt;Render(m_D3D-&gt;GetDeviceContext());
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Render the square model using the flame shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Render the square model using the fire shader.
+	result = m_FireShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+				      m_Model-&gt;GetTexture1(), m_Model-&gt;GetTexture2(), m_Model-&gt;GetTexture3(), frameTime, scrollSpeeds, 
+				      scales, distortion1, distortion2, distortion3, distortionScale, distortionBias);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn off alpha blending.
+	m_D3D-&gt;TurnOffAlphaBlending();
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The fire shader produces an incredibly realistic fire effect.  
+It is also highly customizable giving it the ability to produce almost any type of fire flame by just modifying one or more of the many tweakable shader variables.
+The flame will still need to be bill boarded or rendered a couple times at different angles in the same location to be used realistically in a 3D setting.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic0162.gif" width="186" height="186"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile and run the program.  You should get an animated fire effect.  Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Modify the many different shader values to see the different effects they produce.  Start with scale and bias.
+You may also want to comment out certain parts of the fire shader to see the effect they have on the different textures.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Create your own noise texture and see how it changes the fire.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Create your own alpha texture to modify the overall shape of the flame.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2008 Project: <a href="http://www.rastertek.com/dx11tut33.zip">dx11tut33.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src33.zip">dx11src33.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe33.zip">dx11exe33.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 33_ Fire_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 33_ Fire_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

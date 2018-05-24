@@ -1,0 +1,2195 @@
+
+<!-- saved from url=(0038)http://www.rastertek.com/tertut01.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 1: Grid and Camera Movement</title><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 1: Grid and Camera Movement
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 1_ Grid and Camera Movement_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover the basics of rendering a terrain grid using DirectX 11. 
+Before getting into more advanced terrain concepts you should be able to render a basic grid and have good camera functionality 
+and that will be the purpose of this tutorial. 
+With a good camera that can move around the terrain easily it can help debugging issues that occur during development. 
+Having good debugging tools is always the key to speeding up development and ensuring quality. 
+Also note that this tutorial is based on the knowledge and framework of the DirectX 11 tutorials. 
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The grid in this tutorial will be a basic 100x100 unit flat terrain. 
+It will be composed of quads made out of lines that will be encapsulated in a new class called TerrainClass. 
+The camera will also be based on a new class called PositionClass (CameraClass is still used to make the view matrix, I've just separated the functionality). 
+PositionClass will maintain the position and rotation of the camera as well as the acceleration and deceleration so that the camera moves smoothly around the terrain.
+And finally we will reuse the TextClass to display the FPS, CPU usage, video card information, and position/rotation of the camera. 
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frame work contains the new TerrainClass and PositionClass.  
+The rest of the classes have already been covered in the DirectX 11 tutorials section.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 1_ Grid and Camera Movement_files/pic0107.gif" width="590" height="266"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will start the tutorial by looking at the new TerrainClass.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The terrain class will encapsulate the model data and rendering functionality for drawing the 100x100 line grid.
+This class contains only the basics for now since this tutorial is just focused on getting a very basic terrain drawn first.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _TERRAINCLASS_H_
+#define _TERRAINCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: TerrainClass
+////////////////////////////////////////////////////////////////////////////////
+class TerrainClass
+{
+private:
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The vertex data/structure for the terrain will just be position and color as we are only drawing white lines to start with.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR4 color;
+	};
+
+public:
+	TerrainClass();
+	TerrainClass(const TerrainClass&amp;);
+	~TerrainClass();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The TerrainClass has the usual public and private functions for loading, releasing, and rendering the terrain.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	bool Initialize(ID3D11Device*);
+	void Shutdown();
+	void Render(ID3D11DeviceContext*);
+
+	int GetIndexCount();
+
+private:
+	bool InitializeBuffers(ID3D11Device*);
+	void ShutdownBuffers();
+	void RenderBuffers(ID3D11DeviceContext*);
+	
+private:
+	int m_terrainWidth, m_terrainHeight;
+	int m_vertexCount, m_indexCount;
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "terrainclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor will initialize the vertex and index buffer pointers to null.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">TerrainClass::TerrainClass()
+{
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+}
+
+
+TerrainClass::TerrainClass(const TerrainClass&amp; other)
+{
+}
+
+
+TerrainClass::~TerrainClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function will first set the width and height of the terrain and then call the function for initializing the 
+vertex and index buffers that will hold the terrain model data.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool TerrainClass::Initialize(ID3D11Device* device)
+{
+	bool result;
+
+
+	// Manually set the width and height of the terrain.
+	m_terrainWidth = 100;
+	m_terrainHeight = 100;
+
+	// Initialize the vertex and index buffer that hold the geometry for the terrain.
+	result = InitializeBuffers(device);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Shutdown calls the ShutdownBuffers function to release the vertex and index buffers that are holding the terrain model data.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void TerrainClass::Shutdown()
+{
+	// Release the vertex and index buffer.
+	ShutdownBuffers();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function calls RenderBuffers to put the terrain model data on the graphics pipeline so the ColorShaderClass object can then render it.
+This is done in the ApplicationClass::Render function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void TerrainClass::Render(ID3D11DeviceContext* deviceContext)
+{
+	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	RenderBuffers(deviceContext);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetIndexCount returns the number of indexes in the terrain model.
+This is called by the shaders that render the terrain as they require this information to perform the render.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">int TerrainClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The InitializeBuffers function creates the vertex and index buffers used to hold the terrain grid data.
+The terrain is going to be composed of lines forming squares. 
+In DirectX 11 to draw a line you need two points, and to draw a square you need eight points to form the four lines.
+So in the code below you will see a for loop that creates each square in the 100x100 grid using eight points to create four lines.
+Its not efficient but it is fine just to quickly see something working.
+Since we aren't loading a model I use a vertex and index array to create the terrain grid and then I create a vertex and index buffer from those arrays.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool TerrainClass::InitializeBuffers(ID3D11Device* device)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	int index, i, j;
+	float positionX, positionZ;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Determine the number of vertices in the 100x100 mesh.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Calculate the number of vertices in the terrain mesh.
+	m_vertexCount = (m_terrainWidth - 1) * (m_terrainHeight - 1) * 8;
+
+	// Set the index count to the same as the vertex count.
+	m_indexCount = m_vertexCount;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create the temporary vertex and index arrays.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now load the vertex and index arrays with the line lists that will form the 100x100 terrain grid.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the index to the vertex array.
+	index = 0;
+
+	// Load the vertex and index arrays with the terrain data.
+	for(j=0; j&lt;(m_terrainHeight-1); j++)
+	{
+		for(i=0; i&lt;(m_terrainWidth-1); i++)
+		{
+			// LINE 1
+			// Upper left.
+			positionX = (float)i;
+			positionZ = (float)(j+1);
+
+			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
+			vertices[index].color = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+			indices[index] = index;
+			index++;
+
+			// Upper right.
+			positionX = (float)(i+1);
+			positionZ = (float)(j+1);
+
+			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
+			vertices[index].color = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+			indices[index] = index;
+			index++;
+
+			// LINE 2
+			// Upper right.
+			positionX = (float)(i+1);
+			positionZ = (float)(j+1);
+
+			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
+			vertices[index].color = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+			indices[index] = index;
+			index++;
+
+			// Bottom right.
+			positionX = (float)(i+1);
+			positionZ = (float)j;
+
+			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
+			vertices[index].color = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+			indices[index] = index;
+			index++;
+
+			// LINE 3
+			// Bottom right.
+			positionX = (float)(i+1);
+			positionZ = (float)j;
+
+			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
+			vertices[index].color = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+			indices[index] = index;
+			index++;
+
+			// Bottom left.
+			positionX = (float)i;
+			positionZ = (float)j;
+
+			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
+			vertices[index].color = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+			indices[index] = index;
+			index++;
+
+			// LINE 4
+			// Bottom left.
+			positionX = (float)i;
+			positionZ = (float)j;
+
+			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
+			vertices[index].color = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+			indices[index] = index;
+			index++;
+
+			// Upper left.
+			positionX = (float)i;
+			positionZ = (float)(j+1);
+
+			vertices[index].position = D3DXVECTOR3(positionX, 0.0f, positionZ);
+			vertices[index].color = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+			indices[index] = index;
+			index++;			
+		}
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create the vertex and index buffers from the vertex and index arrays.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Finally release the arrays since the data is now in the buffers.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the arrays now that the buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ShutdownBuffers function releases the vertex and index buffer that were used to hold the terrain data.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void TerrainClass::ShutdownBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+RenderBuffers places the line list terrain model on the graphics pipeline for rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void TerrainClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType); 
+	offset = 0;
+    
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the render format to line list.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the type of primitive that should be rendered from this vertex buffer, in this case a line list.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Positionclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PositionClass is the class that encapsulates the camera/viewer location and the camera movement functionality.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: positionclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _POSITIONCLASS_H_
+#define _POSITIONCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: PositionClass
+////////////////////////////////////////////////////////////////////////////////
+class PositionClass
+{
+public:
+	PositionClass();
+	PositionClass(const PositionClass&amp;);
+	~PositionClass();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PositionClass has some helper functions to set and retrieve the position and rotation of the viewer/camera.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	void SetPosition(float, float, float);
+	void SetRotation(float, float, float);
+
+	void GetPosition(float&amp;, float&amp;, float&amp;);
+	void GetRotation(float&amp;, float&amp;, float&amp;);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+SetFrameTime is used to keep the viewer/camera in sync with the speed of the application.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	void SetFrameTime(float);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The movement functions are called to move the viewer/camera based on the user input.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	void MoveForward(bool);
+	void MoveBackward(bool);
+	void MoveUpward(bool);
+	void MoveDownward(bool);
+	void TurnLeft(bool);
+	void TurnRight(bool);
+	void LookUpward(bool);
+	void LookDownward(bool);
+
+private:
+	float m_positionX, m_positionY, m_positionZ;
+	float m_rotationX, m_rotationY, m_rotationZ;
+
+	float m_frameTime;
+
+	float m_forwardSpeed, m_backwardSpeed;
+	float m_upwardSpeed, m_downwardSpeed;
+	float m_leftTurnSpeed, m_rightTurnSpeed;
+	float m_lookUpSpeed, m_lookDownSpeed;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Positionclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: positionclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "positionclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor initializes all the position, rotation, frame time, and speed variables to zero.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">PositionClass::PositionClass()
+{
+	m_positionX = 0.0f;
+	m_positionY = 0.0f;
+	m_positionZ = 0.0f;
+	
+	m_rotationX = 0.0f;
+	m_rotationY = 0.0f;
+	m_rotationZ = 0.0f;
+
+	m_frameTime = 0.0f;
+
+	m_forwardSpeed   = 0.0f;
+	m_backwardSpeed  = 0.0f;
+	m_upwardSpeed    = 0.0f;
+	m_downwardSpeed  = 0.0f;
+	m_leftTurnSpeed  = 0.0f;
+	m_rightTurnSpeed = 0.0f;
+	m_lookUpSpeed    = 0.0f;
+	m_lookDownSpeed  = 0.0f;
+}
+
+
+PositionClass::PositionClass(const PositionClass&amp; other)
+{
+}
+
+
+PositionClass::~PositionClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetPosition and SetRotation functions are used for setting the position and rotation of the viewer/camera.
+These functions are generally used to initialize the position of the camera other than at the origin.
+In this tutorial the camera will be set slightly back from the grid and in the center of it.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::SetPosition(float x, float y, float z)
+{
+	m_positionX = x;
+	m_positionY = y;
+	m_positionZ = z;
+	return;
+}
+
+
+void PositionClass::SetRotation(float x, float y, float z)
+{
+	m_rotationX = x;
+	m_rotationY = y;
+	m_rotationZ = z;
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GetPosition and GetRotation functions return the current position and rotation of the camera location.
+In this tutorial these functions are called to provide the location and rotation of the camera for display purposes.
+We will draw the position/rotation as text strings on the left side of the screen.
+This is very useful for debugging.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::GetPosition(float&amp; x, float&amp; y, float&amp; z)
+{
+	x = m_positionX;
+	y = m_positionY;
+	z = m_positionZ;
+	return;
+}
+
+
+void PositionClass::GetRotation(float&amp; x, float&amp; y, float&amp; z)
+{
+	x = m_rotationX;
+	y = m_rotationY;
+	z = m_rotationZ;
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetFrameTime function needs to be called each frame.
+It stores the current frame time inside a private member variable and is then used by the movement calculation functions.
+This way regardless of the speed that the application is running at the movement and rotation speed remains the same.
+If this wasn't done then the movement rate would speed up or down with the frame rate.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::SetFrameTime(float time)
+{
+	m_frameTime = time;
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The following eight movement functions all work nearly the same.
+All eight functions are called each frame.
+The keydown input variable to each function indicates if the user is pressing the forward key, the backward key, and so forth.
+If they are pressing the key then each frame the speed will accelerate until it hits a maximum.
+This way the camera speeds up similar to the acceleration in a vehicle creating the effect of smooth movement and high responsiveness.
+Likewise if the user releases the key and the keydown variable is false it will then smoothly slow down each frame until the speed hits zero.
+The speed is calculated against the frame time to ensure the movement speed remains the same regardless of the frame rate.
+Each function then uses some basic math to calculate the new position of the viewer/camera.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the forward speed and movement of the viewer/camera.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::MoveForward(bool keydown)
+{
+	float radians;
+
+
+	// Update the forward speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_forwardSpeed += m_frameTime * 0.001f;
+
+		if(m_forwardSpeed &gt; (m_frameTime * 0.03f))
+		{
+			m_forwardSpeed = m_frameTime * 0.03f;
+		}
+	}
+	else
+	{
+		m_forwardSpeed -= m_frameTime * 0.0007f;
+
+		if(m_forwardSpeed &lt; 0.0f)
+		{
+			m_forwardSpeed = 0.0f;
+		}
+	}
+
+	// Convert degrees to radians.
+	radians = m_rotationY * 0.0174532925f;
+
+	// Update the position.
+	m_positionX += sinf(radians) * m_forwardSpeed;
+	m_positionZ += cosf(radians) * m_forwardSpeed;
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the backward speed and movement of the viewer/camera.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::MoveBackward(bool keydown)
+{
+	float radians;
+
+
+	// Update the backward speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_backwardSpeed += m_frameTime * 0.001f;
+
+		if(m_backwardSpeed &gt; (m_frameTime * 0.03f))
+		{
+			m_backwardSpeed = m_frameTime * 0.03f;
+		}
+	}
+	else
+	{
+		m_backwardSpeed -= m_frameTime * 0.0007f;
+		
+		if(m_backwardSpeed &lt; 0.0f)
+		{
+			m_backwardSpeed = 0.0f;
+		}
+	}
+
+	// Convert degrees to radians.
+	radians = m_rotationY * 0.0174532925f;
+
+	// Update the position.
+	m_positionX -= sinf(radians) * m_backwardSpeed;
+	m_positionZ -= cosf(radians) * m_backwardSpeed;
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the upward speed and movement of the viewer/camera.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::MoveUpward(bool keydown)
+{
+	// Update the upward speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_upwardSpeed += m_frameTime * 0.003f;
+
+		if(m_upwardSpeed &gt; (m_frameTime * 0.03f))
+		{
+			m_upwardSpeed = m_frameTime * 0.03f;
+		}
+	}
+	else
+	{
+		m_upwardSpeed -= m_frameTime * 0.002f;
+
+		if(m_upwardSpeed &lt; 0.0f)
+		{
+			m_upwardSpeed = 0.0f;
+		}
+	}
+
+	// Update the height position.
+	m_positionY += m_upwardSpeed;
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the downward speed and movement of the viewer/camera.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::MoveDownward(bool keydown)
+{
+	// Update the downward speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_downwardSpeed += m_frameTime * 0.003f;
+
+		if(m_downwardSpeed &gt; (m_frameTime * 0.03f))
+		{
+			m_downwardSpeed = m_frameTime * 0.03f;
+		}
+	}
+	else
+	{
+		m_downwardSpeed -= m_frameTime * 0.002f;
+
+		if(m_downwardSpeed &lt; 0.0f)
+		{
+			m_downwardSpeed = 0.0f;
+		}
+	}
+
+	// Update the height position.
+	m_positionY -= m_downwardSpeed;
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the left turn speed and rotation of the viewer/camera.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::TurnLeft(bool keydown)
+{
+	// Update the left turn speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_leftTurnSpeed += m_frameTime * 0.01f;
+
+		if(m_leftTurnSpeed &gt; (m_frameTime * 0.15f))
+		{
+			m_leftTurnSpeed = m_frameTime * 0.15f;
+		}
+	}
+	else
+	{
+		m_leftTurnSpeed -= m_frameTime* 0.005f;
+
+		if(m_leftTurnSpeed &lt; 0.0f)
+		{
+			m_leftTurnSpeed = 0.0f;
+		}
+	}
+
+	// Update the rotation.
+	m_rotationY -= m_leftTurnSpeed;
+
+	// Keep the rotation in the 0 to 360 range.
+	if(m_rotationY &lt; 0.0f)
+	{
+		m_rotationY += 360.0f;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the right turn speed and rotation of the viewer/camera.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::TurnRight(bool keydown)
+{
+	// Update the right turn speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_rightTurnSpeed += m_frameTime * 0.01f;
+
+		if(m_rightTurnSpeed &gt; (m_frameTime * 0.15f))
+		{
+			m_rightTurnSpeed = m_frameTime * 0.15f;
+		}
+	}
+	else
+	{
+		m_rightTurnSpeed -= m_frameTime* 0.005f;
+
+		if(m_rightTurnSpeed &lt; 0.0f)
+		{
+			m_rightTurnSpeed = 0.0f;
+		}
+	}
+
+	// Update the rotation.
+	m_rotationY += m_rightTurnSpeed;
+
+	// Keep the rotation in the 0 to 360 range.
+	if(m_rotationY &gt; 360.0f)
+	{
+		m_rotationY -= 360.0f;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the upward turn speed and rotation of the viewer/camera.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::LookUpward(bool keydown)
+{
+	// Update the upward rotation speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_lookUpSpeed += m_frameTime * 0.01f;
+
+		if(m_lookUpSpeed &gt; (m_frameTime * 0.15f))
+		{
+			m_lookUpSpeed = m_frameTime * 0.15f;
+		}
+	}
+	else
+	{
+		m_lookUpSpeed -= m_frameTime* 0.005f;
+
+		if(m_lookUpSpeed &lt; 0.0f)
+		{
+			m_lookUpSpeed = 0.0f;
+		}
+	}
+
+	// Update the rotation.
+	m_rotationX -= m_lookUpSpeed;
+
+	// Keep the rotation maximum 90 degrees.
+	if(m_rotationX &gt; 90.0f)
+	{
+		m_rotationX = 90.0f;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the downward turn speed and rotation of the viewer/camera.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void PositionClass::LookDownward(bool keydown)
+{
+	// Update the downward rotation speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_lookDownSpeed += m_frameTime * 0.01f;
+
+		if(m_lookDownSpeed &gt; (m_frameTime * 0.15f))
+		{
+			m_lookDownSpeed = m_frameTime * 0.15f;
+		}
+	}
+	else
+	{
+		m_lookDownSpeed -= m_frameTime* 0.005f;
+
+		if(m_lookDownSpeed &lt; 0.0f)
+		{
+			m_lookDownSpeed = 0.0f;
+		}
+	}
+
+	// Update the rotation.
+	m_rotationX += m_lookDownSpeed;
+
+	// Keep the rotation maximum 90 degrees.
+	if(m_rotationX &lt; -90.0f)
+	{
+		m_rotationX = -90.0f;
+	}
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Systemclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SystemClass has been slightly modified from the DirectX tutorials version.
+It now only contains the Windows initialization and the new ApplicationClass.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: systemclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SYSTEMCLASS_H_
+#define _SYSTEMCLASS_H_
+
+
+///////////////////////////////
+// PRE-PROCESSING DIRECTIVES //
+///////////////////////////////
+#define WIN32_LEAN_AND_MEAN
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;windows.h&gt;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We include the header for the new ApplicationClass here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////</font><font face="arial" color="#aaaaff" size="2">
+#include "applicationclass.h"</font><font face="arial" color="#aaffaa" size="2">
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: SystemClass
+////////////////////////////////////////////////////////////////////////////////
+class SystemClass
+{
+public:
+	SystemClass();
+	SystemClass(const SystemClass&amp;);
+	~SystemClass();
+
+	bool Initialize();
+	void Shutdown();
+	void Run();
+
+	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
+
+private:
+	bool Frame();
+	void InitializeWindows(int&amp;, int&amp;);
+	void ShutdownWindows();
+
+private:
+	LPCWSTR m_applicationName;
+	HINSTANCE m_hinstance;
+	HWND m_hwnd;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We also include a private pointer to the new ApplicationClass object.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	ApplicationClass* m_Application;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+
+/////////////////////////
+// FUNCTION PROTOTYPES //
+/////////////////////////
+static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+
+/////////////
+// GLOBALS //
+/////////////
+static SystemClass* ApplicationHandle = 0;
+
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Systemclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: systemclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "systemclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new ApplicationClass object pointer is initialized to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">SystemClass::SystemClass()
+{</font><font face="arial" color="#aaaaff" size="2">
+	m_Application = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+SystemClass::SystemClass(const SystemClass&amp; other)
+{
+}
+
+
+SystemClass::~SystemClass()
+{
+}
+
+
+bool SystemClass::Initialize()
+{
+	int screenWidth, screenHeight;
+	bool result;
+
+
+	// Initialize the width and height of the screen to zero before sending the variables into the function.
+	screenWidth = 0;
+	screenHeight = 0;
+
+	// Initialize the windows api.
+	InitializeWindows(screenWidth, screenHeight);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ApplicationClass object is created and initialized here.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the application wrapper object.
+	m_Application = new ApplicationClass;
+	if(!m_Application)
+	{
+		return false;
+	}
+
+	// Initialize the application wrapper object.
+	result = m_Application-&gt;Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void SystemClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new ApplicationClass object is released in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Release the application wrapper object.
+	if(m_Application)
+	{
+		m_Application-&gt;Shutdown();
+		delete m_Application;
+		m_Application = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Shutdown the window.
+	ShutdownWindows();
+	
+	return;
+}
+
+
+void SystemClass::Run()
+{
+	MSG msg;
+	bool done, result;
+
+
+	// Initialize the message structure.
+	ZeroMemory(&amp;msg, sizeof(MSG));
+	
+	// Loop until there is a quit message from the window or the user.
+	done = false;
+	while(!done)
+	{
+		// Handle the windows messages.
+		if(PeekMessage(&amp;msg, NULL, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&amp;msg);
+			DispatchMessage(&amp;msg);
+		}
+
+		// If windows signals to end the application then exit out.
+		if(msg.message == WM_QUIT)
+		{
+			done = true;
+		}
+		else
+		{
+			// Otherwise do the frame processing.
+			result = Frame();
+			if(!result)
+			{
+				done = true;
+			}
+		}
+
+	}
+
+	return;
+}
+
+
+bool SystemClass::Frame()
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frame processing now calls the ApplicationClass so that all application processing can be encapsulated inside it.
+This helps simplify the purpose of the SystemClass.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Do the frame processing for the application object.
+	result = m_Application-&gt;Frame();
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
+{
+	return DefWindowProc(hwnd, umsg, wparam, lparam);
+}
+
+
+void SystemClass::InitializeWindows(int&amp; screenWidth, int&amp; screenHeight)
+{
+	WNDCLASSEX wc;
+	DEVMODE dmScreenSettings;
+	int posX, posY;
+
+
+	// Get an external pointer to this object.	
+	ApplicationHandle = this;
+
+	// Get the instance of this application.
+	m_hinstance = GetModuleHandle(NULL);
+
+	// Give the application a name.
+	m_applicationName = L"Engine";
+
+	// Setup the windows class with default settings.
+	wc.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+	wc.lpfnWndProc   = WndProc;
+	wc.cbClsExtra    = 0;
+	wc.cbWndExtra    = 0;
+	wc.hInstance     = m_hinstance;
+	wc.hIcon		 = LoadIcon(NULL, IDI_WINLOGO);
+	wc.hIconSm       = wc.hIcon;
+	wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
+	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	wc.lpszMenuName  = NULL;
+	wc.lpszClassName = m_applicationName;
+	wc.cbSize        = sizeof(WNDCLASSEX);
+	
+	// Register the window class.
+	RegisterClassEx(&amp;wc);
+
+	// Determine the resolution of the clients desktop screen.
+	screenWidth  = GetSystemMetrics(SM_CXSCREEN);
+	screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+	// Setup the screen settings depending on whether it is running in full screen or in windowed mode.
+	if(FULL_SCREEN)
+	{
+		// If full screen set the screen to maximum size of the users desktop and 32bit.
+		memset(&amp;dmScreenSettings, 0, sizeof(dmScreenSettings));
+		dmScreenSettings.dmSize       = sizeof(dmScreenSettings);
+		dmScreenSettings.dmPelsWidth  = (unsigned long)screenWidth;
+		dmScreenSettings.dmPelsHeight = (unsigned long)screenHeight;
+		dmScreenSettings.dmBitsPerPel = 32;			
+		dmScreenSettings.dmFields     = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+
+		// Change the display settings to full screen.
+		ChangeDisplaySettings(&amp;dmScreenSettings, CDS_FULLSCREEN);
+
+		// Set the position of the window to the top left corner.
+		posX = posY = 0;
+	}
+	else
+	{
+		// If windowed then set it to 800x600 resolution.
+		screenWidth  = 800;
+		screenHeight = 600;
+
+		// Place the window in the middle of the screen.
+		posX = (GetSystemMetrics(SM_CXSCREEN) - screenWidth)  / 2;
+		posY = (GetSystemMetrics(SM_CYSCREEN) - screenHeight) / 2;
+	}
+
+	// Create the window with the screen settings and get the handle to it.
+	m_hwnd = CreateWindowEx(WS_EX_APPWINDOW, m_applicationName, m_applicationName, 
+				WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP,
+				posX, posY, screenWidth, screenHeight, NULL, NULL, m_hinstance, NULL);
+
+	// Bring the window up on the screen and set it as main focus.
+	ShowWindow(m_hwnd, SW_SHOW);
+	SetForegroundWindow(m_hwnd);
+	SetFocus(m_hwnd);
+
+	// Hide the mouse cursor.
+	ShowCursor(false);
+
+	return;
+}
+
+
+void SystemClass::ShutdownWindows()
+{
+	// Show the mouse cursor.
+	ShowCursor(true);
+
+	// Fix the display settings if leaving full screen mode.
+	if(FULL_SCREEN)
+	{
+		ChangeDisplaySettings(NULL, 0);
+	}
+
+	// Remove the window.
+	DestroyWindow(m_hwnd);
+	m_hwnd = NULL;
+
+	// Remove the application instance.
+	UnregisterClass(m_applicationName, m_hinstance);
+	m_hinstance = NULL;
+
+	// Release the pointer to this class.
+	ApplicationHandle = NULL;
+
+	return;
+}
+
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
+{
+	switch(umessage)
+	{
+		// Check if the window is being destroyed.
+		case WM_DESTROY:
+		{
+			PostQuitMessage(0);
+			return 0;
+		}
+
+		// Check if the window is being closed.
+		case WM_CLOSE:
+		{
+			PostQuitMessage(0);		
+			return 0;
+		}
+
+		// All other messages pass to the message handler in the system class.
+		default:
+		{
+			return ApplicationHandle-&gt;MessageHandler(hwnd, umessage, wparam, lparam);
+		}
+	}
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ApplicationClass is the main wrapper class for the entire terrain application.
+It handles all the graphics, input, and processing.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _APPLICATIONCLASS_H_
+#define _APPLICATIONCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "inputclass.h"
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "terrainclass.h"
+#include "colorshaderclass.h"
+#include "timerclass.h"
+#include "positionclass.h"
+#include "fpsclass.h"
+#include "cpuclass.h"
+#include "fontshaderclass.h"
+#include "textclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ApplicationClass
+////////////////////////////////////////////////////////////////////////////////
+class ApplicationClass
+{
+public:
+	ApplicationClass();
+	ApplicationClass(const ApplicationClass&amp;);
+	~ApplicationClass();
+
+	bool Initialize(HINSTANCE, HWND, int, int);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool HandleInput(float);
+	bool RenderGraphics();
+
+private:
+	InputClass* m_Input;
+	D3DClass* m_Direct3D;
+	CameraClass* m_Camera;
+	TerrainClass* m_Terrain;
+	ColorShaderClass* m_ColorShader;
+	TimerClass* m_Timer;
+	PositionClass* m_Position;
+	FpsClass* m_Fps;
+	CpuClass* m_Cpu;
+	FontShaderClass* m_FontShader;
+	TextClass* m_Text;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "applicationclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor initializes all the object pointers to null.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">ApplicationClass::ApplicationClass()
+{
+	m_Input = 0;
+	m_Direct3D = 0;
+	m_Camera = 0;
+	m_Terrain = 0;
+	m_ColorShader = 0;
+	m_Timer = 0;
+	m_Position = 0;
+	m_Fps = 0;
+	m_Cpu = 0;
+	m_FontShader = 0;
+	m_Text = 0;
+}
+
+
+ApplicationClass::ApplicationClass(const ApplicationClass&amp; other)
+{
+}
+
+
+ApplicationClass::~ApplicationClass()
+{
+}
+
+
+bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+{
+	bool result;
+	float cameraX, cameraY, cameraZ;
+	D3DXMATRIX baseViewMatrix;
+	char videoCard[128];
+	int videoMemory;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the input object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
+	m_Input = new InputClass;
+	if(!m_Input)
+	{
+		return false;
+	}
+
+	// Initialize the input object.
+	result = m_Input-&gt;Initialize(hinstance, hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the DirectX 11 object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the Direct3D object.
+	m_Direct3D = new D3DClass;
+	if(!m_Direct3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_Direct3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize DirectX 11.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the camera object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Initialize a base view matrix with the camera for 2D user interface rendering.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -1.0f);
+	m_Camera-&gt;Render();
+	m_Camera-&gt;GetViewMatrix(baseViewMatrix);
+
+	// Set the initial position of the camera.
+	cameraX = 50.0f;
+	cameraY = 2.0f;
+	cameraZ = -7.0f;
+
+	m_Camera-&gt;SetPosition(cameraX, cameraY, cameraZ);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the terrain object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the terrain object.
+	m_Terrain = new TerrainClass;
+	if(!m_Terrain)
+	{
+		return false;
+	}
+
+	// Initialize the terrain object.
+	result = m_Terrain-&gt;Initialize(m_Direct3D-&gt;GetDevice());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the color shader object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the color shader object.
+	m_ColorShader = new ColorShaderClass;
+	if(!m_ColorShader)
+	{
+		return false;
+	}
+
+	// Initialize the color shader object.
+	result = m_ColorShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the color shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the timer object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the timer object.
+	m_Timer = new TimerClass;
+	if(!m_Timer)
+	{
+		return false;
+	}
+
+	// Initialize the timer object.
+	result = m_Timer-&gt;Initialize();
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the timer object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the position object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the position object.
+	m_Position = new PositionClass;
+	if(!m_Position)
+	{
+		return false;
+	}
+
+	// Set the initial position of the viewer to the same as the initial camera position.
+	m_Position-&gt;SetPosition(cameraX, cameraY, cameraZ);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the FPS object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the fps object.
+	m_Fps = new FpsClass;
+	if(!m_Fps)
+	{
+		return false;
+	}
+
+	// Initialize the fps object.
+	m_Fps-&gt;Initialize();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the CPU usage object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the cpu object.
+	m_Cpu = new CpuClass;
+	if(!m_Cpu)
+	{
+		return false;
+	}
+
+	// Initialize the cpu object.
+	m_Cpu-&gt;Initialize();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the font shader object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the font shader object.
+	m_FontShader = new FontShaderClass;
+	if(!m_FontShader)
+	{
+		return false;
+	}
+
+	// Initialize the font shader object.
+	result = m_FontShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the font shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the text object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the text object.
+	m_Text = new TextClass;
+	if(!m_Text)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	result = m_Text-&gt;Initialize(m_Direct3D-&gt;GetDevice(), m_Direct3D-&gt;GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Retrieve the video card information.
+	m_Direct3D-&gt;GetVideoCardInfo(videoCard, videoMemory);
+
+	// Set the video card information in the text object.
+	result = m_Text-&gt;SetVideoCardInfo(videoCard, videoMemory, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not set video card info in the text object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function will release all the objects that were created in the Initialize function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void ApplicationClass::Shutdown()
+{
+	// Release the text object.
+	if(m_Text)
+	{
+		m_Text-&gt;Shutdown();
+		delete m_Text;
+		m_Text = 0;
+	}
+
+	// Release the font shader object.
+	if(m_FontShader)
+	{
+		m_FontShader-&gt;Shutdown();
+		delete m_FontShader;
+		m_FontShader = 0;
+	}
+
+	// Release the cpu object.
+	if(m_Cpu)
+	{
+		m_Cpu-&gt;Shutdown();
+		delete m_Cpu;
+		m_Cpu = 0;
+	}
+
+	// Release the fps object.
+	if(m_Fps)
+	{
+		delete m_Fps;
+		m_Fps = 0;
+	}
+
+	// Release the position object.
+	if(m_Position)
+	{
+		delete m_Position;
+		m_Position = 0;
+	}
+
+	// Release the timer object.
+	if(m_Timer)
+	{
+		delete m_Timer;
+		m_Timer = 0;
+	}
+
+	// Release the color shader object.
+	if(m_ColorShader)
+	{
+		m_ColorShader-&gt;Shutdown();
+		delete m_ColorShader;
+		m_ColorShader = 0;
+	}
+
+	// Release the terrain object.
+	if(m_Terrain)
+	{
+		m_Terrain-&gt;Shutdown();
+		delete m_Terrain;
+		m_Terrain = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the Direct3D object.
+	if(m_Direct3D)
+	{
+		m_Direct3D-&gt;Shutdown();
+		delete m_Direct3D;
+		m_Direct3D = 0;
+	}
+
+	// Release the input object.
+	if(m_Input)
+	{
+		m_Input-&gt;Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Frame function does all the processing for the terrain application.
+All processing, input, and graphics must be handled here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool ApplicationClass::Frame()
+{
+	bool result;
+
+
+	// Read the user input.
+	result = m_Input-&gt;Frame();
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Check if the user pressed escape and wants to exit the application.
+	if(m_Input-&gt;IsEscapePressed() == true)
+	{
+		return false;
+	}
+
+	// Update the system stats.
+	m_Timer-&gt;Frame();
+	m_Fps-&gt;Frame();
+	m_Cpu-&gt;Frame();
+
+	// Update the FPS value in the text object.
+	result = m_Text-&gt;SetFps(m_Fps-&gt;GetFps(), m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Update the CPU usage value in the text object.
+	result = m_Text-&gt;SetCpu(m_Cpu-&gt;GetCpuPercentage(), m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Do the frame input processing.
+	result = HandleInput(m_Timer-&gt;GetTime());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the graphics.
+	result = RenderGraphics();
+	if(!result)
+	{
+		return false;
+	}
+
+	return result;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The HandleInput function does all the processing related to the user input from the keyboard and mouse.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool ApplicationClass::HandleInput(float frameTime)
+{
+	bool keyDown, result;
+	float posX, posY, posZ, rotX, rotY, rotZ;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The very first thing that is done is the frame time is set in the PositionClass object.
+The reason being is that the frame time is required by all the following movement calculation functions.
+If it is not set then the movement will not be accurate.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the frame time for calculating the updated position.
+	m_Position-&gt;SetFrameTime(frameTime);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next the user input is determined for each of the eight movement types.
+The forward, backward, turn left, and turn right functions are updated by the arrow keys.
+The up and down movement functions are updated by the A and Z keys.
+The look up and look down rotation functions are updated by the PgUp and PgDn keys.
+If the user is pressing the key then a true boolean value will be sent to the appropriate function.
+If not then false is sent to each.
+This allows us to accelerate if the user is holding down the movement key or decelerate if the user is not holding down that movement key.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Handle the input.
+	keyDown = m_Input-&gt;IsLeftPressed();
+	m_Position-&gt;TurnLeft(keyDown);
+
+	keyDown = m_Input-&gt;IsRightPressed();
+	m_Position-&gt;TurnRight(keyDown);
+
+	keyDown = m_Input-&gt;IsUpPressed();
+	m_Position-&gt;MoveForward(keyDown);
+
+	keyDown = m_Input-&gt;IsDownPressed();
+	m_Position-&gt;MoveBackward(keyDown);
+
+	keyDown = m_Input-&gt;IsAPressed();
+	m_Position-&gt;MoveUpward(keyDown);
+
+	keyDown = m_Input-&gt;IsZPressed();
+	m_Position-&gt;MoveDownward(keyDown);
+
+	keyDown = m_Input-&gt;IsPgUpPressed();
+	m_Position-&gt;LookUpward(keyDown);
+
+	keyDown = m_Input-&gt;IsPgDownPressed();
+	m_Position-&gt;LookDownward(keyDown);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+After the movement for this frame has been calculated we then get the position and rotation from the PositionObject 
+and update the CameraClass and TextClass object with the new viewing position.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Get the view point position/rotation.
+	m_Position-&gt;GetPosition(posX, posY, posZ);
+	m_Position-&gt;GetRotation(rotX, rotY, rotZ);
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(posX, posY, posZ);
+	m_Camera-&gt;SetRotation(rotX, rotY, rotZ);
+
+	// Update the position values in the text object.
+	result = m_Text-&gt;SetCameraPosition(posX, posY, posZ, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Update the rotation values in the text object.
+	result = m_Text-&gt;SetCameraRotation(rotX, rotY, rotZ, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The RenderGraphics function handles all the graphics processing.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool ApplicationClass::RenderGraphics()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First clear the scene and render the view matrix from the camera position.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Clear the scene.
+	m_Direct3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Get all the matrices needed for rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_Direct3D-&gt;GetProjectionMatrix(projectionMatrix);
+	m_Direct3D-&gt;GetOrthoMatrix(orthoMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Render the 100x100 terrain grid using the color shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Render the terrain buffers.
+	m_Terrain-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+
+	// Render the model using the color shader.
+	result = m_ColorShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Finally render the 2D text strings for the user interface.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Turn off the Z buffer to begin all 2D rendering.
+	m_Direct3D-&gt;TurnZBufferOff();
+		
+	// Turn on the alpha blending before rendering the text.
+	m_Direct3D-&gt;TurnOnAlphaBlending();
+
+	// Render the text user interface elements.
+	result = m_Text-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_FontShader, worldMatrix, orthoMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn off alpha blending after rendering the text.
+	m_Direct3D-&gt;TurnOffAlphaBlending();
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D-&gt;TurnZBufferOn();
+
+	// Present the rendered scene to the screen.
+	m_Direct3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+So now we have a highly responsive camera that moves around a 100x100 terrain grid. 
+You also have the position and rotation displayed in the user interface for debugging purposes. 
+With these basic tools built you can now move forward and create more advanced terrain. 
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 1_ Grid and Camera Movement_files/pic0108.gif" width="500" height="282"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the code and move around the terrain grid. Use the arrow keys and the A and Z key to move upward and downward.  Use the PgUp and PgDn
+to rotate the view up and down.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Change the input keys to your own favorite settings.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Add a strafing ability to the PositionClass.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2010 Project: <a href="http://www.rastertek.com/tertut01.zip">tertut01.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/tersrc01.zip">tersrc01.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/terexe01.zip">terexe01.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 1_ Grid and Camera Movement_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 1_ Grid and Camera Movement_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

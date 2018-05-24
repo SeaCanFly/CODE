@@ -1,0 +1,1751 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut48.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 48: Directional Shadow Maps</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000" style="width:1000px">
+
+<p align="center"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 48: Directional Shadow Maps
+</b></font></p>
+
+<p align="center"><img border="0" src="./Tutorial 48_ Directional Shadow Maps_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover how to implement directional shadow maps using DirectX 11 and HLSL.
+We will start with the code from the original shadow mapping tutorial number 40 and modify it 
+to handle directional lighting.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Directional shadow maps are generally used to simulate shadows that would be created by sun light.
+Uses include where something like sun light comes through a window, or shadows for objects on terrain,
+and other lighting methods that require a directional light instead of positional.
+</font></p>
+
+<p align="center"><img border="0" src="./Tutorial 48_ Directional Shadow Maps_files/pic0288.gif" width="500" height="274"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To implement directional shadow maps we will need to just make two changes to our already 
+existing positional shadow map code.  The first change will be to modify the light shading code
+to handle directional lighting instead of positional lighting.  And the second change is to use
+an orthographic projection matrix instead of our regular projection matrix.  The orthographic
+matrix gives us a square projection which fits with directional lighting instead of a trapezoid
+style projection that positional lights use.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will start the code section of the tutorial by looking at the updated HLSL shadow shader.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadow.vs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The vertex shader has had the positional lighting code removed from it.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadow.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////
+// CONSTANT BUFFERS //
+//////////////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+    matrix lightViewMatrix;
+    matrix lightProjectionMatrix;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float4 lightViewPosition : TEXCOORD1;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType ShadowVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+
+    // Calculate the position of the vertice as viewed by the light source.
+    output.lightViewPosition = mul(input.position, worldMatrix);
+    output.lightViewPosition = mul(output.lightViewPosition, lightViewMatrix);
+    output.lightViewPosition = mul(output.lightViewPosition, lightProjectionMatrix);
+
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+
+    // Calculate the normal vector against the world matrix only.
+    output.normal = mul(input.normal, (float3x3)worldMatrix);
+	
+    // Normalize the normal vector.
+    output.normal = normalize(output.normal);
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadow.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadow.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////
+// TEXTURES //
+//////////////
+Texture2D shaderTexture : register(t0);
+Texture2D depthMapTexture : register(t1);
+
+
+///////////////////
+// SAMPLE STATES //
+///////////////////
+SamplerState SampleTypeClamp : register(s0);
+SamplerState SampleTypeWrap  : register(s1);
+
+
+//////////////////////
+// CONSTANT BUFFERS //
+//////////////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now use the light direction instead of light position for directional light calculations.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer LightBuffer
+{
+    float4 ambientColor;
+    float4 diffuseColor;</font><font face="arial" color="#aaaaff" size="2">
+    float3 lightDirection;</font><font face="arial" color="#aaffaa" size="2">
+    float padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float4 lightViewPosition : TEXCOORD1;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 ShadowPixelShader(PixelInputType input) : SV_TARGET
+{
+    float bias;
+    float4 color;
+    float2 projectTexCoord;
+    float depthValue;
+    float lightDepthValue;
+    float lightIntensity;
+    float4 textureColor;</font><font face="arial" color="#aaaaff" size="2">
+    float3 lightDir;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The pixel shader will need to invert the light direction.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">    // Invert the light direction.
+    lightDir = -lightDirection;</font><font face="arial" color="#aaffaa" size="2">
+
+    // Set the bias value for fixing the floating point precision issues.
+    bias = 0.001f;
+
+    // Set the default output color to the ambient light value for all pixels.
+    color = ambientColor;
+
+    // Calculate the projected texture coordinates.
+    projectTexCoord.x =  input.lightViewPosition.x / input.lightViewPosition.w / 2.0f + 0.5f;
+    projectTexCoord.y = -input.lightViewPosition.y / input.lightViewPosition.w / 2.0f + 0.5f;
+
+    // Determine if the projected coordinates are in the 0 to 1 range.  If so then this pixel is in the view of the light.
+    if((saturate(projectTexCoord.x) == projectTexCoord.x) &amp;&amp; (saturate(projectTexCoord.y) == projectTexCoord.y))
+    {
+        // Sample the shadow map depth value from the depth texture using the sampler at the projected texture coordinate location.
+        depthValue = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord).r;
+
+        // Calculate the depth of the light.
+        lightDepthValue = input.lightViewPosition.z / input.lightViewPosition.w;
+
+        // Subtract the bias from the lightDepthValue.
+        lightDepthValue = lightDepthValue - bias;
+
+        // Compare the depth of the shadow map value and the depth of the light to determine whether to shadow or to light this pixel.
+        // If the light is in front of the object then light the pixel, if not then shadow this pixel since an object (occluder) is casting a shadow on it.
+        if(lightDepthValue &lt; depthValue)
+        {
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We calculate directional lighting now instead of positional.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">            // Calculate the amount of light on this pixel.
+            lightIntensity = saturate(dot(input.normal, lightDir));</font><font face="arial" color="#aaffaa" size="2">
+
+            if(lightIntensity &gt; 0.0f)
+            {
+                // Determine the final diffuse color based on the diffuse color and the amount of light intensity.
+                color += (diffuseColor * lightIntensity);
+
+                // Saturate the final light color.
+                color = saturate(color);
+            }
+        }
+    }
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I have added an additional else clause to handle the case where objects are not inside the shadow map area.
+If we find that a pixel is outside this region then we do just regular directional lighting.
+Note that you can comment out this else clause to see exactly where your shadow map range begins and ends.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">    else
+    {
+        // If this is outside the area of shadow map range then draw things normally with regular lighting.
+        lightIntensity = saturate(dot(input.normal, lightDir));
+        if(lightIntensity &gt; 0.0f)
+        {
+            color += (diffuseColor * lightIntensity);
+            color = saturate(color);
+        }
+    }</font><font face="arial" color="#aaffaa" size="2">
+
+    // Sample the pixel color from the texture using the sampler at this texture coordinate location.
+    textureColor = shaderTexture.Sample(SampleTypeWrap, input.tex);
+
+    // Combine the light and texture color.
+    color = color * textureColor;
+
+    return color;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadowshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The shadow map shader class has been modified to perform directional lighting instead of positional lighting.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadowshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SHADOWSHADERCLASS_H_
+#define _SHADOWSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ShadowShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class ShadowShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+		D3DXMATRIX lightView;
+		D3DXMATRIX lightProjection;
+	};
+
+	struct LightBufferType
+	{
+		D3DXVECTOR4 ambientColor;
+		D3DXVECTOR4 diffuseColor;</font><font face="arial" color="#aaaaff" size="2">
+		D3DXVECTOR3 lightDirection;</font><font face="arial" color="#aaffaa" size="2">
+		float padding;
+	};
+
+public:
+	ShadowShaderClass();
+	ShadowShaderClass(const ShadowShaderClass&amp;);
+	~ShadowShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, 
+		    ID3D11ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4, D3DXVECTOR4);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, 
+				 ID3D11ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4, D3DXVECTOR4);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleStateWrap;
+	ID3D11SamplerState* m_sampleStateClamp;
+	ID3D11Buffer* m_matrixBuffer;
+	ID3D11Buffer* m_lightBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadowshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadowshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "shadowshaderclass.h"
+
+
+ShadowShaderClass::ShadowShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleStateWrap = 0;
+	m_sampleStateClamp = 0;
+	m_matrixBuffer = 0;
+	m_lightBuffer = 0;
+}
+
+
+ShadowShaderClass::ShadowShaderClass(const ShadowShaderClass&amp; other)
+{
+}
+
+
+ShadowShaderClass::~ShadowShaderClass()
+{
+}
+
+
+bool ShadowShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+
+
+	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/shadow.vs", L"../Engine/shadow.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ShadowShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now send in the direction of the light instead of the position of the light into the render functions.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool ShadowShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+			       D3DXMATRIX projectionMatrix, D3DXMATRIX lightViewMatrix, D3DXMATRIX lightProjectionMatrix, 
+			       ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* depthMapTexture, D3DXVECTOR3 lightDirection, 
+			       D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor)</font><font face="arial" color="#aaffaa" size="2">
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.</font><font face="arial" color="#aaaaff" size="2">
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, lightViewMatrix, lightProjectionMatrix, texture, 
+				     depthMapTexture, lightDirection, ambientColor, diffuseColor);</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now only need a single light buffer in the InitializeShader function since the positional one for the vertex shader is no longer required.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool ShadowShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC lightBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+
+	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "ShadowVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "ShadowPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	polygonLayout[2].SemanticName = "NORMAL";
+	polygonLayout[2].SemanticIndex = 0;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[2].InputSlot = 0;
+	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[2].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a wrap texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleStateWrap);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create a clamp texture sampler state description.
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleStateClamp);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the pixel shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;lightBufferDesc, NULL, &amp;m_lightBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ShadowShaderClass::ShutdownShader()
+{
+	// Release the light constant buffer.
+	if(m_lightBuffer)
+	{
+		m_lightBuffer-&gt;Release();
+		m_lightBuffer = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler states.
+	if(m_sampleStateWrap)
+	{
+		m_sampleStateWrap-&gt;Release();
+		m_sampleStateWrap = 0;
+	}
+
+	if(m_sampleStateClamp)
+	{
+		m_sampleStateClamp-&gt;Release();
+		m_sampleStateClamp = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void ShadowShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+bool ShadowShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+					    D3DXMATRIX projectionMatrix, D3DXMATRIX lightViewMatrix, D3DXMATRIX lightProjectionMatrix, 
+					    ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* depthMapTexture, D3DXVECTOR3 lightDirection,
+					    D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor)</font><font face="arial" color="#aaffaa" size="2">
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	unsigned int bufferNumber;
+	MatrixBufferType* dataPtr;
+	LightBufferType* dataPtr2;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+	D3DXMatrixTranspose(&amp;lightViewMatrix, &amp;lightViewMatrix);
+	D3DXMatrixTranspose(&amp;lightProjectionMatrix, &amp;lightProjectionMatrix);
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+	dataPtr-&gt;lightView = lightViewMatrix;
+	dataPtr-&gt;lightProjection = lightProjectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+
+	// Set shader texture resource in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;texture);
+	deviceContext-&gt;PSSetShaderResources(1, 1, &amp;depthMapTexture);
+
+	// Lock the light constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (LightBufferType*)mappedResource.pData;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The light direction is set instead of the light position.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Copy the lighting variables into the constant buffer.
+	dataPtr2-&gt;ambientColor = ambientColor;
+	dataPtr2-&gt;diffuseColor = diffuseColor;</font><font face="arial" color="#aaaaff" size="2">
+	dataPtr2-&gt;lightDirection = lightDirection;</font><font face="arial" color="#aaffaa" size="2">
+	dataPtr2-&gt;padding = 0.0f;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_lightBuffer, 0);
+
+	// Set the position of the light constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_lightBuffer);
+
+	return true;
+}
+
+
+void ShadowShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler states in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleStateClamp);
+	deviceContext-&gt;PSSetSamplers(1, 1, &amp;m_sampleStateWrap);
+
+	// Render the geometry.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Lightclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The light class has been modified to use a square orthographic projection instead of a regular trapezoid projection.
+It also contains code for directional lights.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: lightclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _LIGHTCLASS_H_
+#define _LIGHTCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: LightClass
+////////////////////////////////////////////////////////////////////////////////
+class LightClass
+{
+public:
+	LightClass();
+	LightClass(const LightClass&amp;);
+	~LightClass();
+
+	void SetAmbientColor(float, float, float, float);
+	void SetDiffuseColor(float, float, float, float);
+	void SetPosition(float, float, float);
+	void SetLookAt(float, float, float);
+
+	D3DXVECTOR4 GetAmbientColor();
+	D3DXVECTOR4 GetDiffuseColor();
+	D3DXVECTOR3 GetPosition();
+
+	void GenerateViewMatrix();
+	void GetViewMatrix(D3DXMATRIX&amp;);</font><font face="arial" color="#aaaaff" size="2">
+
+	void GenerateOrthoMatrix(float, float, float);
+	void GetOrthoMatrix(D3DXMATRIX&amp;);
+
+	void SetDirection(float, float, float);
+	D3DXVECTOR3 GetDirection();</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	D3DXVECTOR4 m_ambientColor;
+	D3DXVECTOR4 m_diffuseColor;
+	D3DXVECTOR3 m_position;
+	D3DXVECTOR3 m_lookAt;
+	D3DXMATRIX m_viewMatrix;</font><font face="arial" color="#aaaaff" size="2">
+	D3DXMATRIX m_orthoMatrix;
+	D3DXVECTOR3 m_direction;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Lightclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: lightclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "lightclass.h"
+
+
+LightClass::LightClass()
+{
+}
+
+
+LightClass::LightClass(const LightClass&amp; other)
+{
+}
+
+
+LightClass::~LightClass()
+{
+}
+
+
+void LightClass::SetAmbientColor(float red, float green, float blue, float alpha)
+{
+	m_ambientColor = D3DXVECTOR4(red, green, blue, alpha);
+	return;
+}
+
+
+void LightClass::SetDiffuseColor(float red, float green, float blue, float alpha)
+{
+	m_diffuseColor = D3DXVECTOR4(red, green, blue, alpha);
+	return;
+}
+
+
+void LightClass::SetPosition(float x, float y, float z)
+{
+	m_position = D3DXVECTOR3(x, y, z);
+	return;
+}
+
+
+void LightClass::SetLookAt(float x, float y, float z)
+{
+	m_lookAt.x = x;
+	m_lookAt.y = y;
+	m_lookAt.z = z;
+	return;
+}
+
+
+D3DXVECTOR4 LightClass::GetAmbientColor()
+{
+	return m_ambientColor;
+}
+
+
+D3DXVECTOR4 LightClass::GetDiffuseColor()
+{
+	return m_diffuseColor;
+}
+
+
+D3DXVECTOR3 LightClass::GetPosition()
+{
+	return m_position;
+}
+
+
+void LightClass::GenerateViewMatrix()
+{
+	D3DXVECTOR3 up;
+
+
+	// Setup the vector that points upwards.
+	up.x = 0.0f;
+	up.y = 1.0f;
+	up.z = 0.0f;
+
+	// Create the view matrix from the three vectors.
+	D3DXMatrixLookAtLH(&amp;m_viewMatrix, &amp;m_position, &amp;m_lookAt, &amp;up);
+	
+	return;
+}
+
+
+void LightClass::GetViewMatrix(D3DXMATRIX&amp; viewMatrix)
+{
+	viewMatrix = m_viewMatrix;
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have replaced the old projection matrix code with an orthographic projection matrix.
+This will generate a square projection matrix to simulate how directional light would illuminate an area.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">void LightClass::GenerateOrthoMatrix(float width, float depthPlane, float nearPlane)
+{
+	// Create the orthographic matrix for the light.
+	D3DXMatrixOrthoLH(&amp;m_orthoMatrix, width, width, nearPlane, depthPlane);
+
+	return;
+}
+
+
+void LightClass::GetOrthoMatrix(D3DXMATRIX&amp; orthoMatrix)
+{
+	orthoMatrix = m_orthoMatrix;
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Helper functions for directional lighting have also been added.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">void LightClass::SetDirection(float x, float y, float z)
+{
+	m_direction = D3DXVECTOR3(x, y, z);
+	return;
+}
+
+
+D3DXVECTOR3 LightClass::GetDirection()
+{
+	return m_direction;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+#include "lightclass.h"
+#include "rendertextureclass.h"
+#include "depthshaderclass.h"
+#include "shadowshaderclass.h"
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 100.0f;
+const float SCREEN_NEAR = 1.0f;
+const int SHADOWMAP_WIDTH = 1024;
+const int SHADOWMAP_HEIGHT = 1024;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Two new globals were added to give individual control over the depth range of the shadow map.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">const float SHADOWMAP_DEPTH = 50.0f;
+const float SHADOWMAP_NEAR = 1.0f;</font><font face="arial" color="#aaffaa" size="2">
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame(float, float, float, float, float, float, float);
+
+private:
+	bool RenderSceneToTexture();
+	bool Render();
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	ModelClass *m_CubeModel, *m_GroundModel, *m_SphereModel;
+	LightClass* m_Light;
+	RenderTextureClass* m_RenderTexture;
+	DepthShaderClass* m_DepthShader;
+	ShadowShaderClass* m_ShadowShader;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_CubeModel = 0;
+	m_GroundModel = 0;
+	m_SphereModel = 0;
+	m_Light = 0;
+	m_RenderTexture = 0;
+	m_DepthShader = 0;	
+	m_ShadowShader = 0;
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	
+	// Create the cube model object.
+	m_CubeModel = new ModelClass;
+	if(!m_CubeModel)
+	{
+		return false;
+	}
+
+	// Initialize the cube model object.
+	result = m_CubeModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/cube.txt", L"../Engine/data/wall01.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the cube model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Set the position for the cube model.
+	m_CubeModel-&gt;SetPosition(-2.0f, 2.0f, 0.0f);
+
+	// Create the sphere model object.
+	m_SphereModel = new ModelClass;
+	if(!m_SphereModel)
+	{
+		return false;
+	}
+
+	// Initialize the sphere model object.
+	result = m_SphereModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/sphere.txt", L"../Engine/data/ice.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sphere model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Set the position for the sphere model.
+	m_SphereModel-&gt;SetPosition(2.0f, 2.0f, 0.0f);
+
+	// Create the ground model object.
+	m_GroundModel = new ModelClass;
+	if(!m_GroundModel)
+	{
+		return false;
+	}
+
+	// Initialize the ground model object.
+	result = m_GroundModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/plane01.txt", L"../Engine/data/metal001.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the ground model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Set the position for the ground model.
+	m_GroundModel-&gt;SetPosition(0.0f, 1.0f, 0.0f);
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+An orthographic matrix is now generated for the directional light instead of the positional projection matrix.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_Light-&gt;GenerateOrthoMatrix(20.0f, SHADOWMAP_DEPTH, SHADOWMAP_NEAR);</font><font face="arial" color="#aaffaa" size="2">
+
+	// Create the render to texture object.
+	m_RenderTexture = new RenderTextureClass;
+	if(!m_RenderTexture)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The shadow map is initialized with the two new globals that control the depth range.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Initialize the render to texture object.
+	result = m_RenderTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT, SHADOWMAP_DEPTH, SHADOWMAP_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the render to texture object.", L"Error", MB_OK);
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Create the depth shader object.
+	m_DepthShader = new DepthShaderClass;
+	if(!m_DepthShader)
+	{
+		return false;
+	}
+
+	// Initialize the depth shader object.
+	result = m_DepthShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the depth shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the shadow shader object.
+	m_ShadowShader = new ShadowShaderClass;
+	if(!m_ShadowShader)
+	{
+		return false;
+	}
+
+	// Initialize the shadow shader object.
+	result = m_ShadowShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the shadow shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+	// Release the shadow shader object.
+	if(m_ShadowShader)
+	{
+		m_ShadowShader-&gt;Shutdown();
+		delete m_ShadowShader;
+		m_ShadowShader = 0;
+	}
+
+	// Release the depth shader object.
+	if(m_DepthShader)
+	{
+		m_DepthShader-&gt;Shutdown();
+		delete m_DepthShader;
+		m_DepthShader = 0;
+	}
+
+	// Release the render to texture object.
+	if(m_RenderTexture)
+	{
+		m_RenderTexture-&gt;Shutdown();
+		delete m_RenderTexture;
+		m_RenderTexture = 0;
+	}
+
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the ground model object.
+	if(m_GroundModel)
+	{
+		m_GroundModel-&gt;Shutdown();
+		delete m_GroundModel;
+		m_GroundModel = 0;
+	}
+
+	// Release the sphere model object.
+	if(m_SphereModel)
+	{
+		m_SphereModel-&gt;Shutdown();
+		delete m_SphereModel;
+		m_SphereModel = 0;
+	}
+
+	// Release the cube model object.
+	if(m_CubeModel)
+	{
+		m_CubeModel-&gt;Shutdown();
+		delete m_CubeModel;
+		m_CubeModel = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame(float posX, float posY, float posZ, float rotX, float rotY, float rotZ, float frameTime)
+{
+	bool result;</font><font face="arial" color="#aaaaff" size="2">
+	static float lightAngle = 270.0f;
+	float radians;
+	static float lightPosX = 9.0f;</font><font face="arial" color="#aaffaa" size="2">
+
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(posX, posY, posZ);
+	m_Camera-&gt;SetRotation(rotX, rotY, rotZ);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Each frame we now rotate a directional light from 270 degrees to 90 degrees to simulate sun light movement.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Update the position of the light each frame.
+	lightPosX -= 0.003f * frameTime;
+
+	// Update the angle of the light each frame.
+	lightAngle -= 0.03f * frameTime;
+	if(lightAngle &lt; 90.0f)
+	{
+		lightAngle = 270.0f;
+
+		// Reset the light position also.
+		lightPosX = 9.0f;
+	}
+	radians = lightAngle * 0.0174532925f;
+
+	// Update the direction of the light.
+	m_Light-&gt;SetDirection(sinf(radians), cosf(radians), 0.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Also each frame we now simulate a sun light rotation using the position and lookat.
+As a directional light has no position we have to just create a simulated version of it by polarizing the position and lookat X coordinate.
+If your light needs to cover more distance then just increase the Y coordinate distance between the position and the lookat.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Set the position and lookat for the light.
+	m_Light-&gt;SetPosition(lightPosX, 8.0f, -0.1f);
+	m_Light-&gt;SetLookAt(-lightPosX, 0.0f, 0.0f);</font><font face="arial" color="#aaffaa" size="2">
+
+	// Render the graphics scene.
+	result = Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the RenderSceneToTexture function we now change everything from a projection matrix to an orthographic matrix.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::RenderSceneToTexture()
+{</font><font face="arial" color="#aaaaff" size="2">
+	D3DXMATRIX worldMatrix, lightViewMatrix, lightOrthoMatrix;</font><font face="arial" color="#aaffaa" size="2">
+	float posX, posY, posZ;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_RenderTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_RenderTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the light view matrix based on the light's position.
+	m_Light-&gt;GenerateViewMatrix();
+
+	// Get the world matrix from the d3d object.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Get the view and orthographic matrices from the light object.
+	m_Light-&gt;GetViewMatrix(lightViewMatrix);</font><font face="arial" color="#aaaaff" size="2">
+	m_Light-&gt;GetOrthoMatrix(lightOrthoMatrix);</font><font face="arial" color="#aaffaa" size="2">
+
+	// Setup the translation matrix for the cube model.
+	m_CubeModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the cube model with the depth shader.
+	m_CubeModel-&gt;Render(m_D3D-&gt;GetDeviceContext());</font><font face="arial" color="#aaaaff" size="2">
+	result = m_DepthShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_CubeModel-&gt;GetIndexCount(), worldMatrix, lightViewMatrix, lightOrthoMatrix);</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the sphere model.
+	m_SphereModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the sphere model with the depth shader.
+	m_SphereModel-&gt;Render(m_D3D-&gt;GetDeviceContext());</font><font face="arial" color="#aaaaff" size="2">
+	result = m_DepthShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SphereModel-&gt;GetIndexCount(), worldMatrix, lightViewMatrix, lightOrthoMatrix);</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the ground model.
+	m_GroundModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the ground model with the depth shader.
+	m_GroundModel-&gt;Render(m_D3D-&gt;GetDeviceContext());</font><font face="arial" color="#aaaaff" size="2">
+	result = m_DepthShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_GroundModel-&gt;GetIndexCount(), worldMatrix, lightViewMatrix, lightOrthoMatrix);</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the Render function we also change everything to use an orthographic matrix instead of a projection matrix.
+The render functions also now take the light direction as opposed to previously using the light position.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::Render()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;</font><font face="arial" color="#aaaaff" size="2">
+	D3DXMATRIX lightViewMatrix, lightOrthoMatrix;</font><font face="arial" color="#aaffaa" size="2">
+	bool result;
+	float posX, posY, posZ;
+
+
+	// First render the scene to a texture.
+	result = RenderSceneToTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Generate the light view matrix based on the light's position.
+	m_Light-&gt;GenerateViewMatrix();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Get the light's view and projection matrices from the light object.
+	m_Light-&gt;GetViewMatrix(lightViewMatrix);</font><font face="arial" color="#aaaaff" size="2">
+	m_Light-&gt;GetOrthoMatrix(lightOrthoMatrix);</font><font face="arial" color="#aaffaa" size="2">
+
+	// Setup the translation matrix for the cube model.
+	m_CubeModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+	
+	// Put the cube model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_CubeModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the model using the shadow shader.</font><font face="arial" color="#aaaaff" size="2">
+	result = m_ShadowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_CubeModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, lightViewMatrix, 
+					lightOrthoMatrix, m_CubeModel-&gt;GetTexture(), m_RenderTexture-&gt;GetShaderResourceView(), m_Light-&gt;GetDirection(),
+					m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor());</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the sphere model.
+	m_SphereModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_SphereModel-&gt;Render(m_D3D-&gt;GetDeviceContext());</font><font face="arial" color="#aaaaff" size="2">
+	result = m_ShadowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SphereModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, lightViewMatrix, 
+					lightOrthoMatrix, m_SphereModel-&gt;GetTexture(), m_RenderTexture-&gt;GetShaderResourceView(), m_Light-&gt;GetDirection(), 
+					m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor());</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the ground model.
+	m_GroundModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the ground model using the shadow shader.
+	m_GroundModel-&gt;Render(m_D3D-&gt;GetDeviceContext());</font><font face="arial" color="#aaaaff" size="2">
+	result = m_ShadowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_GroundModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, lightViewMatrix,
+					lightOrthoMatrix, m_GroundModel-&gt;GetTexture(), m_RenderTexture-&gt;GetShaderResourceView(), m_Light-&gt;GetDirection(), 
+					m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor());</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Directional shadow maps can now be produced by using directional light and orthographic projections.
+</font></p>
+
+<p align="center"><img border="0" src="./Tutorial 48_ Directional Shadow Maps_files/pic0288.gif" width="500" height="274"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Compile and run the code.  Use the arrow keys, A, Z, PgUp, and PgDn to move around and view the light.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Modify the direction, position, and lookat in the Frame function to see the effect.
+</font></p>
+
+<br>
+<p align="center"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="center"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11src48.zip">dx11src48.zip</a></font></p>
+<p align="center"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11exe48.zip">dx11exe48.zip</a></font></p>
+
+<p align="center"><img border="0" src="./Tutorial 48_ Directional Shadow Maps_files/pic1002.gif" width="800" height="1"></p>
+<p align="center"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutdx11.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 48_ Directional Shadow Maps_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

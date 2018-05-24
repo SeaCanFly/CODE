@@ -1,0 +1,2908 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut42.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 42: Soft Shadows</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 42: Soft Shadows
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 42_ Soft Shadows_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover how to implement soft shadows in DirectX 11 using HLSL and C++.
+The code in this tutorial is based on the shadow mapping tutorial.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+One of the issues with shadow maps is the lack of precision in the texture used for the shadow map.
+Even high resolution textures such as 1024x1024 (as was used in the shadow mapping tutorial) still create shadows with jagged edges.
+For example looking at the edge of the shadow for the sphere we get the following visual artifact:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 42_ Soft Shadows_files/pic0233.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With that said one of the main advantages of using shadow maps is that we can easily produce soft shadows to fix the jagged shadow edges.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To create soft shadows we first need to modify the shadow shader.
+Instead of using the shader to render the shadowed scene with lighting as it previously did it will now instead just render
+shadow areas as pure black and the illuminated areas as pure white.
+So rendering our scene will now produce a black and white image as follows:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 42_ Soft Shadows_files/pic0234.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Also we render the black and white scene to a render to texture instead of to the back buffer.
+The reason we render to a texture is so that we can perform the next step which is to blur the black and white image.
+For this tutorial we will perform a regular blur like we did in the blur tutorial (Tutorial 36).
+With the black and white texture blurred we now have the following texture result:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 42_ Soft Shadows_files/pic0235.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+As you can see the shadow edges are now blurred creating the soft shadows.
+To apply the soft shadows to the final scene we use just a regular lighting shader except that it takes as input the blurred image
+and at the end of the pixel shader we multiple the color result by the projected blur image to get soft shadows.
+We project the blurred image from the camera's view point.
+Doing so gives us the following soft shadow scene:
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will start the code section of the tutorial by looking at the modified shadow shader.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 42_ Soft Shadows_files/pic0236.gif" width="500" height="282"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadow.vs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The vertex shader can remain the same.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadow.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+    matrix lightViewMatrix;
+    matrix lightProjectionMatrix;
+};
+
+
+//////////////////////
+// CONSTANT BUFFERS //
+//////////////////////
+cbuffer LightBuffer2
+{
+    float3 lightPosition;
+    float padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float4 lightViewPosition : TEXCOORD1;
+    float3 lightPos : TEXCOORD2;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType ShadowVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    float4 worldPosition;
+    
+    
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Calculate the position of the vertice as viewed by the light source.
+    output.lightViewPosition = mul(input.position, worldMatrix);
+    output.lightViewPosition = mul(output.lightViewPosition, lightViewMatrix);
+    output.lightViewPosition = mul(output.lightViewPosition, lightProjectionMatrix);
+
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+    
+    // Calculate the normal vector against the world matrix only.
+    output.normal = mul(input.normal, (float3x3)worldMatrix);
+	
+    // Normalize the normal vector.
+    output.normal = normalize(output.normal);
+
+    // Calculate the position of the vertex in the world.
+    worldPosition = mul(input.position, worldMatrix);
+
+    // Determine the light position based on the position of the light and the position of the vertex in the world.
+    output.lightPos = lightPosition.xyz - worldPosition.xyz;
+
+    // Normalize the light position vector.
+    output.lightPos = normalize(output.lightPos);
+
+    return output;
+}
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadow.ps</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the pixel shader we have removed a number of the inputs as lighting and texturing are no longer needed to produce the black and white shadow image.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadow.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////
+// TEXTURES //
+//////////////
+Texture2D depthMapTexture : register(t0);
+
+
+///////////////////
+// SAMPLE STATES //
+///////////////////
+SamplerState SampleTypeClamp : register(s0);
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float4 lightViewPosition : TEXCOORD1;
+    float3 lightPos : TEXCOORD2;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 ShadowPixelShader(PixelInputType input) : SV_TARGET
+{
+    float bias;
+    float4 color;
+    float2 projectTexCoord;
+    float depthValue;
+    float lightDepthValue;
+    float lightIntensity;
+
+
+    // Set the bias value for fixing the floating point precision issues.
+    bias = 0.001f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now in the pixel shader we set the default color to be black (shadowed).
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Set the default output color to be black (shadow).
+    color = float4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // Calculate the projected texture coordinates.
+    projectTexCoord.x =  input.lightViewPosition.x / input.lightViewPosition.w / 2.0f + 0.5f;
+    projectTexCoord.y = -input.lightViewPosition.y / input.lightViewPosition.w / 2.0f + 0.5f;
+
+    // Determine if the projected coordinates are in the 0 to 1 range.  If so then this pixel is in the view of the light.
+    if((saturate(projectTexCoord.x) == projectTexCoord.x) &amp;&amp; (saturate(projectTexCoord.y) == projectTexCoord.y))
+    {
+        // Sample the shadow map depth value from the depth texture using the sampler at the projected texture coordinate location.
+        depthValue = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord).r;
+
+        // Calculate the depth of the light.
+        lightDepthValue = input.lightViewPosition.z / input.lightViewPosition.w;
+
+        // Subtract the bias from the lightDepthValue.
+        lightDepthValue = lightDepthValue - bias;
+
+        // Compare the depth of the shadow map value and the depth of the light to determine whether to shadow or to light this pixel.
+        // If the light is in front of the object then light the pixel, if not then shadow this pixel since an object (occluder) is casting a shadow on it.
+        if(lightDepthValue &lt; depthValue)
+        {
+            // Calculate the amount of light on this pixel.
+            lightIntensity = saturate(dot(input.normal, input.lightPos));
+
+            // If this pixel is illuminated then set it to pure white (non-shadow).
+            if(lightIntensity &gt; 0.0f)
+            {
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And if we determine a pixel is illuminated then it is colored pure white.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">                color = float4(1.0f, 1.0f, 1.0f, 1.0f);
+            }
+        }
+    }
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This will return a black and white image of the shadowed scene so we can use it as input to the blurring shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    return color;
+}
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadowshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ShadowShaderClass has had just the texturing and lighting color elements removed from it since it only needs to produce an un-textured black and white image.
+Otherwise it remains the same.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadowshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SHADOWSHADERCLASS_H_
+#define _SHADOWSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ShadowShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class ShadowShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+		D3DXMATRIX lightView;
+		D3DXMATRIX lightProjection;
+	};
+
+	struct LightBufferType2
+	{
+		D3DXVECTOR3 lightPosition;
+		float padding;
+	};
+
+public:
+	ShadowShaderClass();
+	ShadowShaderClass(const ShadowShaderClass&amp;);
+	~ShadowShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, D3DXVECTOR3);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, D3DXVECTOR3);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleStateClamp;
+	ID3D11Buffer* m_matrixBuffer;
+	ID3D11Buffer* m_lightBuffer2;
+};
+
+#endif
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadowshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadowshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "shadowshaderclass.h"
+
+
+ShadowShaderClass::ShadowShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleStateClamp = 0;
+	m_matrixBuffer = 0;
+	m_lightBuffer2 = 0;
+}
+
+
+ShadowShaderClass::ShadowShaderClass(const ShadowShaderClass&amp; other)
+{
+}
+
+
+ShadowShaderClass::~ShadowShaderClass()
+{
+}
+
+
+bool ShadowShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+
+
+	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/shadow.vs", L"../Engine/shadow.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ShadowShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+
+
+bool ShadowShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+			       D3DXMATRIX projectionMatrix, D3DXMATRIX lightViewMatrix, D3DXMATRIX lightProjectionMatrix, 
+			       ID3D11ShaderResourceView* depthMapTexture, D3DXVECTOR3 lightPosition)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, lightViewMatrix, lightProjectionMatrix,  depthMapTexture, 
+				     lightPosition);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool ShadowShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC lightBufferDesc2;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+
+	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "ShadowVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "ShadowPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	polygonLayout[2].SemanticName = "NORMAL";
+	polygonLayout[2].SemanticIndex = 0;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[2].InputSlot = 0;
+	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[2].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a clamp texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleStateClamp);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the light dynamic constant buffer that is in the vertex shader.
+	lightBufferDesc2.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc2.ByteWidth = sizeof(LightBufferType2);
+	lightBufferDesc2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc2.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc2.MiscFlags = 0;
+	lightBufferDesc2.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;lightBufferDesc2, NULL, &amp;m_lightBuffer2);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ShadowShaderClass::ShutdownShader()
+{
+	// Release the light constant buffer.
+	if(m_lightBuffer2)
+	{
+		m_lightBuffer2-&gt;Release();
+		m_lightBuffer2 = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleStateClamp)
+	{
+		m_sampleStateClamp-&gt;Release();
+		m_sampleStateClamp = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void ShadowShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+
+
+bool ShadowShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+					    D3DXMATRIX projectionMatrix, D3DXMATRIX lightViewMatrix, D3DXMATRIX lightProjectionMatrix, 
+					    ID3D11ShaderResourceView* depthMapTexture, D3DXVECTOR3 lightPosition)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	unsigned int bufferNumber;
+	MatrixBufferType* dataPtr;
+	LightBufferType2* dataPtr3;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+	D3DXMatrixTranspose(&amp;lightViewMatrix, &amp;lightViewMatrix);
+	D3DXMatrixTranspose(&amp;lightProjectionMatrix, &amp;lightProjectionMatrix);
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+	dataPtr-&gt;lightView = lightViewMatrix;
+	dataPtr-&gt;lightProjection = lightProjectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+
+	// Set shader texture resource in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;depthMapTexture);
+
+	// Lock the second light constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_lightBuffer2, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr3 = (LightBufferType2*)mappedResource.pData;
+
+	// Copy the lighting variables into the constant buffer.
+	dataPtr3-&gt;lightPosition = lightPosition;
+	dataPtr3-&gt;padding = 0.0f;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_lightBuffer2, 0);
+
+	// Set the position of the light constant buffer in the vertex shader.
+	bufferNumber = 1;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_lightBuffer2);
+
+	return true;
+}
+
+
+void ShadowShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler states in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleStateClamp);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Softshadow.vs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The soft shadow shaders are where we light the scene as normal but then project the blurred black and white shadow 
+texture onto the scene to complete the soft shadow effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: softshadow.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+
+
+//////////////////////
+// CONSTANT BUFFERS //
+//////////////////////
+cbuffer LightBuffer2
+{
+    float3 lightPosition;
+    float padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float4 viewPosition : TEXCOORD1;
+    float3 lightPos : TEXCOORD2;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType SoftShadowVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    float4 worldPosition;
+    
+    
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The viewPosition will be used to calculate the projection coordinates to project the soft shadows onto the scene.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Store the position of the vertice as viewed by the camera in a separate variable.
+    output.viewPosition = output.position;
+
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+    
+    // Calculate the normal vector against the world matrix only.
+    output.normal = mul(input.normal, (float3x3)worldMatrix);
+	
+    // Normalize the normal vector.
+    output.normal = normalize(output.normal);
+
+    // Calculate the position of the vertex in the world.
+    worldPosition = mul(input.position, worldMatrix);
+
+    // Determine the light position based on the position of the light and the position of the vertex in the world.
+    output.lightPos = lightPosition.xyz - worldPosition.xyz;
+
+    // Normalize the light position vector.
+    output.lightPos = normalize(output.lightPos);
+
+    return output;
+}
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Softshadow.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: softshadow.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////
+// TEXTURES //
+//////////////
+Texture2D shaderTexture : register(t0);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The shadowTexture is the black and white blurred image that contains the soft shadows. We will project this texture onto the scene.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Texture2D shadowTexture : register(t1);
+
+
+///////////////////
+// SAMPLE STATES //
+///////////////////
+SamplerState SampleTypeClamp : register(s0);
+SamplerState SampleTypeWrap  : register(s1);
+
+
+//////////////////////
+// CONSTANT BUFFERS //
+//////////////////////
+cbuffer LightBuffer
+{
+    float4 ambientColor;
+    float4 diffuseColor;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float4 viewPosition : TEXCOORD1;
+    float3 lightPos : TEXCOORD2;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 SoftShadowPixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 color;
+    float lightIntensity;
+    float4 textureColor;
+    float2 projectTexCoord;
+    float shadowValue;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Calculate the lighting and texturing as normal. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Set the default output color to the ambient light value for all pixels.
+    color = ambientColor;
+
+    // Calculate the amount of light on this pixel.
+    lightIntensity = saturate(dot(input.normal, input.lightPos));
+    if(lightIntensity &gt; 0.0f)
+    {
+        // Determine the light color based on the diffuse color and the amount of light intensity.
+        color += (diffuseColor * lightIntensity);
+
+        // Saturate the light color.
+        color = saturate(color);
+    }
+
+    // Sample the pixel color from the texture using the sampler at this texture coordinate location.
+    textureColor = shaderTexture.Sample(SampleTypeWrap, input.tex);
+
+    // Combine the light and texture color.
+    color = color * textureColor;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now calculate the projected coordinates to sample the blurred black and white image from based on the camera's view point.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Calculate the projected texture coordinates to be used with the shadow texture.
+    projectTexCoord.x =  input.viewPosition.x / input.viewPosition.w / 2.0f + 0.5f;
+    projectTexCoord.y = -input.viewPosition.y / input.viewPosition.w / 2.0f + 0.5f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Sample the soft shadow image using the projected coordinates and then multiple it in the same fashion as a light map to the final color to get the soft shadow effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Sample the shadow value from the shadow texture using the sampler at the projected texture coordinate location.
+    shadowValue = shadowTexture.Sample(SampleTypeClamp, projectTexCoord).r;
+
+    // Combine the shadows with the final color.
+    color = color * shadowValue;
+
+    return color;
+}
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Softshadowshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SoftShadowShaderClass is the same as the LightShaderClass except that we also provide a blurred black and 
+white soft shadow texture as input to the Render function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: softshadowshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SOFTSHADOWSHADERCLASS_H_
+#define _SOFTSHADOWSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: SoftShadowShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class SoftShadowShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+
+	struct LightBufferType
+	{
+		D3DXVECTOR4 ambientColor;
+		D3DXVECTOR4 diffuseColor;
+	};
+
+	struct LightBufferType2
+	{
+		D3DXVECTOR3 lightPosition;
+		float padding;
+	};
+
+public:
+	SoftShadowShaderClass();
+	SoftShadowShaderClass(const SoftShadowShaderClass&amp;);
+	~SoftShadowShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, D3DXVECTOR3, 
+		    D3DXVECTOR4, D3DXVECTOR4);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, D3DXVECTOR3, 
+				 D3DXVECTOR4, D3DXVECTOR4);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleStateWrap;
+	ID3D11SamplerState* m_sampleStateClamp;
+	ID3D11Buffer* m_matrixBuffer;
+	ID3D11Buffer* m_lightBuffer;
+	ID3D11Buffer* m_lightBuffer2;
+};
+
+#endif
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Softshadowshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: softshadowshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "softshadowshaderclass.h"
+
+
+SoftShadowShaderClass::SoftShadowShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleStateWrap = 0;
+	m_sampleStateClamp = 0;
+	m_matrixBuffer = 0;
+	m_lightBuffer = 0;
+	m_lightBuffer2 = 0;
+}
+
+
+SoftShadowShaderClass::SoftShadowShaderClass(const SoftShadowShaderClass&amp; other)
+{
+}
+
+
+SoftShadowShaderClass::~SoftShadowShaderClass()
+{
+}
+
+
+bool SoftShadowShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the soft shadow HLSL programs. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/softshadow.vs", L"../Engine/softshadow.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void SoftShadowShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+
+
+bool SoftShadowShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+				   D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* shadowTexture, 
+				   D3DXVECTOR3 lightPosition, D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, shadowTexture, lightPosition, ambientColor, 
+				     diffuseColor);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool SoftShadowShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC lightBufferDesc;
+	D3D11_BUFFER_DESC lightBufferDesc2;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Compile and load the soft shadow HLSL programs. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "SoftShadowVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "SoftShadowPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	polygonLayout[2].SemanticName = "NORMAL";
+	polygonLayout[2].SemanticIndex = 0;
+	polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[2].InputSlot = 0;
+	polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[2].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a wrap texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleStateWrap);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create a clamp texture sampler state description.
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleStateClamp);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+	lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc.ByteWidth = sizeof(LightBufferType);
+	lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc.MiscFlags = 0;
+	lightBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the pixel shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;lightBufferDesc, NULL, &amp;m_lightBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the light dynamic constant buffer that is in the vertex shader.
+	lightBufferDesc2.Usage = D3D11_USAGE_DYNAMIC;
+	lightBufferDesc2.ByteWidth = sizeof(LightBufferType2);
+	lightBufferDesc2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	lightBufferDesc2.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lightBufferDesc2.MiscFlags = 0;
+	lightBufferDesc2.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;lightBufferDesc2, NULL, &amp;m_lightBuffer2);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void SoftShadowShaderClass::ShutdownShader()
+{
+	// Release the light constant buffers.
+	if(m_lightBuffer)
+	{
+		m_lightBuffer-&gt;Release();
+		m_lightBuffer = 0;
+	}
+
+	if(m_lightBuffer2)
+	{
+		m_lightBuffer2-&gt;Release();
+		m_lightBuffer2 = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler states.
+	if(m_sampleStateWrap)
+	{
+		m_sampleStateWrap-&gt;Release();
+		m_sampleStateWrap = 0;
+	}
+
+	if(m_sampleStateClamp)
+	{
+		m_sampleStateClamp-&gt;Release();
+		m_sampleStateClamp = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void SoftShadowShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+
+
+bool SoftShadowShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+						D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* shadowTexture, 
+						D3DXVECTOR3 lightPosition, D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	unsigned int bufferNumber;
+	MatrixBufferType* dataPtr;
+	LightBufferType* dataPtr2;
+	LightBufferType2* dataPtr3;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+
+	// Set shader texture resource in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;texture);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Bind the blurred black and white soft shadow texture here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	deviceContext-&gt;PSSetShaderResources(1, 1, &amp;shadowTexture);
+
+	// Lock the light constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (LightBufferType*)mappedResource.pData;
+
+	// Copy the lighting variables into the constant buffer.
+	dataPtr2-&gt;ambientColor = ambientColor;
+	dataPtr2-&gt;diffuseColor = diffuseColor;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_lightBuffer, 0);
+
+	// Set the position of the light constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_lightBuffer);
+
+	// Lock the second light constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_lightBuffer2, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr3 = (LightBufferType2*)mappedResource.pData;
+
+	// Copy the lighting variables into the constant buffer.
+	dataPtr3-&gt;lightPosition = lightPosition;
+	dataPtr3-&gt;padding = 0.0f;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_lightBuffer2, 0);
+
+	// Set the position of the light constant buffer in the vertex shader.
+	bufferNumber = 1;
+
+	// Finally set the light constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_lightBuffer2);
+
+	return true;
+}
+
+
+void SoftShadowShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler states in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleStateClamp);
+	deviceContext-&gt;PSSetSamplers(1, 1, &amp;m_sampleStateWrap);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GraphicsClass will require a number of objects since we are performing a blur and separating the algorithm into individual steps for clarity purposes.
+This is not the most efficient way to perform soft shadowing but for the purposes of the tutorial it makes it easier to debug and learn the different steps involved.
+You can also refer to tutorial 36 as this is pretty much a copy of that tutorial with shadowing added.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+#include "lightclass.h"
+#include "rendertextureclass.h"
+#include "depthshaderclass.h"
+#include "shadowshaderclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Add the new headers required for blurring and soft shadowing.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">#include "orthowindowclass.h"
+#include "textureshaderclass.h"
+#include "horizontalblurshaderclass.h"
+#include "verticalblurshaderclass.h"
+#include "softshadowshaderclass.h"
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 100.0f;
+const float SCREEN_NEAR = 1.0f;
+const int SHADOWMAP_WIDTH = 1024;
+const int SHADOWMAP_HEIGHT = 1024;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame(float, float, float, float, float, float);
+
+private:
+	bool RenderSceneToTexture();
+	bool RenderBlackAndWhiteShadows();
+	bool DownSampleTexture();
+	bool RenderHorizontalBlurToTexture();
+	bool RenderVerticalBlurToTexture();
+	bool UpSampleTexture();
+	bool Render();
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	ModelClass *m_CubeModel, *m_GroundModel, *m_SphereModel;
+	LightClass* m_Light;
+	RenderTextureClass *m_RenderTexture, *m_BlackWhiteRenderTexture, *m_DownSampleTexure;
+	RenderTextureClass *m_HorizontalBlurTexture, *m_VerticalBlurTexture, *m_UpSampleTexure;
+	DepthShaderClass* m_DepthShader;
+	ShadowShaderClass* m_ShadowShader;
+	OrthoWindowClass *m_SmallWindow, *m_FullScreenWindow;
+	TextureShaderClass* m_TextureShader;
+	HorizontalBlurShaderClass* m_HorizontalBlurShader;
+	VerticalBlurShaderClass* m_VerticalBlurShader;
+	SoftShadowShaderClass* m_SoftShadowShader;
+};
+
+#endif
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_CubeModel = 0;
+	m_GroundModel = 0;
+	m_SphereModel = 0;
+	m_Light = 0;
+	m_RenderTexture = 0;
+	m_DepthShader = 0;	
+	m_BlackWhiteRenderTexture = 0;
+	m_ShadowShader = 0;
+	m_DownSampleTexure = 0;
+	m_SmallWindow = 0;
+	m_TextureShader = 0;
+	m_HorizontalBlurTexture = 0;
+	m_HorizontalBlurShader = 0;
+	m_VerticalBlurTexture = 0;
+	m_VerticalBlurShader = 0;
+	m_UpSampleTexure = 0;
+	m_FullScreenWindow = 0;
+	m_SoftShadowShader = 0;
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+	int downSampleWidth, downSampleHeight;
+
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	m_Camera-&gt;RenderBaseViewMatrix();
+
+	// Create the cube model object.
+	m_CubeModel = new ModelClass;
+	if(!m_CubeModel)
+	{
+		return false;
+	}
+
+	// Initialize the cube model object.
+	result = m_CubeModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/cube.txt", L"../Engine/data/wall01.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the cube model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Set the position for the cube model.
+	m_CubeModel-&gt;SetPosition(-2.0f, 2.0f, 0.0f);
+
+	// Create the sphere model object.
+	m_SphereModel = new ModelClass;
+	if(!m_SphereModel)
+	{
+		return false;
+	}
+
+	// Initialize the sphere model object.
+	result = m_SphereModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/sphere.txt", L"../Engine/data/ice.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sphere model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Set the position for the sphere model.
+	m_SphereModel-&gt;SetPosition(2.0f, 2.0f, 0.0f);
+
+	// Create the ground model object.
+	m_GroundModel = new ModelClass;
+	if(!m_GroundModel)
+	{
+		return false;
+	}
+
+	// Initialize the ground model object.
+	result = m_GroundModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/plane01.txt", L"../Engine/data/metal001.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the ground model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Set the position for the ground model.
+	m_GroundModel-&gt;SetPosition(0.0f, 1.0f, 0.0f);
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetLookAt(0.0f, 0.0f, 0.0f);
+	m_Light-&gt;GenerateProjectionMatrix(SCREEN_DEPTH, SCREEN_NEAR);
+
+	// Create the render to texture object.
+	m_RenderTexture = new RenderTextureClass;
+	if(!m_RenderTexture)
+	{
+		return false;
+	}
+
+	// Initialize the render to texture object.
+	result = m_RenderTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the depth shader object.
+	m_DepthShader = new DepthShaderClass;
+	if(!m_DepthShader)
+	{
+		return false;
+	}
+
+	// Initialize the depth shader object.
+	result = m_DepthShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the depth shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the render to texture object.
+	m_BlackWhiteRenderTexture = new RenderTextureClass;
+	if(!m_BlackWhiteRenderTexture)
+	{
+		return false;
+	}
+
+	// Initialize the black and white render to texture object.
+	result = m_BlackWhiteRenderTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the black and white render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the shadow shader object.
+	m_ShadowShader = new ShadowShaderClass;
+	if(!m_ShadowShader)
+	{
+		return false;
+	}
+
+	// Initialize the shadow shader object.
+	result = m_ShadowShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the shadow shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Set the size to sample down to.
+	downSampleWidth = SHADOWMAP_WIDTH / 2;
+	downSampleHeight = SHADOWMAP_HEIGHT / 2;
+
+	// Create the down sample render to texture object.
+	m_DownSampleTexure = new RenderTextureClass;
+	if(!m_DownSampleTexure)
+	{
+		return false;
+	}
+
+	// Initialize the down sample render to texture object.
+	result = m_DownSampleTexure-&gt;Initialize(m_D3D-&gt;GetDevice(), downSampleWidth, downSampleHeight, 100.0f, 1.0f);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the down sample render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the small ortho window object.
+	m_SmallWindow = new OrthoWindowClass;
+	if(!m_SmallWindow)
+	{
+		return false;
+	}
+
+	// Initialize the small ortho window object.
+	result = m_SmallWindow-&gt;Initialize(m_D3D-&gt;GetDevice(), downSampleWidth, downSampleHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the small ortho window object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+	if(!m_TextureShader)
+	{
+		return false;
+	}
+
+	// Initialize the texture shader object.
+	result = m_TextureShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the horizontal blur render to texture object.
+	m_HorizontalBlurTexture = new RenderTextureClass;
+	if(!m_HorizontalBlurTexture)
+	{
+		return false;
+	}
+
+	// Initialize the horizontal blur render to texture object.
+	result = m_HorizontalBlurTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, 0.1f);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the horizontal blur render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the horizontal blur shader object.
+	m_HorizontalBlurShader = new HorizontalBlurShaderClass;
+	if(!m_HorizontalBlurShader)
+	{
+		return false;
+	}
+
+	// Initialize the horizontal blur shader object.
+	result = m_HorizontalBlurShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the horizontal blur shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the vertical blur render to texture object.
+	m_VerticalBlurTexture = new RenderTextureClass;
+	if(!m_VerticalBlurTexture)
+	{
+		return false;
+	}
+
+	// Initialize the vertical blur render to texture object.
+	result = m_VerticalBlurTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, 0.1f);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the vertical blur render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the vertical blur shader object.
+	m_VerticalBlurShader = new VerticalBlurShaderClass;
+	if(!m_VerticalBlurShader)
+	{
+		return false;
+	}
+
+	// Initialize the vertical blur shader object.
+	result = m_VerticalBlurShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the vertical blur shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the up sample render to texture object.
+	m_UpSampleTexure = new RenderTextureClass;
+	if(!m_UpSampleTexure)
+	{
+		return false;
+	}
+
+	// Initialize the up sample render to texture object.
+	result = m_UpSampleTexure-&gt;Initialize(m_D3D-&gt;GetDevice(), SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT, SCREEN_DEPTH, 0.1f);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the up sample render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the full screen ortho window object.
+	m_FullScreenWindow = new OrthoWindowClass;
+	if(!m_FullScreenWindow)
+	{
+		return false;
+	}
+
+	// Initialize the full screen ortho window object.
+	result = m_FullScreenWindow-&gt;Initialize(m_D3D-&gt;GetDevice(), SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the full screen ortho window object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the soft shadow shader object.
+	m_SoftShadowShader = new SoftShadowShaderClass;
+	if(!m_SoftShadowShader)
+	{
+		return false;
+	}
+
+	// Initialize the soft shadow shader object.
+	result = m_SoftShadowShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the soft shadow shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+	// Release the soft shadow shader object.
+	if(m_SoftShadowShader)
+	{
+		m_SoftShadowShader-&gt;Shutdown();
+		delete m_SoftShadowShader;
+		m_SoftShadowShader = 0;
+	}
+
+	// Release the full screen ortho window object.
+	if(m_FullScreenWindow)
+	{
+		m_FullScreenWindow-&gt;Shutdown();
+		delete m_FullScreenWindow;
+		m_FullScreenWindow = 0;
+	}
+
+	// Release the up sample render to texture object.
+	if(m_UpSampleTexure)
+	{
+		m_UpSampleTexure-&gt;Shutdown();
+		delete m_UpSampleTexure;
+		m_UpSampleTexure = 0;
+	}
+
+	// Release the vertical blur shader object.
+	if(m_VerticalBlurShader)
+	{
+		m_VerticalBlurShader-&gt;Shutdown();
+		delete m_VerticalBlurShader;
+		m_VerticalBlurShader = 0;
+	}
+
+	// Release the vertical blur render to texture object.
+	if(m_VerticalBlurTexture)
+	{
+		m_VerticalBlurTexture-&gt;Shutdown();
+		delete m_VerticalBlurTexture;
+		m_VerticalBlurTexture = 0;
+	}
+
+	// Release the horizontal blur shader object.
+	if(m_HorizontalBlurShader)
+	{
+		m_HorizontalBlurShader-&gt;Shutdown();
+		delete m_HorizontalBlurShader;
+		m_HorizontalBlurShader = 0;
+	}
+
+	// Release the horizontal blur render to texture object.
+	if(m_HorizontalBlurTexture)
+	{
+		m_HorizontalBlurTexture-&gt;Shutdown();
+		delete m_HorizontalBlurTexture;
+		m_HorizontalBlurTexture = 0;
+	}
+
+	// Release the texture shader object.
+	if(m_TextureShader)
+	{
+		m_TextureShader-&gt;Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
+	}
+
+	// Release the small ortho window object.
+	if(m_SmallWindow)
+	{
+		m_SmallWindow-&gt;Shutdown();
+		delete m_SmallWindow;
+		m_SmallWindow = 0;
+	}
+
+	// Release the down sample render to texture object.
+	if(m_DownSampleTexure)
+	{
+		m_DownSampleTexure-&gt;Shutdown();
+		delete m_DownSampleTexure;
+		m_DownSampleTexure = 0;
+	}
+
+	// Release the shadow shader object.
+	if(m_ShadowShader)
+	{
+		m_ShadowShader-&gt;Shutdown();
+		delete m_ShadowShader;
+		m_ShadowShader = 0;
+	}
+
+	// Release the black and white render to texture.
+	if(m_BlackWhiteRenderTexture)
+	{
+		m_BlackWhiteRenderTexture-&gt;Shutdown();
+		delete m_BlackWhiteRenderTexture; 
+		m_BlackWhiteRenderTexture = 0;
+	}
+
+	// Release the depth shader object.
+	if(m_DepthShader)
+	{
+		m_DepthShader-&gt;Shutdown();
+		delete m_DepthShader;
+		m_DepthShader = 0;
+	}
+
+	// Release the render to texture object.
+	if(m_RenderTexture)
+	{
+		m_RenderTexture-&gt;Shutdown();
+		delete m_RenderTexture;
+		m_RenderTexture = 0;
+	}
+
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the ground model object.
+	if(m_GroundModel)
+	{
+		m_GroundModel-&gt;Shutdown();
+		delete m_GroundModel;
+		m_GroundModel = 0;
+	}
+
+	// Release the sphere model object.
+	if(m_SphereModel)
+	{
+		m_SphereModel-&gt;Shutdown();
+		delete m_SphereModel;
+		m_SphereModel = 0;
+	}
+
+	// Release the cube model object.
+	if(m_CubeModel)
+	{
+		m_CubeModel-&gt;Shutdown();
+		delete m_CubeModel;
+		m_CubeModel = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame(float posX, float posY, float posZ, float rotX, float rotY, float rotZ)
+{
+	bool result;
+	static float lightPositionX = -5.0f;
+
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(posX, posY, posZ);
+	m_Camera-&gt;SetRotation(rotX, rotY, rotZ);
+
+	// Update the position of the light each frame.
+	lightPositionX += 0.05f;
+	if(lightPositionX &gt; 5.0f)
+	{
+		lightPositionX = -5.0f;
+	}
+
+	// Update the position of the light.
+	m_Light-&gt;SetPosition(lightPositionX, 8.0f, -5.0f);
+
+	// Render the graphics scene.
+	result = Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function is where we render the scene to texture to perform the basic shadowing.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::RenderSceneToTexture()
+{
+	D3DXMATRIX worldMatrix, lightViewMatrix, lightProjectionMatrix, translateMatrix;
+	float posX, posY, posZ;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_RenderTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_RenderTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the light view matrix based on the light's position.
+	m_Light-&gt;GenerateViewMatrix();
+
+	// Get the world matrix from the d3d object.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Get the view and orthographic matrices from the light object.
+	m_Light-&gt;GetViewMatrix(lightViewMatrix);
+	m_Light-&gt;GetProjectionMatrix(lightProjectionMatrix);
+
+	// Setup the translation matrix for the cube model.
+	m_CubeModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the cube model with the depth shader.
+	m_CubeModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_DepthShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_CubeModel-&gt;GetIndexCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the sphere model.
+	m_SphereModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the sphere model with the depth shader.
+	m_SphereModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_DepthShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SphereModel-&gt;GetIndexCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the ground model.
+	m_GroundModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the ground model with the depth shader.
+	m_GroundModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_DepthShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_GroundModel-&gt;GetIndexCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This next function is where we render the shadows but as a black and white only image to another render to texture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::RenderBlackAndWhiteShadows()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, translateMatrix;
+	D3DXMATRIX lightViewMatrix, lightProjectionMatrix;
+	float posX, posY, posZ;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_BlackWhiteRenderTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_BlackWhiteRenderTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Generate the light view matrix based on the light's position.
+	m_Light-&gt;GenerateViewMatrix();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Get the light's view and projection matrices from the light object.
+	m_Light-&gt;GetViewMatrix(lightViewMatrix);
+	m_Light-&gt;GetProjectionMatrix(lightProjectionMatrix);
+
+	// Setup the translation matrix for the cube model.
+	m_CubeModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+	
+	// Render the cube model using the shadow shader.
+	m_CubeModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_ShadowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_CubeModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, lightViewMatrix,
+					lightProjectionMatrix, m_RenderTexture-&gt;GetShaderResourceView(), m_Light-&gt;GetPosition());
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the sphere model.
+	m_SphereModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the sphere model using the shadow shader.
+	m_SphereModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_ShadowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SphereModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, lightViewMatrix, 
+					lightProjectionMatrix, m_RenderTexture-&gt;GetShaderResourceView(), m_Light-&gt;GetPosition());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the ground model.
+	m_GroundModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the ground model using the shadow shader.
+	m_GroundModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_ShadowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_GroundModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, lightViewMatrix,
+					lightProjectionMatrix, m_RenderTexture-&gt;GetShaderResourceView(), m_Light-&gt;GetPosition());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function is where we down sample the black and white shadow image to begin the blur process.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::DownSampleTexture()
+{
+	D3DXMATRIX worldMatrix, baseViewMatrix, orthoMatrix;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_DownSampleTexure-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_DownSampleTexure-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetBaseViewMatrix(baseViewMatrix);
+	
+	// Get the ortho matrix from the render to texture since texture has different dimensions being that it is smaller.
+	m_DownSampleTexure-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_SmallWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the small ortho window using the texture shader and the render to texture of the scene as the texture resource.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SmallWindow-&gt;GetIndexCount(), worldMatrix, baseViewMatrix, orthoMatrix, 
+					 m_BlackWhiteRenderTexture-&gt;GetShaderResourceView());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+	
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function is where perform the horizontal blur on the down sampled black and white shadow image.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::RenderHorizontalBlurToTexture()
+{
+	D3DXMATRIX worldMatrix, baseViewMatrix, orthoMatrix;
+	float screenSizeX;
+	bool result;
+
+
+	// Store the screen width in a float that will be used in the horizontal blur shader.
+	screenSizeX = (float)(SHADOWMAP_WIDTH / 2);
+	
+	// Set the render target to be the render to texture.
+	m_HorizontalBlurTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_HorizontalBlurTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_Camera-&gt;GetBaseViewMatrix(baseViewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Get the ortho matrix from the render to texture since texture has different dimensions.
+	m_HorizontalBlurTexture-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_SmallWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	
+	// Render the small ortho window using the horizontal blur shader and the down sampled render to texture resource.
+	result = m_HorizontalBlurShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SmallWindow-&gt;GetIndexCount(), worldMatrix, baseViewMatrix, orthoMatrix,
+						m_DownSampleTexure-&gt;GetShaderResourceView(), screenSizeX);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+	
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function is where perform the vertical blur on the horizontally blurred black and white shadow image.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::RenderVerticalBlurToTexture()
+{
+	D3DXMATRIX worldMatrix, baseViewMatrix, orthoMatrix;
+	float screenSizeY;
+	bool result;
+
+
+	// Store the screen height in a float that will be used in the vertical blur shader.
+	screenSizeY = (float)(SHADOWMAP_HEIGHT / 2);
+
+	// Set the render target to be the render to texture.
+	m_VerticalBlurTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_VerticalBlurTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_Camera-&gt;GetBaseViewMatrix(baseViewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Get the ortho matrix from the render to texture since texture has different dimensions.
+	m_VerticalBlurTexture-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_SmallWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	
+	// Render the small ortho window using the vertical blur shader and the horizontal blurred render to texture resource.
+	result = m_VerticalBlurShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SmallWindow-&gt;GetIndexCount(), worldMatrix, baseViewMatrix, orthoMatrix,
+					      m_HorizontalBlurTexture-&gt;GetShaderResourceView(), screenSizeY);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+	
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And this function is where perform the up sample of the blurred black and white shadow image.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::UpSampleTexture()
+{
+	D3DXMATRIX worldMatrix, baseViewMatrix, orthoMatrix;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_UpSampleTexure-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_UpSampleTexure-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_Camera-&gt;GetBaseViewMatrix(baseViewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Get the ortho matrix from the render to texture since texture has different dimensions.
+	m_UpSampleTexure-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the full screen ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_FullScreenWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the full screen ortho window using the texture shader and the small sized final blurred render to texture resource.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_FullScreenWindow-&gt;GetIndexCount(), worldMatrix, baseViewMatrix, orthoMatrix,
+					 m_VerticalBlurTexture-&gt;GetShaderResourceView());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+	
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function calls all the above functions in the correct order and then uses the up sampled blurred image to perform the soft shadow rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::Render()
+{
+	bool result;
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, translateMatrix;
+	float posX, posY, posZ;
+
+
+	// First render the scene to a texture.
+	result = RenderSceneToTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Next render the shadowed scene in black and white.
+	result = RenderBlackAndWhiteShadows();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Then down sample the black and white scene texture.
+	result = DownSampleTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Perform a horizontal blur on the down sampled texture.
+	result = RenderHorizontalBlurToTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now perform a vertical blur on the texture.
+	result = RenderVerticalBlurToTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Finally up sample the final blurred render to texture that can now be used in the soft shadow shader.
+	result = UpSampleTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Setup the translation matrix for the cube model.
+	m_CubeModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+	
+	// Render the cube model using the soft shadow shader.
+	m_CubeModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_SoftShadowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_CubeModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+					    m_CubeModel-&gt;GetTexture(), m_UpSampleTexure-&gt;GetShaderResourceView(), m_Light-&gt;GetPosition(), 
+					    m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the sphere model.
+	m_SphereModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the sphere model using the soft shadow shader.
+	m_SphereModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_SoftShadowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SphereModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+					    m_SphereModel-&gt;GetTexture(), m_UpSampleTexure-&gt;GetShaderResourceView(), m_Light-&gt;GetPosition(), 
+					    m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Setup the translation matrix for the ground model.
+	m_GroundModel-&gt;GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&amp;worldMatrix, posX, posY, posZ);
+
+	// Render the ground model using the soft shadow shader.
+	m_GroundModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_SoftShadowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_GroundModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+					    m_GroundModel-&gt;GetTexture(), m_UpSampleTexure-&gt;GetShaderResourceView(), m_Light-&gt;GetPosition(),
+					    m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The shadows now have soft edges creating a more realistic shadowing effect.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 42_ Soft Shadows_files/pic0232.gif" width="500" height="500"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Compile and run the program.  Use the arrow keys, A, Z, PgUp, and PgDn to navigate through the scene.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Change the blur effect to a faster performing blur.  There are quite a few optimized techniques that can be found on the net.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11src42.zip">dx11src42.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11exe42.zip">dx11exe42.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 42_ Soft Shadows_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutdx11.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 42_ Soft Shadows_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

@@ -1,0 +1,15 @@
+# Blender MTL File: 'ea.blend'
+# Material Count: 1
+
+newmtl Material
+Ns 750.980392
+Ka 1.000000 1.000000 1.000000
+Kd 0.787412 0.787412 0.787412
+Ks 0.500000 0.500000 0.500000
+Ke 0.055119 0.055119 0.055119
+Ni 1.000000
+d 1.000000
+illum 2
+map_Ka Engine/data/fd.png
+#map_Kd Engine/data/fd.png
+#map_Bump Engine/data/fd.png

@@ -1,0 +1,2857 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut46.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 46: Glow</title><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 46: Glow
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 46_ Glow_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover how to add glow to your scene using DirectX 11 and HLSL.
+This tutorial builds on the concepts from the DirectX blur tutorial as blur is a required step in producing a glow.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Usually user interface elements (such as menu systems) and 3D objects are the two things that get glow applied to them in 2D and 3D applications.
+Both are done in the exact same fashion.
+For this tutorial I will be applying glow to just a single 2D user interface object to make the tutorial simple and to cover the most popular use of glow.
+However the steps are exactly the same for 3D objects.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To begin I have created a simple menu button that looks like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 46_ Glow_files/pic0265.gif" width="161" height="30"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now say I want to apply glow to just the border of the button and not the text.
+Controlling where we apply glow is very important as we generally don't want everything glowing.
+To do so I will create a black and white glow map indicating where I want the glow effect to be applied.
+This is similar to making an alpha map for transparency.
+In the case of the menu button and just applying glow to the border I would create a glow map that looks like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 46_ Glow_files/pic0266.gif" width="161" height="30"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that we have a glow map bitmap and the menu button bitmap we can start the glow effect.
+The first step is that we render just the portion of the menu button bitmap that we want the glow applied to onto a render to texture.
+We do the render by creating a glow map shader which takes the two bitmaps and renders the pixels from the color bitmap on the render to texture object
+only if there is a corresponding non-black pixel in the glow map.
+This way our glow map basically becomes a transparency mask allowing just the border of the menu button to be rendered to the render to texture object.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With the border rendered to the render to texture object we can proceed to the next important step of applying the blur.
+We will down sample the texture, blur it horizontally, then blur it vertically, and then up sample it.
+This was done in the DirectX blur tutorial on this website so we won't cover those blur details in this tutorial.
+Once the render to texture has been blurred we then brighten the glow by multiplying the color by a glow strength value.  The following image I used a glow strength of 3.0:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 46_ Glow_files/pic0267.gif" width="180" height="50"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that we have the glow render to texture we will apply it to the final scene.
+We first need to render all our user interface elements as we would normally without the glow to their own render to texture.
+We then take the resulting render to texture object and the blurred render to texture object and combine the two textures in a glow shader.
+All the glow shader does is it adds the to textures together and then draws it to the back buffer.
+The following image is the result:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 46_ Glow_files/pic0268.gif" width="180" height="50"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Also remember that 3D objects are done in the exact same way.
+Render the portions of the 3D object using the glow map to a render to texture, blur it, and combine it with the regular 3D scene using the glow shader.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For this tutorial the following steps and the related render to texture objects for each step will be the following:
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Render the glow maps to a render to texture object (output is m_RenderTexture).
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Down sample the render to texture of the glow maps to a render to texture object that is half the size (new output is m_DownSampleTexure).
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Perform a horizontal blur on the output of the previous step (new output is m_HorizontalBlurTexture).
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Perform a vertical blur on the horizontal blur texture (new output is m_VerticalBlurTexture).
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Up sample the vertical blurred texture to regular screen size again (new output is m_UpSampleTexure).
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+6. Now render the user interface elements to render to texture (output will be m_RenderTexture).
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+7. Combine the up sampled texture and the render texture of the user interface elements using the glow shader and write it to the back buffer.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For the code section of this tutorial we won't be discussing anything related to blur as it was already covered in the blur tutorial.
+We will start by looking at the modified BitmapClass.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Bitmapclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The BitmapClass has been modified and now has a glow map texture associated with it.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: bitmapclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _BITMAPCLASS_H_
+#define _BITMAPCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "textureclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: BitmapClass
+////////////////////////////////////////////////////////////////////////////////
+class BitmapClass
+{
+private:
+	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
+	};
+
+public:
+	BitmapClass();
+	BitmapClass(const BitmapClass&amp;);
+	~BitmapClass();</font><font face="arial" color="#aaaaff" size="2">
+
+	bool Initialize(ID3D11Device*, int, int, WCHAR*, WCHAR*, int, int);</font><font face="arial" color="#aaffaa" size="2">
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, int);
+
+	int GetIndexCount();
+	ID3D11ShaderResourceView* GetTexture();</font><font face="arial" color="#aaaaff" size="2">
+	ID3D11ShaderResourceView* GetGlowMap();</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	bool InitializeBuffers(ID3D11Device*);
+	void ShutdownBuffers();
+	bool UpdateBuffers(ID3D11DeviceContext*, int, int);
+	void RenderBuffers(ID3D11DeviceContext*);</font><font face="arial" color="#aaaaff" size="2">
+
+	bool LoadTextures(ID3D11Device*, WCHAR*, WCHAR*);
+	void ReleaseTextures();</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+	int m_vertexCount, m_indexCount;
+	TextureClass* m_Texture;</font><font face="arial" color="#aaaaff" size="2">
+	TextureClass* m_GlowMap;</font><font face="arial" color="#aaffaa" size="2">
+	int m_screenWidth, m_screenHeight;
+	int m_bitmapWidth, m_bitmapHeight;
+	int m_previousPosX, m_previousPosY;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Bitmapclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: bitmapclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "bitmapclass.h"
+
+
+BitmapClass::BitmapClass()
+{
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+	m_Texture = 0;</font><font face="arial" color="#aaaaff" size="2">
+	m_GlowMap = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+BitmapClass::BitmapClass(const BitmapClass&amp; other)
+{
+}
+
+
+BitmapClass::~BitmapClass()
+{
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+bool BitmapClass::Initialize(ID3D11Device* device, int screenWidth, int screenHeight, WCHAR* textureFilename, WCHAR* glowMapFilename, int bitmapWidth, int bitmapHeight)</font><font face="arial" color="#aaffaa" size="2">
+{
+	bool result;
+
+
+	// Store the screen size.
+	m_screenWidth = screenWidth;
+	m_screenHeight = screenHeight;
+
+	// Store the size in pixels that this bitmap should be rendered at.
+	m_bitmapWidth = bitmapWidth;
+	m_bitmapHeight = bitmapHeight;
+
+	// Initialize the previous rendering position to negative one.
+	m_previousPosX = -1;
+	m_previousPosY = -1;
+
+	// Initialize the vertex and index buffers.
+	result = InitializeBuffers(device);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Load the textures for this bitmap.</font><font face="arial" color="#aaaaff" size="2">
+	result = LoadTextures(device, textureFilename, glowMapFilename);</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void BitmapClass::Shutdown()
+{
+	// Release the bitmap textures.</font><font face="arial" color="#aaaaff" size="2">
+	ReleaseTextures();</font><font face="arial" color="#aaffaa" size="2">
+
+	// Shutdown the vertex and index buffers.
+	ShutdownBuffers();
+
+	return;
+}
+
+
+bool BitmapClass::Render(ID3D11DeviceContext* deviceContext, int positionX, int positionY)
+{
+	bool result;
+
+
+	// Re-build the dynamic vertex buffer for rendering to possibly a different location on the screen.
+	result = UpdateBuffers(deviceContext, positionX, positionY);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	RenderBuffers(deviceContext);
+
+	return true;
+}
+
+
+int BitmapClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+
+
+ID3D11ShaderResourceView* BitmapClass::GetTexture()
+{
+	return m_Texture-&gt;GetTexture();
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+ID3D11ShaderResourceView* BitmapClass::GetGlowMap()
+{
+	return m_GlowMap-&gt;GetTexture();
+}</font><font face="arial" color="#aaffaa" size="2">
+
+
+bool BitmapClass::InitializeBuffers(ID3D11Device* device)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+	int i;
+
+
+	// Set the number of vertices in the vertex array.
+	m_vertexCount = 6;
+
+	// Set the number of indices in the index array.
+	m_indexCount = m_vertexCount;
+
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+
+	// Initialize vertex array to zeros at first.
+	memset(vertices, 0, (sizeof(VertexType) * m_vertexCount));
+
+	// Load the index array with data.
+	for(i=0; i&lt;m_indexCount; i++)
+	{
+		indices[i] = i;
+	}
+
+	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+
+
+void BitmapClass::ShutdownBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+
+
+bool BitmapClass::UpdateBuffers(ID3D11DeviceContext* deviceContext, int positionX, int positionY)
+{
+	float left, right, top, bottom;
+	VertexType* vertices;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	VertexType* verticesPtr;
+	HRESULT result;
+
+
+	// If the position we are rendering this bitmap to has not changed then don't update the vertex buffer since it
+	// currently has the correct parameters.
+	if((positionX == m_previousPosX) &amp;&amp; (positionY == m_previousPosY))
+	{
+		return true;
+	}
+	
+	// If it has changed then update the position it is being rendered to.
+	m_previousPosX = positionX;
+	m_previousPosY = positionY;
+
+	// Calculate the screen coordinates of the left side of the bitmap.
+	left = (float)((m_screenWidth / 2) * -1) + (float)positionX;
+
+	// Calculate the screen coordinates of the right side of the bitmap.
+	right = left + (float)m_bitmapWidth;
+
+	// Calculate the screen coordinates of the top of the bitmap.
+	top = (float)(m_screenHeight / 2) - (float)positionY;
+
+	// Calculate the screen coordinates of the bottom of the bitmap.
+	bottom = top - (float)m_bitmapHeight;
+
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Load the vertex array with data.
+	// First triangle.
+	vertices[0].position = D3DXVECTOR3(left, top, 0.0f);  // Top left.
+	vertices[0].texture = D3DXVECTOR2(0.0f, 0.0f);
+
+	vertices[1].position = D3DXVECTOR3(right, bottom, 0.0f);  // Bottom right.
+	vertices[1].texture = D3DXVECTOR2(1.0f, 1.0f);
+
+	vertices[2].position = D3DXVECTOR3(left, bottom, 0.0f);  // Bottom left.
+	vertices[2].texture = D3DXVECTOR2(0.0f, 1.0f);
+
+	// Second triangle.
+	vertices[3].position = D3DXVECTOR3(left, top, 0.0f);  // Top left.
+	vertices[3].texture = D3DXVECTOR2(0.0f, 0.0f);
+
+	vertices[4].position = D3DXVECTOR3(right, top, 0.0f);  // Top right.
+	vertices[4].texture = D3DXVECTOR2(1.0f, 0.0f);
+
+	vertices[5].position = D3DXVECTOR3(right, bottom, 0.0f);  // Bottom right.
+	vertices[5].texture = D3DXVECTOR2(1.0f, 1.0f);
+
+	// Lock the vertex buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the vertex buffer.
+	verticesPtr = (VertexType*)mappedResource.pData;
+
+	// Copy the data into the vertex buffer.
+	memcpy(verticesPtr, (void*)vertices, (sizeof(VertexType) * m_vertexCount));
+
+	// Unlock the vertex buffer.
+	deviceContext-&gt;Unmap(m_vertexBuffer, 0);
+
+	// Release the vertex array as it is no longer needed.
+	delete [] vertices;
+	vertices = 0;
+
+	return true;
+}
+
+
+void BitmapClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType); 
+	offset = 0;
+    
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	return;
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+bool BitmapClass::LoadTextures(ID3D11Device* device, WCHAR* filename, WCHAR* glowMapFilename)</font><font face="arial" color="#aaffaa" size="2">
+{
+	bool result;
+
+
+	// Create the texture object.
+	m_Texture = new TextureClass;
+	if(!m_Texture)
+	{
+		return false;
+	}
+
+	// Initialize the texture object.
+	result = m_Texture-&gt;Initialize(device, filename);
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaaaff" size="2">
+
+	// Create the glow map texture object.
+	m_GlowMap = new TextureClass;
+	if(!m_GlowMap)
+	{
+		return false;
+	}
+
+	// Initialize the glow map texture object.
+	result = m_GlowMap-&gt;Initialize(device, glowMapFilename);
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+void BitmapClass::ReleaseTextures()</font><font face="arial" color="#aaffaa" size="2">
+{
+	// Release the texture objects.
+	if(m_Texture)
+	{
+		m_Texture-&gt;Shutdown();
+		delete m_Texture;
+		m_Texture = 0;
+	}</font><font face="arial" color="#aaaaff" size="2">
+
+	if(m_GlowMap)
+	{
+		m_GlowMap-&gt;Shutdown();
+		delete m_GlowMap;
+		m_GlowMap = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glowmap.vs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The purpose of the glow map shader is to render just the glow map portions of the color bitmap onto a render to texture so that it can be further processed (blurred).
+The code here for the HLSL glow map shader is just the texture shader HLSL code modified to handle glow map rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: glowmap.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType GlowMapVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+    
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glowmap.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: glowmap.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+Texture2D shaderTexture : register(t0);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We add a texture resource for the glow map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Texture2D glowMapTexture : register(t1);
+SamplerState SampleType;
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 GlowMapPixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 textureColor;
+    float4 glowMap;
+    float4 color;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First sample both the bitmap texture and the glow map texture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Sample the pixel color from the texture using the sampler at this texture coordinate location.
+    textureColor = shaderTexture.Sample(SampleType, input.tex);
+
+    // Sample the glow map.
+    glowMap = glowMapTexture.Sample(SampleType, input.tex);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now return just the portions of the color texture that aligns with the white pixels in the glow map.
+In other words black is transparent, and anything else in the bitmap that isn't black gets drawn.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // If the glow map is black then return just black.  Otherwise if the glow map has color then return the color from the texture.
+    if((glowMap.r == 0.0f) &amp;&amp; (glowMap.g == 0.0f) &amp;&amp; (glowMap.b == 0.0f))
+    {
+        color = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    }
+    else
+    {
+        color = textureColor;
+    }
+
+    return color;
+}
+
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glowmapshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GlowMapShaderClass is just the TextureShaderClass modified to handle an extra texture (glow map).
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: glowmapshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GLOWMAPSHADERCLASS_H_
+#define _GLOWMAPSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GlowMapShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class GlowMapShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+
+public:
+	GlowMapShaderClass();
+	GlowMapShaderClass(const GlowMapShaderClass&amp;);
+	~GlowMapShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();</font><font face="arial" color="#aaaaff" size="2">
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*);</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);</font><font face="arial" color="#aaaaff" size="2">
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*);</font><font face="arial" color="#aaffaa" size="2">
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11Buffer* m_matrixBuffer;
+	ID3D11SamplerState* m_sampleState;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glowmapshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: glowmapshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "glowmapshaderclass.h"
+
+
+GlowMapShaderClass::GlowMapShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_matrixBuffer = 0;
+	m_sampleState = 0;
+}
+
+
+GlowMapShaderClass::GlowMapShaderClass(const GlowMapShaderClass&amp; other)
+{
+}
+
+
+GlowMapShaderClass::~GlowMapShaderClass()
+{
+}
+
+
+bool GlowMapShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+
+
+	// Initialize the vertex and pixel shaders.</font><font face="arial" color="#aaaaff" size="2">
+	result = InitializeShader(device, hwnd, L"../Engine/glowmap.vs", L"../Engine/glowmap.ps");</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void GlowMapShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+bool GlowMapShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+				D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* glowMap)</font><font face="arial" color="#aaffaa" size="2">
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.</font><font face="arial" color="#aaaaff" size="2">
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, glowMap);</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool GlowMapShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	unsigned int numElements;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_SAMPLER_DESC samplerDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+
+	// Compile the vertex shader code.</font><font face="arial" color="#aaaaff" size="2">
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "GlowMapVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);</font><font face="arial" color="#aaffaa" size="2">
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Compile the pixel shader code.</font><font face="arial" color="#aaaaff" size="2">
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "GlowMapPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);</font><font face="arial" color="#aaffaa" size="2">
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void GlowMapShaderClass::ShutdownShader()
+{
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void GlowMapShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+bool GlowMapShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+					     D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView* glowMap)</font><font face="arial" color="#aaffaa" size="2">
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* dataPtr;
+	unsigned int bufferNumber;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+
+	// Set shader texture resources in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;texture);</font><font face="arial" color="#aaaaff" size="2">
+	deviceContext-&gt;PSSetShaderResources(1, 1, &amp;glowMap);</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void GlowMapShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glow.vs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The purpose of the glow shader is to combine the blurred glow map texture with the actual regular color rendering of the scene.
+The regular scene is rendered to the input colorTexture, and the glow (blurred glow map) part of the scene has been rendered to the input glowTexture.
+The shader then multiplies the glowTexture by the glowStrength value to increase the glow.
+After that it adds the glow texture with the color texture to get the final pixel result.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: glow.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType GlowVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+    
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glow.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: glow.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The render to texture of the regular scene is sent into the shader as colorTexture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Texture2D colorTexture : register(t0);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The blurred glow map render to texture is sent into the shader as glowTexture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Texture2D glowTexture : register(t1);
+SamplerState SampleType;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The glowStrength variable in the GlowBuffer is for increasing the blurred glow map texture so that the glow has a stronger effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer GlowBuffer
+{
+    float glowStrength;
+    float3 padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 GlowPixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 textureColor;
+    float4 glowColor;
+    float4 color;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Sample the regular scene texture and the glow map texture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Sample the pixel color from the texture using the sampler at this texture coordinate location.
+    textureColor = colorTexture.Sample(SampleType, input.tex);
+
+    // Sample the glow texture.
+    glowColor = glowTexture.Sample(SampleType, input.tex);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Add the two textures together to create the final glow.
+The glow map texture is also multiplied by the glow strength to increase the appearance of the glow effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Add the texture color to the glow color multiplied by the glow stength.
+    color = saturate(textureColor + (glowColor * glowStrength));
+
+    return color;
+}
+
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glowshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GlowShaderClass is just the TextureShaderClass modified to handle glow related variables.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: glowshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GLOWSHADERCLASS_H_
+#define _GLOWSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GlowShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class GlowShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};</font><font face="arial" color="#aaaaff" size="2">
+
+	struct GlowBufferType
+	{
+		float glowStrength;
+		D3DXVECTOR3 padding;
+	};</font><font face="arial" color="#aaffaa" size="2">
+
+public:
+	GlowShaderClass();
+	GlowShaderClass(const GlowShaderClass&amp;);
+	~GlowShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();</font><font face="arial" color="#aaaaff" size="2">
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, float);</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);</font><font face="arial" color="#aaaaff" size="2">
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, float);</font><font face="arial" color="#aaffaa" size="2">
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11Buffer* m_matrixBuffer;</font><font face="arial" color="#aaaaff" size="2">
+	ID3D11Buffer* m_glowBuffer;</font><font face="arial" color="#aaffaa" size="2">
+	ID3D11SamplerState* m_sampleState;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Glowshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: glowshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "glowshaderclass.h"
+
+
+GlowShaderClass::GlowShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_matrixBuffer = 0;</font><font face="arial" color="#aaaaff" size="2">
+	m_glowBuffer = 0;</font><font face="arial" color="#aaffaa" size="2">
+	m_sampleState = 0;
+}
+
+
+GlowShaderClass::GlowShaderClass(const GlowShaderClass&amp; other)
+{
+}
+
+
+GlowShaderClass::~GlowShaderClass()
+{
+}
+
+
+bool GlowShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+
+
+	// Initialize the vertex and pixel shaders.</font><font face="arial" color="#aaaaff" size="2">
+	result = InitializeShader(device, hwnd, L"../Engine/glow.vs", L"../Engine/glow.ps");</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void GlowShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+bool GlowShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+			     D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* colorTexture, ID3D11ShaderResourceView* glowTexture, 
+			     float glowStrength)</font><font face="arial" color="#aaffaa" size="2">
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.</font><font face="arial" color="#aaaaff" size="2">
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, colorTexture, glowTexture, glowStrength);</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool GlowShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	unsigned int numElements;
+	D3D11_BUFFER_DESC matrixBufferDesc;</font><font face="arial" color="#aaaaff" size="2">
+	D3D11_BUFFER_DESC glowBufferDesc;</font><font face="arial" color="#aaffaa" size="2">
+	D3D11_SAMPLER_DESC samplerDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+
+	// Compile the vertex shader code.</font><font face="arial" color="#aaaaff" size="2">
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "GlowVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);</font><font face="arial" color="#aaffaa" size="2">
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+	
+	// Compile the pixel shader code.</font><font face="arial" color="#aaaaff" size="2">
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "GlowPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);</font><font face="arial" color="#aaffaa" size="2">
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}</font><font face="arial" color="#aaaaff" size="2">
+	
+	// Setup the description of the dynamic glow constant buffer that is in the pixel shader.
+	glowBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	glowBufferDesc.ByteWidth = sizeof(GlowBufferType);
+	glowBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	glowBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	glowBufferDesc.MiscFlags = 0;
+	glowBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the pixel shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;glowBufferDesc, NULL, &amp;m_glowBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void GlowShaderClass::ShutdownShader()
+{
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}</font><font face="arial" color="#aaaaff" size="2">
+
+	// Release the glow constant buffer.
+	if(m_glowBuffer)
+	{
+		m_glowBuffer-&gt;Release();
+		m_glowBuffer = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void GlowShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+bool GlowShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+					  D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* colorTexture, 
+					  ID3D11ShaderResourceView* glowTexture, float glowStrength)</font><font face="arial" color="#aaffaa" size="2">
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* dataPtr;</font><font face="arial" color="#aaaaff" size="2">
+	GlowBufferType* dataPtr2;</font><font face="arial" color="#aaffaa" size="2">
+	unsigned int bufferNumber;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);</font><font face="arial" color="#aaaaff" size="2">
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_glowBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (GlowBufferType*)mappedResource.pData;
+
+	// Copy the data into the constant buffer.
+	dataPtr2-&gt;glowStrength = glowStrength;
+	dataPtr2-&gt;padding = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_glowBuffer, 0);
+
+	// Set the position of the constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_glowBuffer);</font><font face="arial" color="#aaffaa" size="2">
+
+	// Set shader texture resources in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;colorTexture);
+	deviceContext-&gt;PSSetShaderResources(1, 1, &amp;glowTexture);
+
+	return true;
+}
+
+
+void GlowShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GraphicsClass is the same as the blur tutorial except that we add shaders for rendering both the glow and the glow map.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "textureshaderclass.h"
+#include "bitmapclass.h"
+#include "rendertextureclass.h"
+#include "orthowindowclass.h"
+#include "horizontalblurshaderclass.h"
+#include "verticalblurshaderclass.h"</font><font face="arial" color="#aaaaff" size="2">
+#include "glowmapshaderclass.h"
+#include "glowshaderclass.h"</font><font face="arial" color="#aaffaa" size="2">
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool Render();</font><font face="arial" color="#aaaaff" size="2">
+	bool RenderGlowMapToTexture();</font><font face="arial" color="#aaffaa" size="2">
+	bool DownSampleTexture();
+	bool RenderHorizontalBlurToTexture();
+	bool RenderVerticalBlurToTexture();
+	bool UpSampleTexture();</font><font face="arial" color="#aaaaff" size="2">
+	bool RenderUIElementsToTexture();
+	bool RenderGlowScene();</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	TextureShaderClass* m_TextureShader;
+	BitmapClass* m_Bitmap;
+	RenderTextureClass *m_RenderTexture, *m_DownSampleTexure, *m_HorizontalBlurTexture, *m_VerticalBlurTexture, *m_UpSampleTexure;
+	OrthoWindowClass *m_SmallWindow, *m_FullScreenWindow;
+	HorizontalBlurShaderClass* m_HorizontalBlurShader;
+	VerticalBlurShaderClass* m_VerticalBlurShader;</font><font face="arial" color="#aaaaff" size="2">
+	GlowMapShaderClass* m_GlowMapShader;
+	GlowShaderClass* m_GlowShader;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_TextureShader = 0;
+	m_Bitmap = 0;
+	m_RenderTexture = 0;
+	m_DownSampleTexure = 0;
+	m_SmallWindow = 0;
+	m_HorizontalBlurTexture = 0;
+	m_HorizontalBlurShader = 0;
+	m_VerticalBlurTexture = 0;
+	m_VerticalBlurShader = 0;
+	m_UpSampleTexure = 0;
+	m_FullScreenWindow = 0;</font><font face="arial" color="#aaaaff" size="2">
+	m_GlowMapShader = 0;
+	m_GlowShader = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	
+	// Create the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+	if(!m_TextureShader)
+	{
+		return false;
+	}
+
+	// Initialize the texture shader object.
+	result = m_TextureShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the bitmap object.
+	m_Bitmap = new BitmapClass;
+	if(!m_Bitmap)
+	{
+		return false;
+	}
+
+	// Initialize the bitmap object.
+	result = m_Bitmap-&gt;Initialize(m_D3D-&gt;GetDevice(), screenWidth, screenHeight, L"../Engine/data/test.dds", 
+				      L"../Engine/data/glowmap.dds", 256, 32);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the bitmap object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the render to texture object.
+	m_RenderTexture = new RenderTextureClass;
+	if(!m_RenderTexture)
+	{
+		return false;
+	}
+
+	// Initialize the render to texture object.
+	result = m_RenderTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the down sample render to texture object.
+	m_DownSampleTexure = new RenderTextureClass;
+	if(!m_DownSampleTexure)
+	{
+		return false;
+	}
+
+	// Initialize the down sample render to texture object.
+	result = m_DownSampleTexure-&gt;Initialize(m_D3D-&gt;GetDevice(), (screenWidth / 2), (screenHeight / 2), SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the down sample render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the small ortho window object.
+	m_SmallWindow = new OrthoWindowClass;
+	if(!m_SmallWindow)
+	{
+		return false;
+	}
+
+	// Initialize the small ortho window object.
+	result = m_SmallWindow-&gt;Initialize(m_D3D-&gt;GetDevice(), (screenWidth / 2), (screenHeight / 2));
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the small ortho window object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the horizontal blur render to texture object.
+	m_HorizontalBlurTexture = new RenderTextureClass;
+	if(!m_HorizontalBlurTexture)
+	{
+		return false;
+	}
+
+	// Initialize the horizontal blur render to texture object.
+	result = m_HorizontalBlurTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), (screenWidth / 2), (screenHeight / 2), SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the horizontal blur render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the horizontal blur shader object.
+	m_HorizontalBlurShader = new HorizontalBlurShaderClass;
+	if(!m_HorizontalBlurShader)
+	{
+		return false;
+	}
+
+	// Initialize the horizontal blur shader object.
+	result = m_HorizontalBlurShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the horizontal blur shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the vertical blur render to texture object.
+	m_VerticalBlurTexture = new RenderTextureClass;
+	if(!m_VerticalBlurTexture)
+	{
+		return false;
+	}
+
+	// Initialize the vertical blur render to texture object.
+	result = m_VerticalBlurTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), (screenWidth / 2), (screenHeight / 2), SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the vertical blur render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the vertical blur shader object.
+	m_VerticalBlurShader = new VerticalBlurShaderClass;
+	if(!m_VerticalBlurShader)
+	{
+		return false;
+	}
+
+	// Initialize the vertical blur shader object.
+	result = m_VerticalBlurShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the vertical blur shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the up sample render to texture object.
+	m_UpSampleTexure = new RenderTextureClass;
+	if(!m_UpSampleTexure)
+	{
+		return false;
+	}
+
+	// Initialize the up sample render to texture object.
+	result = m_UpSampleTexure-&gt;Initialize(m_D3D-&gt;GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the up sample render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the full screen ortho window object.
+	m_FullScreenWindow = new OrthoWindowClass;
+	if(!m_FullScreenWindow)
+	{
+		return false;
+	}
+
+	// Initialize the full screen ortho window object.
+	result = m_FullScreenWindow-&gt;Initialize(m_D3D-&gt;GetDevice(), screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the full screen ortho window object.", L"Error", MB_OK);
+		return false;
+	}</font><font face="arial" color="#aaaaff" size="2">
+
+	// Create the glow map shader object.
+	m_GlowMapShader = new GlowMapShaderClass;
+	if(!m_GlowMapShader)
+	{
+		return false;
+	}
+
+	// Initialize the glow map shader object.
+	result = m_GlowMapShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the glow map shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the glow shader object.
+	m_GlowShader = new GlowShaderClass;
+	if(!m_GlowShader)
+	{
+		return false;
+	}
+
+	// Initialize the glow shader object.
+	result = m_GlowShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the glow shader object.", L"Error", MB_OK);
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{</font><font face="arial" color="#aaaaff" size="2">
+	// Release the glow shader object.
+	if(m_GlowShader)
+	{
+		m_GlowShader-&gt;Shutdown();
+		delete m_GlowShader;
+		m_GlowShader = 0;
+	}
+
+	// Release the glow map shader object.
+	if(m_GlowMapShader)
+	{
+		m_GlowMapShader-&gt;Shutdown();
+		delete m_GlowMapShader;
+		m_GlowMapShader = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the full screen ortho window object.
+	if(m_FullScreenWindow)
+	{
+		m_FullScreenWindow-&gt;Shutdown();
+		delete m_FullScreenWindow;
+		m_FullScreenWindow = 0;
+	}
+
+	// Release the up sample render to texture object.
+	if(m_UpSampleTexure)
+	{
+		m_UpSampleTexure-&gt;Shutdown();
+		delete m_UpSampleTexure;
+		m_UpSampleTexure = 0;
+	}
+
+	// Release the vertical blur shader object.
+	if(m_VerticalBlurShader)
+	{
+		m_VerticalBlurShader-&gt;Shutdown();
+		delete m_VerticalBlurShader;
+		m_VerticalBlurShader = 0;
+	}
+
+	// Release the vertical blur render to texture object.
+	if(m_VerticalBlurTexture)
+	{
+		m_VerticalBlurTexture-&gt;Shutdown();
+		delete m_VerticalBlurTexture;
+		m_VerticalBlurTexture = 0;
+	}
+
+	// Release the horizontal blur shader object.
+	if(m_HorizontalBlurShader)
+	{
+		m_HorizontalBlurShader-&gt;Shutdown();
+		delete m_HorizontalBlurShader;
+		m_HorizontalBlurShader = 0;
+	}
+
+	// Release the horizontal blur render to texture object.
+	if(m_HorizontalBlurTexture)
+	{
+		m_HorizontalBlurTexture-&gt;Shutdown();
+		delete m_HorizontalBlurTexture;
+		m_HorizontalBlurTexture = 0;
+	}
+
+	// Release the small ortho window object.
+	if(m_SmallWindow)
+	{
+		m_SmallWindow-&gt;Shutdown();
+		delete m_SmallWindow;
+		m_SmallWindow = 0;
+	}
+
+	// Release the down sample render to texture object.
+	if(m_DownSampleTexure)
+	{
+		m_DownSampleTexure-&gt;Shutdown();
+		delete m_DownSampleTexure;
+		m_DownSampleTexure = 0;
+	}
+
+	// Release the render to texture object.
+	if(m_RenderTexture)
+	{
+		m_RenderTexture-&gt;Shutdown();
+		delete m_RenderTexture;
+		m_RenderTexture = 0;
+	}
+
+	// Release the bitmap object.
+	if(m_Bitmap)
+	{
+		m_Bitmap-&gt;Shutdown();
+		delete m_Bitmap;
+		m_Bitmap = 0;
+	}
+
+	// Release the texture shader object.
+	if(m_TextureShader)
+	{
+		m_TextureShader-&gt;Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame()
+{
+	bool result;
+
+
+	// Render the graphics scene.
+	result = Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function calls the different steps required to produce the glow.
+It is similar to the blur tutorial except that we start by rendering the glow map to a texture instead of the 3D scene.
+After that we do the blurring as normal.
+Once the blur is complete we render the UI elements to another render to texture and combine it with the blurred texture for the final result.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::Render()
+{
+	bool result;</font><font face="arial" color="#aaaaff" size="2">
+
+
+	// First render the glow maps to a render texture.
+	result = RenderGlowMapToTexture();
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Next down sample the render texture to a smaller sized texture.
+	result = DownSampleTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Perform a horizontal blur on the down sampled render texture.
+	result = RenderHorizontalBlurToTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now perform a vertical blur on the horizontal blur render texture.
+	result = RenderVerticalBlurToTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Up sample the final blurred render texture to screen size again.
+	result = UpSampleTexture();
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaaaff" size="2">
+
+	// Render the regular UI elements to a full screen texture.
+	result = RenderUIElementsToTexture();
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Render the final scene combining the UI elements with the glowing UI elements.
+	RenderGlowScene();</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function is what renders the glow map portions of the color bitmap onto the render to texture object.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool GraphicsClass::RenderGlowMapToTexture()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_RenderTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_RenderTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the bitmap vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	result = m_Bitmap-&gt;Render(m_D3D-&gt;GetDeviceContext(), 100, 100);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the bitmap using the glow map shader.
+	m_GlowMapShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Bitmap-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+				m_Bitmap-&gt;GetTexture(), m_Bitmap-&gt;GetGlowMap());
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}</font><font face="arial" color="#aaffaa" size="2">
+
+
+bool GraphicsClass::DownSampleTexture()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_DownSampleTexure-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_DownSampleTexure-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 1.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	
+	// Get the ortho matrix from the render to texture since texture has different dimensions being that it is smaller.
+	m_DownSampleTexure-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_SmallWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the small ortho window using the texture shader and the render to texture of the scene as the texture resource.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SmallWindow-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+					 m_RenderTexture-&gt;GetShaderResourceView());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+	
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+
+
+bool GraphicsClass::RenderHorizontalBlurToTexture()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	float screenSizeX;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_HorizontalBlurTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_HorizontalBlurTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Get the ortho matrix from the render to texture since texture has different dimensions.
+	m_HorizontalBlurTexture-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Store the screen width in a float that will be used in the horizontal blur shader.
+	screenSizeX = (float)m_HorizontalBlurTexture-&gt;GetTextureWidth();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_SmallWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	
+	// Render the small ortho window using the horizontal blur shader and the down sampled render to texture resource.
+	result = m_HorizontalBlurShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SmallWindow-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+						m_DownSampleTexure-&gt;GetShaderResourceView(), screenSizeX);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+
+
+bool GraphicsClass::RenderVerticalBlurToTexture()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	float screenSizeY;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_VerticalBlurTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_VerticalBlurTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Get the ortho matrix from the render to texture since texture has different dimensions.
+	m_VerticalBlurTexture-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Store the screen height in a float that will be used in the vertical blur shader.
+	screenSizeY = (float)m_VerticalBlurTexture-&gt;GetTextureHeight();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_SmallWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	
+	// Render the small ortho window using the vertical blur shader and the horizontal blurred render to texture resource.
+	result = m_VerticalBlurShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SmallWindow-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+					      m_HorizontalBlurTexture-&gt;GetShaderResourceView(), screenSizeY);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+
+
+bool GraphicsClass::UpSampleTexture()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_UpSampleTexure-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_UpSampleTexure-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+
+	// Get the ortho matrix from the render to texture since texture has different dimensions.
+	m_UpSampleTexure-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the full screen ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_FullScreenWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the full screen ortho window using the texture shader and the small sized final blurred render to texture resource.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_FullScreenWindow-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+					 m_VerticalBlurTexture-&gt;GetShaderResourceView());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+	
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This next function is what renders the user interface elements to their own render to texture object.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool GraphicsClass::RenderUIElementsToTexture()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_RenderTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_RenderTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and ortho matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the bitmap vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	result = m_Bitmap-&gt;Render(m_D3D-&gt;GetDeviceContext(), 100, 100);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the bitmap using the texture shader.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Bitmap-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_Bitmap-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And then this final function is what combines the user interface elements texture with the blurred glow map texture to produce the final glow result.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool GraphicsClass::RenderGlowScene()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(1.0f, 0.0f, 0.0f, 0.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and ortho matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the full screen ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_FullScreenWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the full screen ortho window using the texture shader and the full screen sized blurred render to texture resource.
+	m_GlowShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_FullScreenWindow-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+			     m_RenderTexture-&gt;GetShaderResourceView(), m_UpSampleTexure-&gt;GetShaderResourceView(), 3.0f);
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+	
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We can now apply selective glow to our scene using glow maps.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 46_ Glow_files/pic0268.gif" width="180" height="50"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Compile and run the program.  You should see a glow applied to the bitmap object.  Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Modify the glow strength to see the effect it has.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Create a different glow map to make only the text glow.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Add glow to a 3D scene (such as the spinning cube from the other tutorials).
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Use an additional texture such as noise or a gradient and animate the glow by translating the noise or gradient texture and using it as intensity for the glow.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11src46.zip">dx11src46.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11exe46.zip">dx11exe46.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 46_ Glow_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutdx11.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 46_ Glow_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

@@ -1,0 +1,889 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut45.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 45: Managing Multiple Shaders</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 45: Managing Multiple Shaders
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 45_ Managing Multiple Shaders_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+One of the issues that quickly arises in a graphics application that uses multiple shaders is how to manage them.
+In the DirectX 11 tutorial series I generally don't show how manage them as it makes the tutorials less focused 
+and harder to comprehend.
+So in this tutorial I will present one of the simpler methods for managing multiple shaders.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For this tutorial we will use a new class called ShaderManagerClass.
+What this class does is it encapsulates the loading, unloading, and usage of all the shaders that the application requires.
+In design patterns terminology this is usually referred to as a facade pattern as we are encapsulating and providing a 
+singular simplified interface to a much larger body of code.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In this tutorial the ShaderManagerClass will contain the texture, light, and bump map shader objects.
+It will load and unload all three of them, and it will also provide interfaces to have them render objects.
+This allows us to create just a single ShaderManagerClass object and then pass a single pointer to the class object
+around the application so that rendering objects is just a single function call using the object pointer.
+This is similar to how the D3DClass has been used in previous tutorials.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The following image shows a cube being rendered with a texture shader, a light shader, and a bump map shader all at 
+the same time through the use of the ShaderManagerClass:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 45_ Managing Multiple Shaders_files/pic0256.gif" width="500" height="136"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will start the code section by examining the ShaderManagerClass.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadermanagerclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadermanagerclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SHADERMANAGERCLASS_H_
+#define _SHADERMANAGERCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we include each shader class header file that we want to use in the application.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">#include "textureshaderclass.h"
+#include "lightshaderclass.h"
+#include "bumpmapshaderclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ShaderManagerClass
+////////////////////////////////////////////////////////////////////////////////
+class ShaderManagerClass
+{
+public:
+	ShaderManagerClass();
+	ShaderManagerClass(const ShaderManagerClass&amp;);
+	~ShaderManagerClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We create a single render function for each shader that the ShaderManagerClass handles.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	bool RenderTextureShader(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*);
+
+	bool RenderLightShader(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, 
+			       D3DXVECTOR3, D3DXVECTOR4, D3DXVECTOR4, D3DXVECTOR3, D3DXVECTOR4, float);
+
+	bool RenderBumpMapShader(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, 
+				 ID3D11ShaderResourceView*, D3DXVECTOR3, D3DXVECTOR4);
+
+private:
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ShaderManagerClass contains a private class object for each shader type the application will be using.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	TextureShaderClass* m_TextureShader;
+	LightShaderClass* m_LightShader;
+	BumpMapShaderClass* m_BumpMapShader;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Shadermanagerclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: shadermanagerclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "shadermanagerclass.h"
+
+
+ShaderManagerClass::ShaderManagerClass()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the private shader class objects to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_TextureShader = 0;
+	m_LightShader = 0;
+	m_BumpMapShader = 0;
+}
+
+
+ShaderManagerClass::ShaderManagerClass(const ShaderManagerClass&amp; other)
+{
+}
+
+
+ShaderManagerClass::~ShaderManagerClass()
+{
+}
+
+
+bool ShaderManagerClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the texture shader object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+	if(!m_TextureShader)
+	{
+		return false;
+	}
+
+	// Initialize the texture shader object.
+	result = m_TextureShader-&gt;Initialize(device, hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the light shader object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the light shader object.
+	m_LightShader = new LightShaderClass;
+	if(!m_LightShader)
+	{
+		return false;
+	}
+
+	// Initialize the light shader object.
+	result = m_LightShader-&gt;Initialize(device, hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the bump map shader object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the bump map shader object.
+	m_BumpMapShader = new BumpMapShaderClass;
+	if(!m_BumpMapShader)
+	{
+		return false;
+	}
+
+	// Initialize the bump map shader object.
+	result = m_BumpMapShader-&gt;Initialize(device, hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the bump map shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function releases all the shaders that were in use by the application.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void ShaderManagerClass::Shutdown()
+{
+	// Release the bump map shader object.
+	if(m_BumpMapShader)
+	{
+		m_BumpMapShader-&gt;Shutdown();
+		delete m_BumpMapShader;
+		m_BumpMapShader = 0;
+	}
+
+	// Release the light shader object.
+	if(m_LightShader)
+	{
+		m_LightShader-&gt;Shutdown();
+		delete m_LightShader;
+		m_LightShader = 0;
+	}
+
+	// Release the texture shader object.
+	if(m_TextureShader)
+	{
+		m_TextureShader-&gt;Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we create a specialized render function for each shader type that ShaderManagerClass uses.
+In the application we can now just pass around a pointer to the ShaderManagerClass object and then make a call to one of the following functions to 
+render any model with the desired shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool ShaderManagerClass::RenderTextureShader(ID3D11DeviceContext* device, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, 
+					     ID3D11ShaderResourceView* texture)
+{
+	bool result;
+
+
+	// Render the model using the texture shader.
+	result = m_TextureShader-&gt;Render(device, indexCount, worldMatrix, viewMatrix, projectionMatrix, texture);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool ShaderManagerClass::RenderLightShader(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, 
+					   ID3D11ShaderResourceView* texture, D3DXVECTOR3 lightDirection, D3DXVECTOR4 ambient, D3DXVECTOR4 diffuse, 
+					   D3DXVECTOR3 cameraPosition, D3DXVECTOR4 specular, float specularPower)
+{
+	bool result;
+
+
+	// Render the model using the light shader.
+	result = m_LightShader-&gt;Render(deviceContext, indexCount, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, ambient, diffuse, cameraPosition, 
+				       specular, specularPower);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool ShaderManagerClass::RenderBumpMapShader(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, 
+					     ID3D11ShaderResourceView* colorTexture, ID3D11ShaderResourceView* normalTexture, D3DXVECTOR3 lightDirection, 
+					     D3DXVECTOR4 diffuse)
+{
+	bool result;
+
+
+	// Render the model using the bump map shader.
+	result = m_BumpMapShader-&gt;Render(deviceContext, indexCount, worldMatrix, viewMatrix, projectionMatrix, colorTexture, normalTexture, lightDirection, diffuse);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+So now in the GraphicsClass we include just the header for the ShaderManagerClass instead of all the individual shader headers.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">#include "shadermanagerclass.h"
+#include "cameraclass.h"
+#include "lightclass.h"
+#include "modelclass.h"
+#include "bumpmodelclass.h"
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool Render(float);
+
+private:
+	D3DClass* m_D3D;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We create a private pointer to the ShaderManagerClass object here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ShaderManagerClass* m_ShaderManager;
+	CameraClass* m_Camera;
+	LightClass* m_Light;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will use three different cube models for the purposes of the tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ModelClass* m_Model1;
+	ModelClass* m_Model2;
+	BumpModelClass* m_Model3;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_ShaderManager = 0;
+	m_Light = 0;
+	m_Camera = 0;
+	m_Model1 = 0;
+	m_Model2 = 0;
+	m_Model3 = 0;
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We create and initialize the ShaderManagerClass object here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the shader manager object.
+	m_ShaderManager = new ShaderManagerClass;
+	if(!m_ShaderManager)
+	{
+		return false;
+	}
+
+	// Initialize the shader manager object.
+	result = m_ShaderManager-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the shader manager object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetDirection(0.0f, 0.0f, 1.0f);
+	m_Light-&gt;SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetSpecularPower(64.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the three different cube models with their associated textures.
+This way we have three different cubes that we can each render with a different shader using the ShaderManagerClass.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the model object.
+	m_Model1 = new ModelClass;
+	if(!m_Model1)
+	{
+		return false;
+	}
+
+	// Initialize the model object.
+	result = m_Model1-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/cube.txt", L"../Engine/data/marble.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the first model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the second model object.
+	m_Model2 = new ModelClass;
+	if(!m_Model2)
+	{
+		return false;
+	}
+
+	// Initialize the second model object.
+	result = m_Model2-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/cube.txt", L"../Engine/data/metal.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the second model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the third bump model object for models with normal maps and related vectors.
+	m_Model3 = new BumpModelClass;
+	if(!m_Model3)
+	{
+		return false;
+	}
+
+	// Initialize the bump model object.
+	result = m_Model3-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/cube.txt", L"../Engine/data/stone.dds", 
+				      L"../Engine/data/normal.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the third model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+	// Release the model objects.
+	if(m_Model1)
+	{
+		m_Model1-&gt;Shutdown();
+		delete m_Model1;
+		m_Model1 = 0;
+	}
+
+	if(m_Model2)
+	{
+		m_Model2-&gt;Shutdown();
+		delete m_Model2;
+		m_Model2 = 0;
+	}
+
+	if(m_Model3)
+	{
+		m_Model3-&gt;Shutdown();
+		delete m_Model3;
+		m_Model3 = 0;
+	}
+
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the shader manager object.
+	if(m_ShaderManager)
+	{
+		m_ShaderManager-&gt;Shutdown();
+		delete m_ShaderManager;
+		m_ShaderManager = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame()
+{
+	bool result;
+	static float rotation = 0.0f;
+
+
+	// Update the rotation variable each frame.
+	rotation += (float)D3DX_PI * 0.005f;
+	if(rotation &gt; 360.0f)
+	{
+		rotation -= 360.0f;
+	}
+	
+	// Render the graphics scene.
+	result = Render(rotation);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool GraphicsClass::Render(float rotation)
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, translateMatrix;
+	bool result;
+
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Setup the rotation and translation of the first model.
+	D3DXMatrixRotationY(&amp;worldMatrix, rotation);
+	D3DXMatrixTranslation(&amp;translateMatrix, -3.5f, 0.0f, 0.0f);
+	D3DXMatrixMultiply(&amp;worldMatrix, &amp;worldMatrix, &amp;translateMatrix); 
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Render the first cube model using the texture shader from the ShaderManagerClass object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Render the first model using the texture shader.
+	m_Model1-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_ShaderManager-&gt;RenderTextureShader(m_D3D-&gt;GetDeviceContext(), m_Model1-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+						      m_Model1-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Setup the rotation and translation of the second model.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	D3DXMatrixRotationY(&amp;worldMatrix, rotation);
+	D3DXMatrixTranslation(&amp;translateMatrix, 0.0f, 0.0f, 0.0f);
+	D3DXMatrixMultiply(&amp;worldMatrix, &amp;worldMatrix, &amp;translateMatrix); 
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Render the second cube model using the light shader from the ShaderManagerClass object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Render the second model using the light shader.
+	m_Model2-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_ShaderManager-&gt;RenderLightShader(m_D3D-&gt;GetDeviceContext(), m_Model2-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+						    m_Model2-&gt;GetTexture(), m_Light-&gt;GetDirection(), m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor(), 
+						    m_Camera-&gt;GetPosition(), m_Light-&gt;GetSpecularColor(), m_Light-&gt;GetSpecularPower());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Setup the rotation and translation of the third model.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	D3DXMatrixRotationY(&amp;worldMatrix, rotation);
+	D3DXMatrixTranslation(&amp;translateMatrix, 3.5f, 0.0f, 0.0f);
+	D3DXMatrixMultiply(&amp;worldMatrix, &amp;worldMatrix, &amp;translateMatrix); 
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Render the third cube model using the bump map shader from the ShaderManagerClass object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Render the third model using the bump map shader.
+	m_Model3-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	result = m_ShaderManager-&gt;RenderBumpMapShader(m_D3D-&gt;GetDeviceContext(), m_Model3-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+						      m_Model3-&gt;GetColorTexture(), m_Model3-&gt;GetNormalMapTexture(), m_Light-&gt;GetDirection(), 
+						      m_Light-&gt;GetDiffuseColor());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now we have a single class which encapsulates all the shading functionality that our graphics application will need.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 45_ Managing Multiple Shaders_files/pic0256.gif" width="500" height="136"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Compile and run the code.  You should see three cubes each shaded with a different shader.  Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Add another shader to the ShaderManagerClass and render a fourth cube using that shader.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Add some intelligence to the ShaderManagerClass to load and unload shaders on demand.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11src45.zip">dx11src45.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11exe45.zip">dx11exe45.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 45_ Managing Multiple Shaders_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutdx11.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 45_ Managing Multiple Shaders_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

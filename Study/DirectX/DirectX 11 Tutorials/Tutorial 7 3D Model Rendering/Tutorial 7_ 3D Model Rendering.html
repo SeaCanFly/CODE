@@ -1,0 +1,1068 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut07.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 7: 3D Model Rendering</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 7: 3D Model Rendering
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 7_ 3D Model Rendering_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover how to render 3D models in DirectX 11 using HLSL.  
+The code in this tutorial is based on the code from the diffuse lighting tutorial.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have already been rendering 3D models in the previous tutorials, however they were composed of a single triangle and were fairly uninteresting.
+Now that the basics have been covered we'll move forward to render a more complex object.  In this case the object will be a cube.
+Before we get into how to render more complex models we will first talk about model formats.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There are many tools available that allow users to create 3D models.  
+Maya and 3D Studio Max are two of the more popular 3D modeling programs.
+There are also many other tools with less features but still can do the basics for what we need.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Regardless of which tool you choose to use they will all export their models into numerous different formats.
+My suggestion is that you create your own model format and write a parser to convert their export format into your own format.
+The reason for this is that the 3D modeling package that you use may change over time and their model format will also change.  
+Also you may be using more than one 3D modeling package so you will have multiple different formats to deal with.
+So if you have your own format and convert their formats to your own then your code will never need to change.
+You will only need to change your parser program(s) for changing those formats to your own.
+As well most 3D modeling packages export a ton of junk that is only useful to that modeling program and you don't need any of it in your model format.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The most important part to making your own format is that it covers everything you need it to do and that it is simple for you to use.
+You can also consider making a couple different formats for different objects as some may have animation data, some may be static, and so forth.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The model format I'm going to present is very basic.  It will contain a line for each vertex in the model.
+Each line will match the vertex format used in the code which will be position vector (x, y, z), texture coordinates (tu, tv), and the normal vector (nx, ny, nz).
+The format will also have the vertex count at the top so you can read the first line and build the memory structures needed before reading in the data.
+The format will also require that every three lines makes a triangle, and that the vertices in the model format are presented in clockwise order.
+Here is the model file for the cube we are going to render:
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Cube.txt</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Vertex Count: 36
+
+Data:
+
+-1.0  1.0 -1.0 0.0 0.0  0.0  0.0 -1.0
+ 1.0  1.0 -1.0 1.0 0.0  0.0  0.0 -1.0
+-1.0 -1.0 -1.0 0.0 1.0  0.0  0.0 -1.0
+-1.0 -1.0 -1.0 0.0 1.0  0.0  0.0 -1.0
+ 1.0  1.0 -1.0 1.0 0.0  0.0  0.0 -1.0
+ 1.0 -1.0 -1.0 1.0 1.0  0.0  0.0 -1.0
+ 1.0  1.0 -1.0 0.0 0.0  1.0  0.0  0.0
+ 1.0  1.0  1.0 1.0 0.0  1.0  0.0  0.0
+ 1.0 -1.0 -1.0 0.0 1.0  1.0  0.0  0.0
+ 1.0 -1.0 -1.0 0.0 1.0  1.0  0.0  0.0
+ 1.0  1.0  1.0 1.0 0.0  1.0  0.0  0.0
+ 1.0 -1.0  1.0 1.0 1.0  1.0  0.0  0.0
+ 1.0  1.0  1.0 0.0 0.0  0.0  0.0  1.0
+-1.0  1.0  1.0 1.0 0.0  0.0  0.0  1.0
+ 1.0 -1.0  1.0 0.0 1.0  0.0  0.0  1.0
+ 1.0 -1.0  1.0 0.0 1.0  0.0  0.0  1.0
+-1.0  1.0  1.0 1.0 0.0  0.0  0.0  1.0
+-1.0 -1.0  1.0 1.0 1.0  0.0  0.0  1.0
+-1.0  1.0  1.0 0.0 0.0 -1.0  0.0  0.0
+-1.0  1.0 -1.0 1.0 0.0 -1.0  0.0  0.0
+-1.0 -1.0  1.0 0.0 1.0 -1.0  0.0  0.0
+-1.0 -1.0  1.0 0.0 1.0 -1.0  0.0  0.0
+-1.0  1.0 -1.0 1.0 0.0 -1.0  0.0  0.0
+-1.0 -1.0 -1.0 1.0 1.0 -1.0  0.0  0.0
+-1.0  1.0  1.0 0.0 0.0  0.0  1.0  0.0
+ 1.0  1.0  1.0 1.0 0.0  0.0  1.0  0.0
+-1.0  1.0 -1.0 0.0 1.0  0.0  1.0  0.0
+-1.0  1.0 -1.0 0.0 1.0  0.0  1.0  0.0
+ 1.0  1.0  1.0 1.0 0.0  0.0  1.0  0.0
+ 1.0  1.0 -1.0 1.0 1.0  0.0  1.0  0.0
+-1.0 -1.0 -1.0 0.0 0.0  0.0 -1.0  0.0
+ 1.0 -1.0 -1.0 1.0 0.0  0.0 -1.0  0.0
+-1.0 -1.0  1.0 0.0 1.0  0.0 -1.0  0.0
+-1.0 -1.0  1.0 0.0 1.0  0.0 -1.0  0.0
+ 1.0 -1.0 -1.0 1.0 0.0  0.0 -1.0  0.0
+ 1.0 -1.0  1.0 1.0 1.0  0.0 -1.0  0.0
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+So as you can see there are 36 lines of x, y, z, tu, tv, nx, ny, nz data.
+Every three lines composes its own triangle giving us 12 triangles that will form a cube.
+The format is very straight forward and can be read directly into our vertex buffers and rendered without any modifications.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now one thing to watch out for is that some 3D modeling programs export the data in different orders such as left hand or right hand coordinate systems.
+Remember that by default DirectX 11 is a left-handed coordinate system by default and so the model data needs to match that.
+Keep an eye out for those differences and ensure your parsing program can handle converting data into the correct format/order.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Modelclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For this tutorial all we needed to do was make some minor changes to the ModelClass for it to render 3D models from our text model files.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: modelclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _MODELCLASS_H_
+#define _MODELCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The fstream library is now included to handle reading from the model text file.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">#include &lt;fstream&gt;
+using namespace std;</font><font face="arial" color="#aaffaa" size="2">
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "textureclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ModelClass
+////////////////////////////////////////////////////////////////////////////////
+class ModelClass
+{
+private:
+	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
+		D3DXVECTOR3 normal;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The next change is the addition of a new structure to represent the model format. 
+It is called ModelType. It contains position, texture, and normal vectors the same as our file format does.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	struct ModelType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+	};</font><font face="arial" color="#aaffaa" size="2">
+
+public:
+	ModelClass();
+	ModelClass(const ModelClass&amp;);
+	~ModelClass();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function will now take as input the character string file name of the model to be loaded.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	bool Initialize(ID3D11Device*, char*, WCHAR*);</font><font face="arial" color="#aaffaa" size="2">
+	void Shutdown();
+	void Render(ID3D11DeviceContext*);
+
+	int GetIndexCount();
+	ID3D11ShaderResourceView* GetTexture();
+
+
+private:
+	bool InitializeBuffers(ID3D11Device*);
+	void ShutdownBuffers();
+	void RenderBuffers(ID3D11DeviceContext*);
+
+	bool LoadTexture(ID3D11Device*, WCHAR*);
+	void ReleaseTexture();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We also have two new functions to handle loading and unloading the model data from the text file.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	bool LoadModel(char*);
+	void ReleaseModel();</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+	int m_vertexCount, m_indexCount;
+	TextureClass* m_Texture;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The final change is a new private variable called m_model which is going to be an array of the new private structure ModelType. 
+This variable will be used to read in and hold the model data before it is placed in the vertex buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	ModelType* m_model;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Modelclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: modelclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "modelclass.h"
+
+
+ModelClass::ModelClass()
+{
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+	m_Texture = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new model structure is set to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_model = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+ModelClass::ModelClass(const ModelClass&amp; other)
+{
+}
+
+
+ModelClass::~ModelClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function now takes as input the file name of the model that should be loaded.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool ModelClass::Initialize(ID3D11Device* device, char* modelFilename, WCHAR* textureFilename)
+</font><font face="arial" color="#aaffaa" size="2">{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the Initialize function we now call the new LoadModel function first. 
+It will load the model data from the file name we provide into the new m_model array. 
+Once this model array is filled we can then build the vertex and index buffers from it. 
+Since InitializeBuffers now depends on this model data you have to make sure to call the functions in the correct order. 
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Load in the model data,
+	result = LoadModel(modelFilename);
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Initialize the vertex and index buffers.
+	result = InitializeBuffers(device);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Load the texture for this model.
+	result = LoadTexture(device, textureFilename);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ModelClass::Shutdown()
+{
+	// Release the model texture.
+	ReleaseTexture();
+
+	// Shutdown the vertex and index buffers.
+	ShutdownBuffers();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the Shutdown function we add a call to the ReleaseModel function to delete the m_model array data once we are done.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Release the model data.
+	ReleaseModel();</font><font face="arial" color="#aaffaa" size="2">
+
+	return;
+}
+
+
+void ModelClass::Render(ID3D11DeviceContext* deviceContext)
+{
+	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	RenderBuffers(deviceContext);
+
+	return;
+}
+
+
+int ModelClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+
+
+ID3D11ShaderResourceView* ModelClass::GetTexture()
+{
+	return m_Texture-&gt;GetTexture();
+}
+
+
+bool ModelClass::InitializeBuffers(ID3D11Device* device)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+	int i;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Take note that we will no longer manually set the vertex and index count here. 
+Once we get to the ModelClass::LoadModel function you will see that we read the vertex and index counts in at that point instead.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Loading the vertex and index arrays has changed a bit. 
+Instead of setting the values manually we loop through all the elements in the new m_model array and copy that data from there into the vertex array. 
+The index array is easy to build as each vertex we load has the same index number as the position in the array it was loaded into.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Load the vertex array and index array with data.
+	for(i=0; i&lt;m_vertexCount; i++)
+	{
+		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].texture = D3DXVECTOR2(m_model[i].tu, m_model[i].tv);
+		vertices[i].normal = D3DXVECTOR3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
+
+		indices[i] = i;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+
+
+void ModelClass::ShutdownBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+
+
+void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType); 
+	offset = 0;
+    
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	return;
+}
+
+
+bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
+{
+	bool result;
+
+
+	// Create the texture object.
+	m_Texture = new TextureClass;
+	if(!m_Texture)
+	{
+		return false;
+	}
+
+	// Initialize the texture object.
+	result = m_Texture-&gt;Initialize(device, filename);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ModelClass::ReleaseTexture()
+{
+	// Release the texture object.
+	if(m_Texture)
+	{
+		m_Texture-&gt;Shutdown();
+		delete m_Texture;
+		m_Texture = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This is the new LoadModel function which handles loading the model data from the text file into the m_model array variable. 
+It opens the text file and reads in the vertex count first. 
+After reading the vertex count it creates the ModelType array and then reads each line into the array. 
+Both the vertex count and index count are now set in this function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool ModelClass::LoadModel(char* filename)
+{
+	ifstream fin;
+	char input;
+	int i;
+
+
+	// Open the model file.
+	fin.open(filename);
+	
+	// If it could not open the file then exit.
+	if(fin.fail())
+	{
+		return false;
+	}
+
+	// Read up to the value of vertex count.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+
+	// Read in the vertex count.
+	fin &gt;&gt; m_vertexCount;
+
+	// Set the number of indices to be the same as the vertex count.
+	m_indexCount = m_vertexCount;
+
+	// Create the model using the vertex count that was read in.
+	m_model = new ModelType[m_vertexCount];
+	if(!m_model)
+	{
+		return false;
+	}
+
+	// Read up to the beginning of the data.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+	fin.get(input);
+	fin.get(input);
+
+	// Read in the vertex data.
+	for(i=0; i&lt;m_vertexCount; i++)
+	{
+		fin &gt;&gt; m_model[i].x &gt;&gt; m_model[i].y &gt;&gt; m_model[i].z;
+		fin &gt;&gt; m_model[i].tu &gt;&gt; m_model[i].tv;
+		fin &gt;&gt; m_model[i].nx &gt;&gt; m_model[i].ny &gt;&gt; m_model[i].nz;
+	}
+
+	// Close the model file.
+	fin.close();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ReleaseModel function handles deleting the model data array.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">void ModelClass::ReleaseModel()
+{
+	if(m_model)
+	{
+		delete [] m_model;
+		m_model = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The header for the GraphicsClass has not changed since the previous tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+#include "lightshaderclass.h"
+#include "lightclass.h"
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool Render(float);
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	ModelClass* m_Model;
+	LightShaderClass* m_LightShader;
+	LightClass* m_Light;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_Model = 0;
+	m_LightShader = 0;
+	m_Light = 0;
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	
+	// Create the model object.
+	m_Model = new ModelClass;
+	if(!m_Model)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The model initialization now takes in the filename of the model file it is loading. 
+In this tutorial we will use the cube.txt file so this model loads in a 3D cube object for rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the model object.</font><font face="arial" color="#aaaaff" size="2">
+	result = m_Model-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/cube.txt", L"../Engine/data/seafloor.dds");</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light shader object.
+	m_LightShader = new LightShaderClass;
+	if(!m_LightShader)
+	{
+		return false;
+	}
+
+	// Initialize the light shader object.
+	result = m_LightShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I have changed the diffuse light color to white for this tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the light object.</font><font face="arial" color="#aaaaff" size="2">
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);</font><font face="arial" color="#aaffaa" size="2">
+	m_Light-&gt;SetDirection(0.0f, 0.0f, 1.0f);
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the light shader object.
+	if(m_LightShader)
+	{
+		m_LightShader-&gt;Shutdown();
+		delete m_LightShader;
+		m_LightShader = 0;
+	}
+
+	// Release the model object.
+	if(m_Model)
+	{
+		m_Model-&gt;Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame()
+{
+	bool result;
+	static float rotation = 0.0f;
+
+
+	// Update the rotation variable each frame.
+	rotation += (float)D3DX_PI * 0.01f;
+	if(rotation &gt; 360.0f)
+	{
+		rotation -= 360.0f;
+	}
+	
+	// Render the graphics scene.
+	result = Render(rotation);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool GraphicsClass::Render(float rotation)
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Rotate the world matrix by the rotation value so that the triangle will spin.
+	D3DXMatrixRotationY(&amp;worldMatrix, rotation);
+
+	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the model using the light shader.
+	result = m_LightShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+				       m_Model-&gt;GetTexture(), m_Light-&gt;GetDirection(), m_Light-&gt;GetDiffuseColor());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With the changes to the ModelClass we can now load in 3D models and render them. 
+The format used here is just for basic static objects with lighting, however it is a good start to understanding how model formats work. 
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 7_ 3D Model Rendering_files/pic0020.gif" width="260" height="260"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the code and run the program. You should get a rotating cube with the same seafloor.dds texture on it. Press escape to quit once done.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Find a decent 3D modeling package (hopefully something free) and create your own simple models and export them. Start looking at the format.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Write a simple parser program that takes the model exports and converts it to the format used here. Replace cube.txt with your model and run the program.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2010 Project: <a href="http://www.rastertek.com/dx11tut07.zip">dx11tut07.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src07.zip">dx11src07.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe07.zip">dx11exe07.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 7_ 3D Model Rendering_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 7_ 3D Model Rendering_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

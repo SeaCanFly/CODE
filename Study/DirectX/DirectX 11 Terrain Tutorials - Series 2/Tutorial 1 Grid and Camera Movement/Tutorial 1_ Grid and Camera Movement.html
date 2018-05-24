@@ -1,0 +1,1861 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11ter01.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 1: Grid and Camera Movement</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000" style="width:1000px">
+
+<p align="center"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 1: Grid and Camera Movement
+</b></font></p>
+
+<p align="center"><img border="0" src="./Tutorial 1_ Grid and Camera Movement_files/pic3001.gif" width="1024" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover the basics of rendering a terrain grid using DirectX 11. 
+Before getting into more advanced terrain concepts you should be able to render a basic grid and have good camera functionality; and that will be the purpose of this tutorial. 
+With a good camera that can move around the terrain easily it can help debugging issues that occur during development. 
+Having good debugging tools is always the key to speeding up development and ensuring quality. 
+</font></p><p align="center"><img border="0" src="./Tutorial 1_ Grid and Camera Movement_files/pic4001.gif" width="800" height="450"></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+As shown in the screenshot above we will be rendering a basic 256x256 unit flat terrain as well as a simple text user interface to display our position, fps, and so forth.
+For this first tutorial the initial terrain grid will just be composed of quads made out of lines.
+The terrain grid will be encapsulated in a new class called TerrainClass.
+Note that most of the other classes in these tutorials are based on the DirectX 11 tutorials section, so they won't be covered again during these tutorials unless we modify them.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The camera functionality will be encapsulated in a new class named PositionClass.
+CameraClass is still used to make the view matrix, I've just separated the functionality out between the two classes.
+PositionClass will maintain the position and rotation of the camera as well as the acceleration and deceleration so that the camera moves smoothly around the terrain. 
+And finally we use TextClass to display the FPS, video card information, and position/rotation of the camera.
+So those new classes plus learning the new frame work will be the extent of this first tutorial.
+</font></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The following frame work will be used as a basis for all of the DirectX 11 terrain tutorials.
+This frame work contains mostly the same classes as the DirectX 11 tutorial series but has a few new ones which we will cover in this tutorial.
+We now use a large wrapper class called ApplicationClass in the same fashion we used GraphicsClass in the DirectX 11 tutorials.
+</font></p><p align="left"><img border="0" src="./Tutorial 1_ Grid and Camera Movement_files/pic4000.gif" width="701" height="419"></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.h</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ApplicationClass is the main wrapper class for the entire terrain application.
+It will handle all the graphics, input, sound, processing, and so forth.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _APPLICATIONCLASS_H_
+#define _APPLICATIONCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "inputclass.h"
+#include "d3dclass.h"
+#include "shadermanagerclass.h"
+#include "timerclass.h"
+#include "fpsclass.h"
+#include "zoneclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ApplicationClass
+////////////////////////////////////////////////////////////////////////////////
+class ApplicationClass
+{
+public:
+	ApplicationClass();
+	ApplicationClass(const ApplicationClass&amp;);
+	~ApplicationClass();
+
+	bool Initialize(HINSTANCE, HWND, int, int);
+	void Shutdown();
+	bool Frame();
+
+private:
+	InputClass* m_Input;
+	D3DClass* m_Direct3D;
+	ShaderManagerClass* m_ShaderManager;
+	TimerClass* m_Timer;
+	FpsClass* m_Fps;
+	ZoneClass* m_Zone;
+};
+
+#endif
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.cpp</u></font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "applicationclass.h"
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor initializes all the object pointers to null. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">ApplicationClass::ApplicationClass()
+{
+	m_Input = 0;
+	m_Direct3D = 0;
+	m_Timer = 0;
+	m_Fps = 0;
+	m_ShaderManager = 0;
+	m_Zone = 0;
+}
+
+
+ApplicationClass::ApplicationClass(const ApplicationClass&amp; other)
+{
+}
+
+
+ApplicationClass::~ApplicationClass()
+{
+}
+
+
+bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+{
+	bool result;
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the input object.
+The input class will handle registering all the keyboard and mouse input.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Create the input object.
+	m_Input = new InputClass;
+	if (!m_Input)
+	{
+		return false;
+	}
+
+	// Initialize the input object.
+	result = m_Input-&gt;Initialize(hinstance, hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the Direct3D object.
+This object will handle the main portions of the DirectX 11 graphics interface.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Create the Direct3D object.
+	m_Direct3D = new D3DClass;
+	if(!m_Direct3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_Direct3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the shader manager object.
+The ShaderManager is the wrapper classes for all DirectX 11 shader functionality.
+Encapsulating everything into this manager style class allows us to pass a single pointer into any class or function and they now have access to all of the shaders we have written.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Create the shader manager object.
+	m_ShaderManager = new ShaderManagerClass;
+	if(!m_ShaderManager)
+	{
+		return false;
+	}
+
+	// Initialize the shader manager object.
+	result = m_ShaderManager-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the shader manager object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the timer object.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Create the timer object.
+	m_Timer = new TimerClass;
+	if(!m_Timer)
+	{
+		return false;
+	}
+
+	// Initialize the timer object.
+	result = m_Timer-&gt;Initialize();
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the timer object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the FPS object.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Create the fps object.
+	m_Fps = new FpsClass;
+	if(!m_Fps)
+	{
+		return false;
+	}
+
+	// Initialize the fps object.
+	m_Fps-&gt;Initialize();
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the zone object.
+The zone object is where we put all of our terrain rendering and processing.
+This class will be used to easily instantiate new terrain zones and encapsulate anything else related to the terrain such as trees, skies, foliage, and so forth.
+We will also modify this class to be data driven so that we can edit a single text file and the zone will populate itself accordingly without any code changes.
+ZoneClass and the TerrainClass will be the two major classes for this tutorial and all future tutorials.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Create the zone object.
+	m_Zone = new ZoneClass;
+	if(!m_Zone)
+	{
+		return false;
+	}
+
+	// Initialize the zone object.
+	result = m_Zone-&gt;Initialize(m_Direct3D, hwnd, screenWidth, screenHeight, SCREEN_DEPTH);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the zone object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function will release all the objects that were created in the Initialize function. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void ApplicationClass::Shutdown()
+{
+	// Release the zone object.
+	if(m_Zone)
+	{
+		m_Zone-&gt;Shutdown();
+		delete m_Zone;
+		m_Zone = 0;
+	}
+	
+	// Release the fps object.
+	if(m_Fps)
+	{
+		delete m_Fps;
+		m_Fps = 0;
+	}
+
+	// Release the timer object.
+	if(m_Timer)
+	{
+		delete m_Timer;
+		m_Timer = 0;
+	}
+
+	// Release the shader manager object.
+	if(m_ShaderManager)
+	{
+		m_ShaderManager-&gt;Shutdown();
+		delete m_ShaderManager;
+		m_ShaderManager = 0;
+	}
+
+	// Release the Direct3D object.
+	if(m_Direct3D)
+	{
+		m_Direct3D-&gt;Shutdown();
+		delete m_Direct3D;
+		m_Direct3D = 0;
+	}
+
+	// Release the input object.
+	if(m_Input)
+	{
+		m_Input-&gt;Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Frame function does the per frame loop processing for the entire application.
+All of the major objects frame processing must be called here. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">bool ApplicationClass::Frame()
+{
+	bool result;
+
+
+	// Update the system stats.
+	m_Fps-&gt;Frame();
+	m_Timer-&gt;Frame();
+
+	// Do the input frame processing.
+	result = m_Input-&gt;Frame();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Check if the user pressed escape and wants to exit the application.
+	if(m_Input-&gt;IsEscapePressed() == true)
+	{
+		return false;
+	}
+
+	// Do the zone frame processing.
+	result = m_Zone-&gt;Frame(m_Direct3D, m_Input, m_ShaderManager, m_Timer-&gt;GetTime(), m_Fps-&gt;GetFps());
+	if (!result)
+	{
+		return false;
+	}
+
+	return result;
+}
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Zoneclass.h</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The zone class is the main wrapper class for all of the terrain processing as well as anything that would be related to the terrain.
+Currently it will just move the camera around the terrain grid, but in future tutorials it will be expanded to handle sky, trees, foliage, and other objects related to the terrain.
+We will also try to keep this class fairly generic so that in future tutorials it can just read a text file and populate the zone without any need for code changes.
+For this tutorial the ZoneClass will handle all the camera movement, render the terrain grid, and display the user interface.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: zoneclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _ZONECLASS_H_
+#define _ZONECLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "inputclass.h"
+#include "shadermanagerclass.h"
+#include "timerclass.h"
+#include "userinterfaceclass.h"
+#include "cameraclass.h"
+#include "positionclass.h"
+#include "terrainclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ZoneClass
+////////////////////////////////////////////////////////////////////////////////
+class ZoneClass
+{
+public:
+	ZoneClass();
+	ZoneClass(const ZoneClass&amp;);
+	~ZoneClass();
+
+	bool Initialize(D3DClass*, HWND, int, int, float);
+	void Shutdown();
+	bool Frame(D3DClass*, InputClass*, ShaderManagerClass*, float, int);
+
+private:
+	void HandleMovementInput(InputClass*, float);
+	bool Render(D3DClass*, ShaderManagerClass*);
+
+private:
+	UserInterfaceClass* m_UserInterface;
+	CameraClass* m_Camera;
+	PositionClass* m_Position;
+	TerrainClass* m_Terrain;
+	bool m_displayUI;
+};
+
+#endif
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Zoneclass.cpp</u></font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: zoneclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "zoneclass.h"
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor for the ZoneClass will initialize all the objects that we are planning to build to null.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">ZoneClass::ZoneClass()
+{
+	m_UserInterface = 0;
+	m_Camera = 0;
+	m_Position = 0;
+	m_Terrain = 0;
+}
+
+
+ZoneClass::ZoneClass(const ZoneClass&amp; other)
+{
+}
+
+
+ZoneClass::~ZoneClass()
+{
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function will create and initialize the user interface, the camera, the position object, and the terrain grid.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int screenHeight, float screenDepth)
+{
+	bool result;
+
+
+	// Create the user interface object.
+	m_UserInterface = new UserInterfaceClass;
+	if(!m_UserInterface)
+	{
+		return false;
+	}
+
+	// Initialize the user interface object.
+	result = m_UserInterface-&gt;Initialize(Direct3D, screenHeight, screenWidth);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the user interface object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera and build the matrices needed for rendering.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	m_Camera-&gt;Render();
+	m_Camera-&gt;RenderBaseViewMatrix();
+
+	// Create the position object.
+	m_Position = new PositionClass;
+	if(!m_Position)
+	{
+		return false;
+	}
+
+	// Set the initial position and rotation.
+	m_Position-&gt;SetPosition(128.0f, 5.0f, -10.0f);
+	m_Position-&gt;SetRotation(0.0f, 0.0f, 0.0f);
+
+	// Create the terrain object.
+	m_Terrain = new TerrainClass;
+	if(!m_Terrain)
+	{
+		return false;
+	}
+
+	// Initialize the terrain object.
+	result = m_Terrain-&gt;Initialize(Direct3D-&gt;GetDevice());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
+		return false;
+	}
+	
+	// Set the UI to display by default.
+	m_displayUI = true;
+
+	return true;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function will release all of the objects that we had originally created in the Initialize function.
+This function will be called when the application is exiting or if we wish to destroy this zone and then create a new one.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void ZoneClass::Shutdown()
+{
+	// Release the terrain object.
+	if(m_Terrain)
+	{
+		m_Terrain-&gt;Shutdown();
+		delete m_Terrain;
+		m_Terrain = 0;
+	}
+
+	// Release the position object.
+	if(m_Position)
+	{
+		delete m_Position;
+		m_Position = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the user interface object.
+	if(m_UserInterface)
+	{
+		m_UserInterface-&gt;Shutdown();
+		delete m_UserInterface;
+		m_UserInterface = 0;
+	}
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Frame function handles the updating loop for the zone and is called every 16.67 milliseconds if we lock to 60 frames per second.
+Any object that needs to be updated each frame is updated in this function.
+And once all the objects have called their frame processing this function will then call the ZoneClass::Render function to do all the drawing of the zone.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">bool ZoneClass::Frame(D3DClass* Direct3D, InputClass* Input, ShaderManagerClass* ShaderManager, float frameTime, int fps)
+{
+	bool result;
+	float posX, posY, posZ, rotX, rotY, rotZ;
+
+
+	// Do the frame input processing.
+	HandleMovementInput(Input, frameTime);
+
+	// Get the view point position/rotation.
+	m_Position-&gt;GetPosition(posX, posY, posZ);
+	m_Position-&gt;GetRotation(rotX, rotY, rotZ);
+
+	// Do the frame processing for the user interface.
+	result = m_UserInterface-&gt;Frame(Direct3D-&gt;GetDeviceContext(), fps, posX, posY, posZ, rotX, rotY, rotZ);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the graphics.
+	result = Render(Direct3D, ShaderManager);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The HandleInput function does all the processing related to the user input from the keyboard and mouse.
+This function is called each frame in the ZoneClass::Frame function.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void ZoneClass::HandleMovementInput(InputClass* Input, float frameTime)
+{
+	bool keyDown;
+	float posX, posY, posZ, rotX, rotY, rotZ;
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The very first thing that is done is the frame time is set in the PositionClass object.
+The reason being is that the frame time is required by all the following movement calculation functions.
+If it is not set then the movement will not be accurate. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Set the frame time for calculating the updated position.
+	m_Position-&gt;SetFrameTime(frameTime);
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next the user input is determined for each of the eight movement types.
+The forward, backward, turn left, and turn right functions are updated by the arrow keys.
+The up and down movement functions are updated by the A and Z keys.
+The look up and look down rotation functions are updated by the PgUp and PgDn keys.
+If the user is pressing the key then a true boolean value will be sent to the appropriate function.
+If not then false is sent to each.
+This allows us to accelerate if the user is holding down the movement key or decelerate if the user is not holding down that movement key. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Handle the input.
+	keyDown = Input-&gt;IsLeftPressed();
+	m_Position-&gt;TurnLeft(keyDown);
+
+	keyDown = Input-&gt;IsRightPressed();
+	m_Position-&gt;TurnRight(keyDown);
+
+	keyDown = Input-&gt;IsUpPressed();
+	m_Position-&gt;MoveForward(keyDown);
+
+	keyDown = Input-&gt;IsDownPressed();
+	m_Position-&gt;MoveBackward(keyDown);
+
+	keyDown = Input-&gt;IsAPressed();
+	m_Position-&gt;MoveUpward(keyDown);
+
+	keyDown = Input-&gt;IsZPressed();
+	m_Position-&gt;MoveDownward(keyDown);
+
+	keyDown = Input-&gt;IsPgUpPressed();
+	m_Position-&gt;LookUpward(keyDown);
+
+	keyDown = Input-&gt;IsPgDownPressed();
+	m_Position-&gt;LookDownward(keyDown);
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+After the movement for this frame has been calculated we then get the position and rotation from the PositionObject and update the CameraClass and TextClass object with the new viewing position. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Get the view point position/rotation.
+	m_Position-&gt;GetPosition(posX, posY, posZ);
+	m_Position-&gt;GetRotation(rotX, rotY, rotZ);
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(posX, posY, posZ);
+	m_Camera-&gt;SetRotation(rotX, rotY, rotZ);
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We also determine if additional key commands have been entered and act appropriately.
+In the case of this tutorial we will toggle the user interface on and off if the user is pressing the F1 key.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Determine if the user interface should be displayed or not.
+	if(Input-&gt;IsF1Toggled())
+	{
+		m_displayUI = !m_displayUI;
+	}
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function handles all the graphics processing for the zone.
+For this tutorial it gets all the matrices it needs and then renders the terrain and user interface using those matrices.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">bool ZoneClass::Render(D3DClass* Direct3D, ShaderManagerClass* ShaderManager)
+{
+	XMMATRIX worldMatrix, viewMatrix, projectionMatrix, baseViewMatrix, orthoMatrix;
+	bool result;
+
+	
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	Direct3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	Direct3D-&gt;GetProjectionMatrix(projectionMatrix);
+	m_Camera-&gt;GetBaseViewMatrix(baseViewMatrix);
+	Direct3D-&gt;GetOrthoMatrix(orthoMatrix);
+	
+	// Clear the buffers to begin the scene.
+	Direct3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Render the terrain grid using the color shader.
+	m_Terrain-&gt;Render(Direct3D-&gt;GetDeviceContext());
+	result = ShaderManager-&gt;RenderColorShader(Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetIndexCount(), worldMatrix, viewMatrix, 
+						  projectionMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the user interface.
+	if(m_displayUI)
+	{
+		result = m_UserInterface-&gt;Render(Direct3D, ShaderManager, worldMatrix, baseViewMatrix, orthoMatrix);
+		if(!result)
+		{
+			return false;
+		}
+	}
+
+	// Present the rendered scene to the screen.
+	Direct3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainclass.h</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The terrain class will encapsulate the model data and rendering functionality for drawing the 256x256 line grid.
+This class contains only the basics for now since this tutorial is just focused on getting a very basic terrain grid drawn first. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _TERRAINCLASS_H_
+#define _TERRAINCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;directxmath.h&gt;
+using namespace DirectX;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: TerrainClass
+////////////////////////////////////////////////////////////////////////////////
+class TerrainClass
+{
+private:
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The vertex data/structure for the terrain will just be position and color as we are only drawing white lines to start with. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	struct VertexType
+	{
+		XMFLOAT3 position;
+		XMFLOAT4 color;
+	};
+
+public:
+	TerrainClass();
+	TerrainClass(const TerrainClass&amp;);
+	~TerrainClass();
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The TerrainClass has the usual public and private functions for loading, releasing, and rendering the terrain. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	bool Initialize(ID3D11Device*);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*);
+
+	int GetIndexCount();
+
+private:
+	bool InitializeBuffers(ID3D11Device*);
+	void ShutdownBuffers();
+	void RenderBuffers(ID3D11DeviceContext*);
+
+private:
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+	int m_vertexCount, m_indexCount;
+};
+
+#endif
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainclass.cpp</u></font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "terrainclass.h"
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor will initialize the vertex and index buffer pointers to null. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">TerrainClass::TerrainClass()
+{
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+}
+
+
+TerrainClass::TerrainClass(const TerrainClass&amp; other)
+{
+}
+
+
+TerrainClass::~TerrainClass()
+{
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For now the Initialize function will just call the function for initializing the vertex and index buffers that will hold the terrain grid data. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">bool TerrainClass::Initialize(ID3D11Device* device)
+{
+	bool result;
+
+
+	// Load the rendering buffers with the terrain data.
+	result = InitializeBuffers(device);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Shutdown calls the ShutdownBuffers function to release the vertex and index buffers that are holding the terrain grid data. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void TerrainClass::Shutdown()
+{
+	// Release the rendering buffers.
+	ShutdownBuffers();
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function calls RenderBuffers to put the terrain grid data on the graphics pipeline so the ColorShaderClass object can then render it.
+This is done in the ApplicationClass::Render function. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">bool TerrainClass::Render(ID3D11DeviceContext* deviceContext)
+{
+	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	RenderBuffers(deviceContext);
+
+	return true;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetIndexCount returns the number of indexes in the terrain grid.
+This is called by the shaders that render the terrain as they require this information to perform the render. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">int TerrainClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The InitializeBuffers function creates the vertex and index buffers used to hold the terrain grid data.
+The terrain is going to be composed of lines forming squares.
+In DirectX 11 to draw a line you need two points, and to draw a square you need eight points to form the four lines.
+So in the code below you will see a for loop that creates each square in the 256x256 grid using eight points to create four lines.
+It is not efficient but it is fine just to quickly see something working. 
+Since we aren't loading a model I use a vertex and index array to create the terrain grid and then I create a vertex and index buffer from those arrays. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">bool TerrainClass::InitializeBuffers(ID3D11Device* device)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+	int i, j, terrainWidth, terrainHeight, index;
+	XMFLOAT4 color;
+	float positionX, positionZ;
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the size and color of the terrain grid.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Set the height and width of the terrain grid.
+	terrainHeight = 256;
+	terrainWidth = 256;
+
+	// Set the color of the terrain grid.
+	color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Determine the number of vertices and indices in the 256x256 grid.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Calculate the number of vertices in the terrain.
+	m_vertexCount = (terrainWidth - 1) * (terrainHeight - 1) * 8;
+
+	// Set the index count to the same as the vertex count.
+	m_indexCount = m_vertexCount;
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create the temporary vertex and index arrays. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the vertex and index arrays with the line lists that will form the 256x256 terrain grid. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Initialize the index into the vertex and index arrays.
+	index = 0;
+
+	// Load the vertex array and index array with data.
+	for(j=0; j&lt;(terrainHeight-1); j++)
+	{
+		for(i=0; i&lt;(terrainWidth-1); i++)
+		{
+			// Line 1 - Upper left.
+			positionX = (float)i;
+			positionZ = (float)(j + 1);
+
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].color = color;
+			indices[index] = index;
+			index++;
+
+			// Line 1 - Upper right.
+			positionX = (float)(i + 1);
+			positionZ = (float)(j + 1);
+
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].color = color;
+			indices[index] = index;
+			index++;
+
+			// Line 2 - Upper right
+			positionX = (float)(i + 1);
+			positionZ = (float)(j + 1);
+
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].color = color;
+			indices[index] = index;
+			index++;
+
+			// Line 2 - Bottom right.
+			positionX = (float)(i + 1);
+			positionZ = (float)j;
+
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].color = color;
+			indices[index] = index;
+			index++;
+
+			// Line 3 - Bottom right.
+			positionX = (float)(i + 1);
+			positionZ = (float)j;
+
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].color = color;
+			indices[index] = index;
+			index++;
+
+			// Line 3 - Bottom left.
+			positionX = (float)i;
+			positionZ = (float)j;
+
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].color = color;
+			indices[index] = index;
+			index++;
+
+			// Line 4 - Bottom left.
+			positionX = (float)i;
+			positionZ = (float)j;
+
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].color = color;
+			indices[index] = index;
+			index++;
+
+			// Line 4 - Upper left.
+			positionX = (float)i;
+			positionZ = (float)(j + 1);
+
+			vertices[index].position = XMFLOAT3(positionX, 0.0f, positionZ);
+			vertices[index].color = color;
+			indices[index] = index;
+			index++;
+		}
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create the vertex and index buffers from the vertex and index arrays.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Finally release the arrays since the data is now stored in the buffers. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Release the arrays now that the buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ShutdownBuffers function releases the vertex and index buffer that were used to hold the terrain grid data. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void TerrainClass::ShutdownBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+RenderBuffers places the line list terrain grid on the graphics pipeline for rendering. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void TerrainClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType);
+	offset = 0;
+
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the render format to line list.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	// Set the type of primitive that should be rendered from this vertex buffer, in this case lines.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+
+	return;
+}
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Positionclass.h</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PositionClass is the class that encapsulates the camera/viewer location and the camera movement functionality.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: positionclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _POSITIONCLASS_H_
+#define _POSITIONCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: PositionClass
+////////////////////////////////////////////////////////////////////////////////
+class PositionClass
+{
+public:
+	PositionClass();
+	PositionClass(const PositionClass&amp;);
+	~PositionClass();
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PositionClass has some helper functions to set and retrieve the position and rotation of the viewer/camera. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	void SetPosition(float, float, float);
+	void SetRotation(float, float, float);
+
+	void GetPosition(float&amp;, float&amp;, float&amp;);
+	void GetRotation(float&amp;, float&amp;, float&amp;);
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+SetFrameTime is used to keep the viewer/camera in sync with the speed of the application. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	void SetFrameTime(float);
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The movement functions are called to move the viewer/camera based on the user input.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">	void MoveForward(bool);
+	void MoveBackward(bool);
+	void MoveUpward(bool);
+	void MoveDownward(bool);
+	void TurnLeft(bool);
+	void TurnRight(bool);
+	void LookUpward(bool);
+	void LookDownward(bool);
+
+private:
+	float m_positionX, m_positionY, m_positionZ;
+	float m_rotationX, m_rotationY, m_rotationZ;
+
+	float m_frameTime;
+
+	float m_forwardSpeed, m_backwardSpeed;
+	float m_upwardSpeed, m_downwardSpeed;
+	float m_leftTurnSpeed, m_rightTurnSpeed;
+	float m_lookUpSpeed, m_lookDownSpeed;
+};
+
+#endif
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Positionclass.cpp</u></font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: positionclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "positionclass.h"
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor initializes all the position, rotation, frame time, and speed variables to zero. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">PositionClass::PositionClass()
+{
+	m_positionX = 0.0f;
+	m_positionY = 0.0f;
+	m_positionZ = 0.0f;
+	
+	m_rotationX = 0.0f;
+	m_rotationY = 0.0f;
+	m_rotationZ = 0.0f;
+
+	m_frameTime = 0.0f;
+
+	m_forwardSpeed   = 0.0f;
+	m_backwardSpeed  = 0.0f;
+	m_upwardSpeed    = 0.0f;
+	m_downwardSpeed  = 0.0f;
+	m_leftTurnSpeed  = 0.0f;
+	m_rightTurnSpeed = 0.0f;
+	m_lookUpSpeed    = 0.0f;
+	m_lookDownSpeed  = 0.0f;
+}
+
+
+PositionClass::PositionClass(const PositionClass&amp; other)
+{
+}
+
+
+PositionClass::~PositionClass()
+{
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetPosition and SetRotation functions are used for setting the position and rotation of the viewer/camera.
+These functions are generally used to initialize the position of the camera other than at the origin.
+In this tutorial the camera will be set slightly back from the grid and in the center of it. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void PositionClass::SetPosition(float x, float y, float z)
+{
+	m_positionX = x;
+	m_positionY = y;
+	m_positionZ = z;
+	return;
+}
+
+
+void PositionClass::SetRotation(float x, float y, float z)
+{
+	m_rotationX = x;
+	m_rotationY = y;
+	m_rotationZ = z;
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GetPosition and GetRotation functions return the current position and rotation of the camera location.
+In this tutorial these functions are called to provide the location and rotation of the camera for display purposes.
+We will draw the position/rotation as text strings on the left side of the screen.
+This is very useful for debugging. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void PositionClass::GetPosition(float&amp; x, float&amp; y, float&amp; z)
+{
+	x = m_positionX;
+	y = m_positionY;
+	z = m_positionZ;
+	return;
+}
+
+
+void PositionClass::GetRotation(float&amp; x, float&amp; y, float&amp; z)
+{
+	x = m_rotationX;
+	y = m_rotationY;
+	z = m_rotationZ;
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetFrameTime function needs to be called each frame.
+It stores the current frame time inside a private member variable and is then used by the movement calculation functions.
+This way, regardless of the speed that the application is running at, the movement and rotation speed will remain consistent.
+If this wasn't done then the movement rate would speed up or down with the frame rate. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void PositionClass::SetFrameTime(float time)
+{
+	m_frameTime = time;
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The following eight movement functions all work nearly the same.
+All eight functions are called each frame.
+The keydown input variable to each function indicates if the user is pressing the forward key, the backward key, and so forth.
+If they are pressing the key then each frame the speed will accelerate until it hits a maximum.
+This way the camera speeds up similar to the acceleration in a vehicle creating the effect of smooth movement and high responsiveness.
+Likewise if the user releases the key and the keydown variable is false it will then smoothly slow down each frame until the speed hits zero.
+The speed is calculated against the frame time to ensure the movement speed remains the same regardless of the frame rate.
+Each function then uses some basic math to calculate the new position of the viewer/camera. 
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the forward speed and movement of the viewer/camera. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void PositionClass::MoveForward(bool keydown)
+{
+	float radians;
+
+
+	// Update the forward speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_forwardSpeed += m_frameTime * 1.0f;
+		if(m_forwardSpeed &gt; (m_frameTime * 50.0f))
+		{
+			m_forwardSpeed = m_frameTime * 50.0f;
+		}
+	}
+	else
+	{
+		m_forwardSpeed -= m_frameTime * 0.5f;
+
+		if(m_forwardSpeed &lt; 0.0f)
+		{
+			m_forwardSpeed = 0.0f;
+		}
+	}
+
+	// Convert degrees to radians.
+	radians = m_rotationY * 0.0174532925f;
+
+	// Update the position.
+	m_positionX += sinf(radians) * m_forwardSpeed;
+	m_positionZ += cosf(radians) * m_forwardSpeed;
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the backward speed and movement of the viewer/camera. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void PositionClass::MoveBackward(bool keydown)
+{
+	float radians;
+
+
+	// Update the backward speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_backwardSpeed += m_frameTime * 1.0f;
+
+		if(m_backwardSpeed &gt; (m_frameTime * 50.0f))
+		{
+			m_backwardSpeed = m_frameTime * 50.0f;
+		}
+	}
+	else
+	{
+		m_backwardSpeed -= m_frameTime * 0.5f;
+		
+		if(m_backwardSpeed &lt; 0.0f)
+		{
+			m_backwardSpeed = 0.0f;
+		}
+	}
+
+	// Convert degrees to radians.
+	radians = m_rotationY * 0.0174532925f;
+
+	// Update the position.
+	m_positionX -= sinf(radians) * m_backwardSpeed;
+	m_positionZ -= cosf(radians) * m_backwardSpeed;
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the upward speed and movement of the viewer/camera. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void PositionClass::MoveUpward(bool keydown)
+{
+	// Update the upward speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_upwardSpeed += m_frameTime * 1.5f;
+
+		if(m_upwardSpeed &gt; (m_frameTime * 15.0f))
+		{
+			m_upwardSpeed = m_frameTime * 15.0f;
+		}
+	}
+	else
+	{
+		m_upwardSpeed -= m_frameTime * 0.5f;
+
+		if(m_upwardSpeed &lt; 0.0f)
+		{
+			m_upwardSpeed = 0.0f;
+		}
+	}
+
+	// Update the height position.
+	m_positionY += m_upwardSpeed;
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the downward speed and movement of the viewer/camera. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void PositionClass::MoveDownward(bool keydown)
+{
+	// Update the downward speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_downwardSpeed += m_frameTime * 1.5f;
+
+		if(m_downwardSpeed &gt; (m_frameTime * 15.0f))
+		{
+			m_downwardSpeed = m_frameTime * 15.0f;
+		}
+	}
+	else
+	{
+		m_downwardSpeed -= m_frameTime * 0.5f;
+
+		if(m_downwardSpeed &lt; 0.0f)
+		{
+			m_downwardSpeed = 0.0f;
+		}
+	}
+
+	// Update the height position.
+	m_positionY -= m_downwardSpeed;
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the left turn speed and rotation of the viewer/camera. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void PositionClass::TurnLeft(bool keydown)
+{
+	// Update the left turn speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_leftTurnSpeed += m_frameTime * 5.0f;
+
+		if(m_leftTurnSpeed &gt; (m_frameTime * 150.0f))
+		{
+			m_leftTurnSpeed = m_frameTime * 150.0f;
+		}
+	}
+	else
+	{
+		m_leftTurnSpeed -= m_frameTime* 3.5f;
+
+		if(m_leftTurnSpeed &lt; 0.0f)
+		{
+			m_leftTurnSpeed = 0.0f;
+		}
+	}
+
+	// Update the rotation.
+	m_rotationY -= m_leftTurnSpeed;
+
+	// Keep the rotation in the 0 to 360 range.
+	if(m_rotationY &lt; 0.0f)
+	{
+		m_rotationY += 360.0f;
+	}
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the right turn speed and rotation of the viewer/camera. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void PositionClass::TurnRight(bool keydown)
+{
+	// Update the right turn speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_rightTurnSpeed += m_frameTime * 5.0f;
+
+		if(m_rightTurnSpeed &gt; (m_frameTime * 150.0f))
+		{
+			m_rightTurnSpeed = m_frameTime * 150.0f;
+		}
+	}
+	else
+	{
+		m_rightTurnSpeed -= m_frameTime* 3.5f;
+
+		if(m_rightTurnSpeed &lt; 0.0f)
+		{
+			m_rightTurnSpeed = 0.0f;
+		}
+	}
+
+	// Update the rotation.
+	m_rotationY += m_rightTurnSpeed;
+
+	// Keep the rotation in the 0 to 360 range.
+	if(m_rotationY &gt; 360.0f)
+	{
+		m_rotationY -= 360.0f;
+	}
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the upward turn speed and rotation of the viewer/camera. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void PositionClass::LookUpward(bool keydown)
+{
+	// Update the upward rotation speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_lookUpSpeed += m_frameTime * 7.5f;
+
+		if(m_lookUpSpeed &gt; (m_frameTime * 75.0f))
+		{
+			m_lookUpSpeed = m_frameTime * 75.0f;
+		}
+	}
+	else
+	{
+		m_lookUpSpeed -= m_frameTime* 2.0f;
+
+		if(m_lookUpSpeed &lt; 0.0f)
+		{
+			m_lookUpSpeed = 0.0f;
+		}
+	}
+
+	// Update the rotation.
+	m_rotationX -= m_lookUpSpeed;
+
+	// Keep the rotation maximum 90 degrees.
+	if(m_rotationX &gt; 90.0f)
+	{
+		m_rotationX = 90.0f;
+	}
+
+	return;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This function calculates the downward turn speed and rotation of the viewer/camera. 
+</font></p><pre><font face="arial" color="#aaffaa" size="2">void PositionClass::LookDownward(bool keydown)
+{
+	// Update the downward rotation speed movement based on the frame time and whether the user is holding the key down or not.
+	if(keydown)
+	{
+		m_lookDownSpeed += m_frameTime * 7.5f;
+
+		if(m_lookDownSpeed &gt; (m_frameTime * 75.0f))
+		{
+			m_lookDownSpeed = m_frameTime * 75.0f;
+		}
+	}
+	else
+	{
+		m_lookDownSpeed -= m_frameTime* 2.0f;
+
+		if(m_lookDownSpeed &lt; 0.0f)
+		{
+			m_lookDownSpeed = 0.0f;
+		}
+	}
+
+	// Update the rotation.
+	m_rotationX += m_lookDownSpeed;
+
+	// Keep the rotation maximum 90 degrees.
+	if(m_rotationX &lt; -90.0f)
+	{
+		m_rotationX = -90.0f;
+	}
+
+	return;
+}
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now we have a highly responsive camera that moves around a 256x256 terrain grid.
+We also have the position and rotation displayed in the user interface for debugging purposes.
+And more importantly we have a basic frame work that is easy to expand and build upon for more advanced terrain rendering.
+</font></p><p align="left"><img border="0" src="./Tutorial 1_ Grid and Camera Movement_files/pic4001.gif" width="800" height="450"></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the code in 64 bit mode (not 32 bit) and move around the terrain grid. Use the arrow keys and the A and Z key to move upward and downward. Use the PgUp and PgDn to rotate the view up and down.  Toggle F1 to turn on/off the user interface display.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Change the input keys to your own favorite settings.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Add a strafing ability to the PositionClass.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Change the color of the grid to green.
+</font></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11ter01_src.zip">dx11ter01_src.zip</a></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11ter01_exe.zip">dx11ter01_exe.zip</a></font></p><table align="center" border="0" width="1024"><tbody><tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</tr></tbody></table>
+
+<p align="center"><img border="0" src="./Tutorial 1_ Grid and Camera Movement_files/pic3002.gif" width="1024" height="1"></p>
+
+<p align="center"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutdx11s2ter.html">Back to Tutorial Index</a></font></p>
+
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 1_ Grid and Camera Movement_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

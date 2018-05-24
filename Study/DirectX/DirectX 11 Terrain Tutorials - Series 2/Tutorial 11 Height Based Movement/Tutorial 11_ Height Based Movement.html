@@ -1,0 +1,2006 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11ter11.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 11: Height Based Movement</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000" style="width:1000px">
+
+<p align="center"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 11: Height Based Movement
+</b></font></p>
+
+<p align="center"><img border="0" src="./Tutorial 11_ Height Based Movement_files/pic3001.gif" width="1024" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The previous terrain tutorial covered how to cull all of the terrain cells that were not visible.
+This was the major advantage of terrain cell partitioning.
+However there is a second major advantage which is quick determination of which triangle we are currently positioned over.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Since we can now cull out all of the other cells we are not inside it then allows us to quickly determine the smaller subset of triangles that we may actually be standing on.
+Then we can perform just a triangle-line intersection test with just the triangles in the one cell and determine exactly which triangle we are currently above.
+With that information we can adjust the height of the camera to be just slightly above the triangle we are on.
+</font></p><p align="left"><img border="0" src="./Tutorial 11_ Height Based Movement_files/pic4042.gif" width="800" height="450"></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainclass.h</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The TerrainClass has two new functions.
+One is a public function that the ZoneClass will call to get the current height at the current position in the terrain.
+The second new function is a private one that is used be TerrainClass to determine the height of a triangle from the terrain cell.
+These are used in conjunction to return the height of the current position on the terrain.
+</font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _TERRAINCLASS_H_
+#define _TERRAINCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;fstream&gt;
+#include &lt;stdio.h&gt;
+using namespace std;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "terraincellclass.h"
+#include "frustumclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: TerrainClass
+////////////////////////////////////////////////////////////////////////////////
+class TerrainClass
+{
+private:
+	struct HeightMapType
+	{
+		float x, y, z;
+		float nx, ny, nz;
+		float r, g, b;
+	};
+
+	struct ModelType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+		float tx, ty, tz;
+		float bx, by, bz;
+		float r, g, b;
+	};
+
+	struct VectorType
+	{
+		float x, y, z;
+	};
+
+	struct TempVertexType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+	};
+
+public:
+	TerrainClass();
+	TerrainClass(const TerrainClass&amp;);
+	~TerrainClass();
+
+	bool Initialize(ID3D11Device*, char*);
+	void Shutdown();
+	void Frame();
+
+	bool RenderCell(ID3D11DeviceContext*, int, FrustumClass*);
+	void RenderCellLines(ID3D11DeviceContext*, int);
+
+	int GetCellIndexCount(int);
+	int GetCellLinesIndexCount(int);
+	int GetCellCount();
+	int GetRenderCount();
+	int GetCellsDrawn();
+	int GetCellsCulled();</font><font face="arial" color="#aaaaff" size="2">
+
+	bool GetHeightAtPosition(float, float, float&amp;);</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	bool LoadSetupFile(char*);
+	bool LoadRawHeightMap();
+	void ShutdownHeightMap();
+	void SetTerrainCoordinates();
+	bool CalculateNormals();
+	bool LoadColorMap();
+	bool BuildTerrainModel();
+	void ShutdownTerrainModel();
+	void CalculateTerrainVectors();
+	void CalculateTangentBinormal(TempVertexType, TempVertexType, TempVertexType, VectorType&amp;, VectorType&amp;);
+	bool LoadTerrainCells(ID3D11Device*);
+	void ShutdownTerrainCells();</font><font face="arial" color="#aaaaff" size="2">
+	bool CheckHeightOfTriangle(float, float, float&amp;, float[3], float[3], float[3]);</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	int m_terrainHeight, m_terrainWidth, m_vertexCount;
+	float m_heightScale;
+	char *m_terrainFilename, *m_colorMapFilename;
+	HeightMapType* m_heightMap;
+	ModelType* m_terrainModel;
+	TerrainCellClass* m_TerrainCells;
+	int m_cellCount, m_renderCount, m_cellsDrawn, m_cellsCulled;
+};
+
+#endif
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Terrainclass.cpp</u></font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: terrainclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "terrainclass.h"
+
+
+TerrainClass::TerrainClass()
+{
+	m_terrainFilename = 0;
+	m_colorMapFilename = 0;
+	m_heightMap = 0;
+	m_terrainModel = 0;
+	m_TerrainCells = 0;
+}
+
+
+TerrainClass::TerrainClass(const TerrainClass&amp; other)
+{
+}
+
+
+TerrainClass::~TerrainClass()
+{
+}
+
+
+bool TerrainClass::Initialize(ID3D11Device* device, char* setupFilename)
+{
+	bool result;
+
+
+	// Get the terrain filename, dimensions, and so forth from the setup file.
+	result = LoadSetupFile(setupFilename);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Initialize the terrain height map with the data from the raw file.
+	result = LoadRawHeightMap();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Setup the X and Z coordinates for the height map as well as scale the terrain height by the height scale value.
+	SetTerrainCoordinates();
+
+	// Calculate the normals for the terrain data.
+	result = CalculateNormals();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Load in the color map for the terrain.
+	result = LoadColorMap();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now build the 3D model of the terrain.
+	result = BuildTerrainModel();
+	if(!result)
+	{
+		return false;
+	}
+
+	// We can now release the height map since it is no longer needed in memory once the 3D terrain model has been built.
+	ShutdownHeightMap();
+
+	// Calculate the tangent and binormal for the terrain model.
+	CalculateTerrainVectors();
+
+	// Create and load the cells with the terrain data.
+	result = LoadTerrainCells(device);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Release the terrain model now that the terrain cells have been loaded.
+	ShutdownTerrainModel();
+
+	return true;
+}
+
+
+void TerrainClass::Shutdown()
+{
+	// Release the terrain cells.
+	ShutdownTerrainCells();
+
+	// Release the terrain model.
+	ShutdownTerrainModel();
+
+	// Release the height map.
+	ShutdownHeightMap();
+
+	return;
+}
+
+
+void TerrainClass::Frame()
+{
+	m_renderCount = 0;
+	m_cellsDrawn = 0;
+	m_cellsCulled = 0;
+	return;
+}
+
+
+bool TerrainClass::LoadSetupFile(char* filename)
+{
+	int stringLength;
+	ifstream fin;
+	char input;
+
+	// Initialize the strings that will hold the terrain file name and the color map file name.
+	stringLength = 256;
+
+	m_terrainFilename = new char[stringLength];
+	if(!m_terrainFilename)
+	{
+		return false;
+	}
+
+	m_colorMapFilename = new char[stringLength];
+	if(!m_colorMapFilename)
+	{
+		return false;
+	}
+
+	// Open the setup file.  If it could not open the file then exit.
+	fin.open(filename);
+	if(fin.fail())
+	{
+		return false;
+	}
+
+	// Read up to the terrain file name.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+
+	// Read in the terrain file name.
+	fin &gt;&gt; m_terrainFilename;
+
+	// Read up to the value of terrain height.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+
+	// Read in the terrain height.
+	fin &gt;&gt; m_terrainHeight;
+
+	// Read up to the value of terrain width.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+
+	// Read in the terrain width.
+	fin &gt;&gt; m_terrainWidth;
+
+	// Read up to the value of terrain height scaling.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+
+	// Read in the terrain height scaling.
+	fin &gt;&gt; m_heightScale;
+
+	// Read up to the color map file name.
+	fin.get(input);
+	while(input != ':')
+	{
+		fin.get(input);
+	}
+
+	// Read in the color map file name.
+	fin &gt;&gt; m_colorMapFilename;
+
+	// Close the setup file.
+	fin.close();
+
+	return true;
+}
+
+
+bool TerrainClass::LoadRawHeightMap()
+{
+	int error, i, j, index;
+	FILE* filePtr;
+	unsigned long long imageSize, count;
+	unsigned short* rawImage;
+
+
+	// Create the float array to hold the height map data.
+	m_heightMap = new HeightMapType[m_terrainWidth * m_terrainHeight];
+	if(!m_heightMap)
+	{
+		return false;
+	}
+
+	// Open the 16 bit raw height map file for reading in binary.
+	error = fopen_s(&amp;filePtr, m_terrainFilename, "rb");
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Calculate the size of the raw image data.
+	imageSize = m_terrainHeight * m_terrainWidth;
+
+	// Allocate memory for the raw image data.
+	rawImage = new unsigned short[imageSize];
+	if(!rawImage)
+	{
+		return false;
+	}
+
+	// Read in the raw image data.
+	count = fread(rawImage, sizeof(unsigned short), imageSize, filePtr);
+	if(count != imageSize)
+	{
+		return false;
+	}
+
+	// Close the file.
+	error = fclose(filePtr);
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Copy the image data into the height map array.
+	for(j=0; j&lt;m_terrainHeight; j++)
+	{
+		for(i=0; i&lt;m_terrainWidth; i++)
+		{
+			index = (m_terrainWidth * j) + i;
+
+			// Store the height at this point in the height map array.
+			m_heightMap[index].y = (float)rawImage[index];
+		}
+	}
+
+	// Release the bitmap image data.
+	delete [] rawImage;
+	rawImage = 0;
+
+	// Release the terrain filename now that it has been read in.
+	delete [] m_terrainFilename;
+	m_terrainFilename = 0;
+
+	return true;
+}
+
+
+void TerrainClass::ShutdownHeightMap()
+{
+	// Release the height map array.
+	if(m_heightMap)
+	{
+		delete [] m_heightMap;
+		m_heightMap = 0;
+	}
+
+	return;
+}
+
+
+void TerrainClass::SetTerrainCoordinates()
+{
+	int i, j, index;
+
+
+	// Loop through all the elements in the height map array and adjust their coordinates correctly.
+	for(j=0; j&lt;m_terrainHeight; j++)
+	{
+		for(i=0; i&lt;m_terrainWidth; i++)
+		{
+			index = (m_terrainWidth * j) + i;
+
+			// Set the X and Z coordinates.
+			m_heightMap[index].x = (float)i;
+			m_heightMap[index].z = -(float)j;
+
+			// Move the terrain depth into the positive range.  For example from (0, -256) to (256, 0).
+			m_heightMap[index].z += (float)(m_terrainHeight - 1);
+
+			// Scale the height.
+			m_heightMap[index].y /= m_heightScale;
+		}
+	}
+
+	return;
+}
+
+
+bool TerrainClass::CalculateNormals()
+{
+	int i, j, index1, index2, index3, index;
+	float vertex1[3], vertex2[3], vertex3[3], vector1[3], vector2[3], sum[3], length;
+	VectorType* normals;
+
+
+	// Create a temporary array to hold the face normal vectors.
+	normals = new VectorType[(m_terrainHeight-1) * (m_terrainWidth-1)];
+	if(!normals)
+	{
+		return false;
+	}
+
+	// Go through all the faces in the mesh and calculate their normals.
+	for(j=0; j&lt;(m_terrainHeight-1); j++)
+	{
+		for(i=0; i&lt;(m_terrainWidth-1); i++)
+		{
+			index1 = ((j+1) * m_terrainWidth) + i;      // Bottom left vertex.
+			index2 = ((j+1) * m_terrainWidth) + (i+1);  // Bottom right vertex.
+			index3 = (j * m_terrainWidth) + i;          // Upper left vertex.
+
+			// Get three vertices from the face.
+			vertex1[0] = m_heightMap[index1].x;
+			vertex1[1] = m_heightMap[index1].y;
+			vertex1[2] = m_heightMap[index1].z;
+
+			vertex2[0] = m_heightMap[index2].x;
+			vertex2[1] = m_heightMap[index2].y;
+			vertex2[2] = m_heightMap[index2].z;
+
+			vertex3[0] = m_heightMap[index3].x;
+			vertex3[1] = m_heightMap[index3].y;
+			vertex3[2] = m_heightMap[index3].z;
+
+			// Calculate the two vectors for this face.
+			vector1[0] = vertex1[0] - vertex3[0];
+			vector1[1] = vertex1[1] - vertex3[1];
+			vector1[2] = vertex1[2] - vertex3[2];
+			vector2[0] = vertex3[0] - vertex2[0];
+			vector2[1] = vertex3[1] - vertex2[1];
+			vector2[2] = vertex3[2] - vertex2[2];
+
+			index = (j * (m_terrainWidth - 1)) + i;
+
+			// Calculate the cross product of those two vectors to get the un-normalized value for this face normal.
+			normals[index].x = (vector1[1] * vector2[2]) - (vector1[2] * vector2[1]);
+			normals[index].y = (vector1[2] * vector2[0]) - (vector1[0] * vector2[2]);
+			normals[index].z = (vector1[0] * vector2[1]) - (vector1[1] * vector2[0]);
+
+			// Calculate the length.
+			length = (float)sqrt((normals[index].x * normals[index].x) + (normals[index].y * normals[index].y) + 
+								 (normals[index].z * normals[index].z));
+
+			// Normalize the final value for this face using the length.
+			normals[index].x = (normals[index].x / length);
+			normals[index].y = (normals[index].y / length);
+			normals[index].z = (normals[index].z / length);
+		}
+	}
+
+	// Now go through all the vertices and take a sum of the face normals that touch this vertex.
+	for(j=0; j&lt;m_terrainHeight; j++)
+	{
+		for(i=0; i&lt;m_terrainWidth; i++)
+		{
+			// Initialize the sum.
+			sum[0] = 0.0f;
+			sum[1] = 0.0f;
+			sum[2] = 0.0f;
+
+			// Bottom left face.
+			if(((i-1) &gt;= 0) &amp;&amp; ((j-1) &gt;= 0))
+			{
+				index = ((j-1) * (m_terrainWidth-1)) + (i-1);
+
+				sum[0] += normals[index].x;
+				sum[1] += normals[index].y;
+				sum[2] += normals[index].z;
+			}
+
+			// Bottom right face.
+			if((i&lt;(m_terrainWidth-1)) &amp;&amp; ((j-1) &gt;= 0))
+			{
+				index = ((j - 1) * (m_terrainWidth - 1)) + i;
+
+				sum[0] += normals[index].x;
+				sum[1] += normals[index].y;
+				sum[2] += normals[index].z;
+			}
+
+			// Upper left face.
+			if(((i-1) &gt;= 0) &amp;&amp; (j&lt;(m_terrainHeight-1)))
+			{
+				index = (j * (m_terrainWidth-1)) + (i-1);
+
+				sum[0] += normals[index].x;
+				sum[1] += normals[index].y;
+				sum[2] += normals[index].z;
+			}
+
+			// Upper right face.
+			if((i &lt; (m_terrainWidth-1)) &amp;&amp; (j &lt; (m_terrainHeight-1)))
+			{
+				index = (j * (m_terrainWidth-1)) + i;
+
+				sum[0] += normals[index].x;
+				sum[1] += normals[index].y;
+				sum[2] += normals[index].z;
+			}
+
+			// Calculate the length of this normal.
+			length = (float)sqrt((sum[0] * sum[0]) + (sum[1] * sum[1]) + (sum[2] * sum[2]));
+
+			// Get an index to the vertex location in the height map array.
+			index = (j * m_terrainWidth) + i;
+
+			// Normalize the final shared normal for this vertex and store it in the height map array.
+			m_heightMap[index].nx = (sum[0] / length);
+			m_heightMap[index].ny = (sum[1] / length);
+			m_heightMap[index].nz = (sum[2] / length);
+		}
+	}
+
+	// Release the temporary normals.
+	delete [] normals;
+	normals = 0;
+
+	return true;
+}
+
+
+bool TerrainClass::LoadColorMap()
+{
+	int error, imageSize, i, j, k, index;
+	FILE* filePtr;
+	unsigned long long count;
+	BITMAPFILEHEADER bitmapFileHeader;
+	BITMAPINFOHEADER bitmapInfoHeader;
+	unsigned char* bitmapImage;
+
+
+	// Open the color map file in binary.
+	error = fopen_s(&amp;filePtr, m_colorMapFilename, "rb");
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Read in the file header.
+	count = fread(&amp;bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, filePtr);
+	if(count != 1)
+	{
+		return false;
+	}
+
+	// Read in the bitmap info header.
+	count = fread(&amp;bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, filePtr);
+	if(count != 1)
+	{
+		return false;
+	}
+
+	// Make sure the color map dimensions are the same as the terrain dimensions for easy 1 to 1 mapping.
+	if((bitmapInfoHeader.biWidth != m_terrainWidth) || (bitmapInfoHeader.biHeight != m_terrainHeight))
+	{
+		return false;
+	}
+
+	// Calculate the size of the bitmap image data.
+	// Since this is non-divide by 2 dimensions (eg. 257x257) need to add extra byte to each line.
+	imageSize = m_terrainHeight * ((m_terrainWidth * 3) + 1);
+
+	// Allocate memory for the bitmap image data.
+	bitmapImage = new unsigned char[imageSize];
+	if(!bitmapImage)
+	{
+		return false;
+	}
+
+	// Move to the beginning of the bitmap data.
+	fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
+
+	// Read in the bitmap image data.
+	count = fread(bitmapImage, 1, imageSize, filePtr);
+	if(count != imageSize)
+	{
+		return false;
+	}
+
+	// Close the file.
+	error = fclose(filePtr);
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Initialize the position in the image data buffer.
+	k=0;
+
+	// Read the image data into the color map portion of the height map structure.
+	for(j=0; j&lt;m_terrainHeight; j++)
+	{
+		for(i=0; i&lt;m_terrainWidth; i++)
+		{
+			// Bitmaps are upside down so load bottom to top into the array.
+			index = (m_terrainWidth * (m_terrainHeight - 1 - j)) + i;
+
+			m_heightMap[index].b = (float)bitmapImage[k] / 255.0f;
+			m_heightMap[index].g = (float)bitmapImage[k + 1] / 255.0f;
+			m_heightMap[index].r = (float)bitmapImage[k + 2] / 255.0f;
+
+			k += 3;
+		}
+
+		// Compensate for extra byte at end of each line in non-divide by 2 bitmaps (eg. 257x257).
+		k++;
+	}
+
+	// Release the bitmap image data.
+	delete [] bitmapImage;
+	bitmapImage = 0;
+
+	// Release the color map filename now that is has been read in.
+	delete [] m_colorMapFilename;
+	m_colorMapFilename = 0;
+
+	return true;
+}
+
+
+bool TerrainClass::BuildTerrainModel()
+{
+	int i, j, index, index1, index2, index3, index4;
+
+
+	// Calculate the number of vertices in the 3D terrain model.
+	m_vertexCount = (m_terrainHeight - 1) * (m_terrainWidth - 1) * 6;
+
+	// Create the 3D terrain model array.
+	m_terrainModel = new ModelType[m_vertexCount];
+	if(!m_terrainModel)
+	{
+		return false;
+	}
+
+	// Initialize the index into the height map array.
+	index = 0;
+
+	// Load the 3D terrain model with the height map terrain data.
+	// We will be creating 2 triangles for each of the four points in a quad.
+	for(j=0; j&lt;(m_terrainHeight-1); j++)
+	{
+		for(i=0; i&lt;(m_terrainWidth-1); i++)
+		{
+			// Get the indexes to the four points of the quad.
+			index1 = (m_terrainWidth * j) + i;          // Upper left.
+			index2 = (m_terrainWidth * j) + (i+1);      // Upper right.
+			index3 = (m_terrainWidth * (j+1)) + i;      // Bottom left.
+			index4 = (m_terrainWidth * (j+1)) + (i+1);  // Bottom right.
+
+			// Now create two triangles for that quad.
+			// Triangle 1 - Upper left.
+			m_terrainModel[index].x = m_heightMap[index1].x;
+			m_terrainModel[index].y = m_heightMap[index1].y;
+			m_terrainModel[index].z = m_heightMap[index1].z;
+			m_terrainModel[index].tu = 0.0f;
+			m_terrainModel[index].tv = 0.0f;
+			m_terrainModel[index].nx = m_heightMap[index1].nx;
+			m_terrainModel[index].ny = m_heightMap[index1].ny;
+			m_terrainModel[index].nz = m_heightMap[index1].nz;
+			m_terrainModel[index].r = m_heightMap[index1].r;
+			m_terrainModel[index].g = m_heightMap[index1].g;
+			m_terrainModel[index].b = m_heightMap[index1].b;
+			index++;
+
+			// Triangle 1 - Upper right.
+			m_terrainModel[index].x = m_heightMap[index2].x;
+			m_terrainModel[index].y = m_heightMap[index2].y;
+			m_terrainModel[index].z = m_heightMap[index2].z;
+			m_terrainModel[index].tu = 1.0f;
+			m_terrainModel[index].tv = 0.0f;
+			m_terrainModel[index].nx = m_heightMap[index2].nx;
+			m_terrainModel[index].ny = m_heightMap[index2].ny;
+			m_terrainModel[index].nz = m_heightMap[index2].nz;
+			m_terrainModel[index].r = m_heightMap[index2].r;
+			m_terrainModel[index].g = m_heightMap[index2].g;
+			m_terrainModel[index].b = m_heightMap[index2].b;
+			index++;
+
+			// Triangle 1 - Bottom left.
+			m_terrainModel[index].x = m_heightMap[index3].x;
+			m_terrainModel[index].y = m_heightMap[index3].y;
+			m_terrainModel[index].z = m_heightMap[index3].z;
+			m_terrainModel[index].tu = 0.0f;
+			m_terrainModel[index].tv = 1.0f;
+			m_terrainModel[index].nx = m_heightMap[index3].nx;
+			m_terrainModel[index].ny = m_heightMap[index3].ny;
+			m_terrainModel[index].nz = m_heightMap[index3].nz;
+			m_terrainModel[index].r = m_heightMap[index3].r;
+			m_terrainModel[index].g = m_heightMap[index3].g;
+			m_terrainModel[index].b = m_heightMap[index3].b;
+			index++;
+
+			// Triangle 2 - Bottom left.
+			m_terrainModel[index].x = m_heightMap[index3].x;
+			m_terrainModel[index].y = m_heightMap[index3].y;
+			m_terrainModel[index].z = m_heightMap[index3].z;
+			m_terrainModel[index].tu = 0.0f;
+			m_terrainModel[index].tv = 1.0f;
+			m_terrainModel[index].nx = m_heightMap[index3].nx;
+			m_terrainModel[index].ny = m_heightMap[index3].ny;
+			m_terrainModel[index].nz = m_heightMap[index3].nz;
+			m_terrainModel[index].r = m_heightMap[index3].r;
+			m_terrainModel[index].g = m_heightMap[index3].g;
+			m_terrainModel[index].b = m_heightMap[index3].b;
+			index++;
+
+			// Triangle 2 - Upper right.
+			m_terrainModel[index].x = m_heightMap[index2].x;
+			m_terrainModel[index].y = m_heightMap[index2].y;
+			m_terrainModel[index].z = m_heightMap[index2].z;
+			m_terrainModel[index].tu = 1.0f;
+			m_terrainModel[index].tv = 0.0f;
+			m_terrainModel[index].nx = m_heightMap[index2].nx;
+			m_terrainModel[index].ny = m_heightMap[index2].ny;
+			m_terrainModel[index].nz = m_heightMap[index2].nz;
+			m_terrainModel[index].r = m_heightMap[index2].r;
+			m_terrainModel[index].g = m_heightMap[index2].g;
+			m_terrainModel[index].b = m_heightMap[index2].b;
+			index++;
+
+			// Triangle 2 - Bottom right.
+			m_terrainModel[index].x = m_heightMap[index4].x;
+			m_terrainModel[index].y = m_heightMap[index4].y;
+			m_terrainModel[index].z = m_heightMap[index4].z;
+			m_terrainModel[index].tu = 1.0f;
+			m_terrainModel[index].tv = 1.0f;
+			m_terrainModel[index].nx = m_heightMap[index4].nx;
+			m_terrainModel[index].ny = m_heightMap[index4].ny;
+			m_terrainModel[index].nz = m_heightMap[index4].nz;
+			m_terrainModel[index].r = m_heightMap[index4].r;
+			m_terrainModel[index].g = m_heightMap[index4].g;
+			m_terrainModel[index].b = m_heightMap[index4].b;
+			index++;
+		}
+	}
+
+	return true;
+}
+
+
+void TerrainClass::ShutdownTerrainModel()
+{
+	// Release the terrain model data.
+	if(m_terrainModel)
+	{
+		delete [] m_terrainModel;
+		m_terrainModel = 0;
+	}
+
+	return;
+}
+
+
+void TerrainClass::CalculateTerrainVectors()
+{
+	int faceCount, i, index;
+	TempVertexType vertex1, vertex2, vertex3;
+	VectorType tangent, binormal;
+
+
+	// Calculate the number of faces in the terrain model.
+	faceCount = m_vertexCount / 3;
+
+	// Initialize the index to the model data.
+	index=0;
+
+	// Go through all the faces and calculate the the tangent, binormal, and normal vectors.
+	for(i=0; i&lt;faceCount; i++)
+	{
+		// Get the three vertices for this face from the terrain model.
+		vertex1.x = m_terrainModel[index].x;
+		vertex1.y = m_terrainModel[index].y;
+		vertex1.z = m_terrainModel[index].z;
+		vertex1.tu = m_terrainModel[index].tu;
+		vertex1.tv = m_terrainModel[index].tv;
+		vertex1.nx = m_terrainModel[index].nx;
+		vertex1.ny = m_terrainModel[index].ny;
+		vertex1.nz = m_terrainModel[index].nz;
+		index++;
+
+		vertex2.x = m_terrainModel[index].x;
+		vertex2.y = m_terrainModel[index].y;
+		vertex2.z = m_terrainModel[index].z;
+		vertex2.tu = m_terrainModel[index].tu;
+		vertex2.tv = m_terrainModel[index].tv;
+		vertex2.nx = m_terrainModel[index].nx;
+		vertex2.ny = m_terrainModel[index].ny;
+		vertex2.nz = m_terrainModel[index].nz;
+		index++;
+
+		vertex3.x = m_terrainModel[index].x;
+		vertex3.y = m_terrainModel[index].y;
+		vertex3.z = m_terrainModel[index].z;
+		vertex3.tu = m_terrainModel[index].tu;
+		vertex3.tv = m_terrainModel[index].tv;
+		vertex3.nx = m_terrainModel[index].nx;
+		vertex3.ny = m_terrainModel[index].ny;
+		vertex3.nz = m_terrainModel[index].nz;
+		index++;
+
+		// Calculate the tangent and binormal of that face.
+		CalculateTangentBinormal(vertex1, vertex2, vertex3, tangent, binormal);
+
+		// Store the tangent and binormal for this face back in the model structure.
+		m_terrainModel[index-1].tx = tangent.x;
+		m_terrainModel[index-1].ty = tangent.y;
+		m_terrainModel[index-1].tz = tangent.z;
+		m_terrainModel[index-1].bx = binormal.x;
+		m_terrainModel[index-1].by = binormal.y;
+		m_terrainModel[index-1].bz = binormal.z;
+
+		m_terrainModel[index-2].tx = tangent.x;
+		m_terrainModel[index-2].ty = tangent.y;
+		m_terrainModel[index-2].tz = tangent.z;
+		m_terrainModel[index-2].bx = binormal.x;
+		m_terrainModel[index-2].by = binormal.y;
+		m_terrainModel[index-2].bz = binormal.z;
+
+		m_terrainModel[index-3].tx = tangent.x;
+		m_terrainModel[index-3].ty = tangent.y;
+		m_terrainModel[index-3].tz = tangent.z;
+		m_terrainModel[index-3].bx = binormal.x;
+		m_terrainModel[index-3].by = binormal.y;
+		m_terrainModel[index-3].bz = binormal.z;
+	}
+
+	return;
+}
+
+
+void TerrainClass::CalculateTangentBinormal(TempVertexType vertex1, TempVertexType vertex2, TempVertexType vertex3, VectorType&amp; tangent, VectorType&amp; binormal)
+{
+	float vector1[3], vector2[3];
+	float tuVector[2], tvVector[2];
+	float den;
+	float length;
+
+
+	// Calculate the two vectors for this face.
+	vector1[0] = vertex2.x - vertex1.x;
+	vector1[1] = vertex2.y - vertex1.y;
+	vector1[2] = vertex2.z - vertex1.z;
+
+	vector2[0] = vertex3.x - vertex1.x;
+	vector2[1] = vertex3.y - vertex1.y;
+	vector2[2] = vertex3.z - vertex1.z;
+
+	// Calculate the tu and tv texture space vectors.
+	tuVector[0] = vertex2.tu - vertex1.tu;
+	tvVector[0] = vertex2.tv - vertex1.tv;
+
+	tuVector[1] = vertex3.tu - vertex1.tu;
+	tvVector[1] = vertex3.tv - vertex1.tv;
+
+	// Calculate the denominator of the tangent/binormal equation.
+	den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
+
+	// Calculate the cross products and multiply by the coefficient to get the tangent and binormal.
+	tangent.x = (tvVector[1] * vector1[0] - tvVector[0] * vector2[0]) * den;
+	tangent.y = (tvVector[1] * vector1[1] - tvVector[0] * vector2[1]) * den;
+	tangent.z = (tvVector[1] * vector1[2] - tvVector[0] * vector2[2]) * den;
+
+	binormal.x = (tuVector[0] * vector2[0] - tuVector[1] * vector1[0]) * den;
+	binormal.y = (tuVector[0] * vector2[1] - tuVector[1] * vector1[1]) * den;
+	binormal.z = (tuVector[0] * vector2[2] - tuVector[1] * vector1[2]) * den;
+
+	// Calculate the length of the tangent.
+	length = (float)sqrt((tangent.x * tangent.x) + (tangent.y * tangent.y) + (tangent.z * tangent.z));
+
+	// Normalize the tangent and then store it.
+	tangent.x = tangent.x / length;
+	tangent.y = tangent.y / length;
+	tangent.z = tangent.z / length;
+
+	// Calculate the length of the binormal.
+	length = (float)sqrt((binormal.x * binormal.x) + (binormal.y * binormal.y) + (binormal.z * binormal.z));
+
+	// Normalize the binormal and then store it.
+	binormal.x = binormal.x / length;
+	binormal.y = binormal.y / length;
+	binormal.z = binormal.z / length;
+
+	return;
+}
+
+
+bool TerrainClass::LoadTerrainCells(ID3D11Device* device)
+{
+	int cellHeight, cellWidth, cellRowCount, i, j, index;
+	bool result;
+
+
+	// Set the height and width of each terrain cell to a fixed 33x33 vertex array.
+	cellHeight = 33;
+	cellWidth = 33;
+
+	// Calculate the number of cells needed to store the terrain data.
+	cellRowCount = (m_terrainWidth-1) / (cellWidth-1);
+	m_cellCount = cellRowCount * cellRowCount;
+
+	// Create the terrain cell array.
+	m_TerrainCells = new TerrainCellClass[m_cellCount];
+	if(!m_TerrainCells)
+	{
+		return false;
+	}
+
+	// Loop through and initialize all the terrain cells.
+	for(j=0; j&lt;cellRowCount; j++)
+	{
+		for(i=0; i&lt;cellRowCount; i++)
+		{
+			index = (cellRowCount * j) + i;
+
+			result = m_TerrainCells[index].Initialize(device, m_terrainModel, i, j, cellHeight, cellWidth, m_terrainWidth);
+			if(!result)
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+
+void TerrainClass::ShutdownTerrainCells()
+{
+	int i;
+
+
+	// Release the terrain cell array.
+	if(m_TerrainCells)
+	{
+		for(i=0; i&lt;m_cellCount; i++)
+		{
+			m_TerrainCells[i].Shutdown();
+		}
+
+		delete [] m_TerrainCells;
+		m_TerrainCells = 0;
+	}
+
+	return;
+}
+
+
+bool TerrainClass::RenderCell(ID3D11DeviceContext* deviceContext, int cellId, FrustumClass* Frustum)
+{
+	float maxWidth, maxHeight, maxDepth, minWidth, minHeight, minDepth;
+	bool result;
+
+
+	// Get the dimensions of the terrain cell.
+	m_TerrainCells[cellId].GetCellDimensions(maxWidth, maxHeight, maxDepth, minWidth, minHeight, minDepth);
+
+	// Check if the cell is visible.  If it is not visible then just return and don't render it.
+	result = Frustum-&gt;CheckRectangle2(maxWidth, maxHeight, maxDepth, minWidth, minHeight, minDepth);
+	if(!result)
+	{
+		// Increment the number of cells that were culled.
+		m_cellsCulled++;
+
+		return false;
+	}
+
+	// If it is visible then render it.
+	m_TerrainCells[cellId].Render(deviceContext);
+
+	// Add the polygons in the cell to the render count.
+	m_renderCount += (m_TerrainCells[cellId].GetVertexCount() / 3);
+
+	// Increment the number of cells that were actually drawn.
+	m_cellsDrawn++;
+
+	return true;
+}
+
+
+void TerrainClass::RenderCellLines(ID3D11DeviceContext* deviceContext, int cellId)
+{
+	m_TerrainCells[cellId].RenderLineBuffers(deviceContext);
+	return;
+}
+
+
+int TerrainClass::GetCellIndexCount(int cellId)
+{
+	return m_TerrainCells[cellId].GetIndexCount();
+}
+
+
+int TerrainClass::GetCellLinesIndexCount(int cellId)
+{
+	return m_TerrainCells[cellId].GetLineBuffersIndexCount();
+}
+
+
+int TerrainClass::GetCellCount()
+{
+	return m_cellCount;
+}
+
+
+int TerrainClass::GetRenderCount()
+{
+	return m_renderCount;
+}
+
+
+int TerrainClass::GetCellsDrawn()
+{
+	return m_cellsDrawn;
+}
+
+
+int TerrainClass::GetCellsCulled()
+{
+	return m_cellsCulled;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetHeightAtPosition returns the current height over the terrain given the X and Z inputs.
+If it can't find the height because the camera is off the grid then the function returns false and doesn't populate the height input/output variable.
+The function starts by looping through all the cells until it finds which one the position is inside.
+Once it has the correct cell it loops through all the triangles in just that cell and figures out which one we are currently above.
+Then it returns the height for that each position on that specific triangle.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">bool TerrainClass::GetHeightAtPosition(float inputX, float inputZ, float&amp; height)
+{
+	int i, cellId, index;
+	float vertex1[3], vertex2[3], vertex3[3];
+	bool foundHeight;
+	float maxWidth, maxHeight, maxDepth, minWidth, minHeight, minDepth;
+
+
+	// Loop through all of the terrain cells to find out which one the inputX and inputZ would be inside.
+	cellId = -1;
+	for(i=0; i&lt;m_cellCount; i++)
+	{
+		// Get the current cell dimensions.
+		m_TerrainCells[i].GetCellDimensions(maxWidth, maxHeight, maxDepth, minWidth, minHeight, minDepth);
+
+		// Check to see if the positions are in this cell.
+		if((inputX &lt; maxWidth) &amp;&amp; (inputX &gt; minWidth) &amp;&amp; (inputZ &lt; maxDepth) &amp;&amp; (inputZ &gt; minDepth))
+		{
+			cellId = i;
+			i = m_cellCount;
+		}
+	}
+
+	// If we didn't find a cell then the input position is off the terrain grid.
+	if(cellId == -1)
+	{
+		return false;
+	}
+
+	// If this is the right cell then check all the triangles in this cell to see what the height of the triangle at this position is.
+	for(i=0; i&lt;(m_TerrainCells[cellId].GetVertexCount() / 3); i++)
+	{
+		index = i * 3;
+
+		vertex1[0] = m_TerrainCells[cellId].m_vertexList[index].x;
+		vertex1[1] = m_TerrainCells[cellId].m_vertexList[index].y;
+		vertex1[2] = m_TerrainCells[cellId].m_vertexList[index].z;
+		index++;
+
+		vertex2[0] = m_TerrainCells[cellId].m_vertexList[index].x;
+		vertex2[1] = m_TerrainCells[cellId].m_vertexList[index].y;
+		vertex2[2] = m_TerrainCells[cellId].m_vertexList[index].z;
+		index++;
+
+		vertex3[0] = m_TerrainCells[cellId].m_vertexList[index].x;
+		vertex3[1] = m_TerrainCells[cellId].m_vertexList[index].y;
+		vertex3[2] = m_TerrainCells[cellId].m_vertexList[index].z;
+
+		// Check to see if this is the polygon we are looking for.
+		foundHeight = CheckHeightOfTriangle(inputX, inputZ, height, vertex1, vertex2, vertex3);
+		if(foundHeight)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+CheckHeightOfTriangle is a new function which is responsible for determining if a line intersects the given input triangle.
+It takes the three points of the triangle and constructs three lines from those three points.
+Then it tests to see if the position is on the inside of all three lines.
+If it is inside all three lines then an intersection is found and the height is calculated and returned.
+If the point is outside any of the three lines then false is returned as there is no intersection of the line with the triangle. 
+</font></p><pre><font face="arial" color="#aaaaff" size="2">bool TerrainClass::CheckHeightOfTriangle(float x, float z, float&amp; height, float v0[3], float v1[3], float v2[3])
+{
+	float startVector[3], directionVector[3], edge1[3], edge2[3], normal[3];
+	float Q[3], e1[3], e2[3], e3[3], edgeNormal[3], temp[3];
+	float magnitude, D, denominator, numerator, t, determinant;
+
+
+	// Starting position of the ray that is being cast.
+	startVector[0] = x;
+	startVector[1] = 0.0f;
+	startVector[2] = z;
+
+	// The direction the ray is being cast.
+	directionVector[0] = 0.0f;
+	directionVector[1] = -1.0f;
+	directionVector[2] = 0.0f;
+
+	// Calculate the two edges from the three points given.
+	edge1[0] = v1[0] - v0[0];
+	edge1[1] = v1[1] - v0[1];
+	edge1[2] = v1[2] - v0[2];
+
+	edge2[0] = v2[0] - v0[0];
+	edge2[1] = v2[1] - v0[1];
+	edge2[2] = v2[2] - v0[2];
+
+	// Calculate the normal of the triangle from the two edges.
+	normal[0] = (edge1[1] * edge2[2]) - (edge1[2] * edge2[1]);
+	normal[1] = (edge1[2] * edge2[0]) - (edge1[0] * edge2[2]);
+	normal[2] = (edge1[0] * edge2[1]) - (edge1[1] * edge2[0]);
+
+	magnitude = (float)sqrt((normal[0] * normal[0]) + (normal[1] * normal[1]) + (normal[2] * normal[2]));
+	normal[0] = normal[0] / magnitude;
+	normal[1] = normal[1] / magnitude;
+	normal[2] = normal[2] / magnitude;
+
+	// Find the distance from the origin to the plane.
+	D = ((-normal[0] * v0[0]) + (-normal[1] * v0[1]) + (-normal[2] * v0[2]));
+
+	// Get the denominator of the equation.
+	denominator = ((normal[0] * directionVector[0]) + (normal[1] * directionVector[1]) + (normal[2] * directionVector[2]));
+
+	// Make sure the result doesn't get too close to zero to prevent divide by zero.
+	if(fabs(denominator) &lt; 0.0001f)
+	{
+		return false;
+	}
+
+	// Get the numerator of the equation.
+	numerator = -1.0f * (((normal[0] * startVector[0]) + (normal[1] * startVector[1]) + (normal[2] * startVector[2])) + D);
+
+	// Calculate where we intersect the triangle.
+	t = numerator / denominator;
+
+	// Find the intersection vector.
+	Q[0] = startVector[0] + (directionVector[0] * t);
+	Q[1] = startVector[1] + (directionVector[1] * t);
+	Q[2] = startVector[2] + (directionVector[2] * t);
+
+	// Find the three edges of the triangle.
+	e1[0] = v1[0] - v0[0];
+	e1[1] = v1[1] - v0[1];
+	e1[2] = v1[2] - v0[2];
+
+	e2[0] = v2[0] - v1[0];
+	e2[1] = v2[1] - v1[1];
+	e2[2] = v2[2] - v1[2];
+
+	e3[0] = v0[0] - v2[0];
+	e3[1] = v0[1] - v2[1];
+	e3[2] = v0[2] - v2[2];
+
+	// Calculate the normal for the first edge.
+	edgeNormal[0] = (e1[1] * normal[2]) - (e1[2] * normal[1]);
+	edgeNormal[1] = (e1[2] * normal[0]) - (e1[0] * normal[2]);
+	edgeNormal[2] = (e1[0] * normal[1]) - (e1[1] * normal[0]);
+
+	// Calculate the determinant to see if it is on the inside, outside, or directly on the edge.
+	temp[0] = Q[0] - v0[0];
+	temp[1] = Q[1] - v0[1];
+	temp[2] = Q[2] - v0[2];
+
+	determinant = ((edgeNormal[0] * temp[0]) + (edgeNormal[1] * temp[1]) + (edgeNormal[2] * temp[2]));
+
+	// Check if it is outside.
+	if(determinant &gt; 0.001f)
+	{
+		return false;
+	}
+
+	// Calculate the normal for the second edge.
+	edgeNormal[0] = (e2[1] * normal[2]) - (e2[2] * normal[1]);
+	edgeNormal[1] = (e2[2] * normal[0]) - (e2[0] * normal[2]);
+	edgeNormal[2] = (e2[0] * normal[1]) - (e2[1] * normal[0]);
+
+	// Calculate the determinant to see if it is on the inside, outside, or directly on the edge.
+	temp[0] = Q[0] - v1[0];
+	temp[1] = Q[1] - v1[1];
+	temp[2] = Q[2] - v1[2];
+
+	determinant = ((edgeNormal[0] * temp[0]) + (edgeNormal[1] * temp[1]) + (edgeNormal[2] * temp[2]));
+
+	// Check if it is outside.
+	if (determinant &gt; 0.001f)
+	{
+		return false;
+	}
+
+	// Calculate the normal for the third edge.
+	edgeNormal[0] = (e3[1] * normal[2]) - (e3[2] * normal[1]);
+	edgeNormal[1] = (e3[2] * normal[0]) - (e3[0] * normal[2]);
+	edgeNormal[2] = (e3[0] * normal[1]) - (e3[1] * normal[0]);
+
+	// Calculate the determinant to see if it is on the inside, outside, or directly on the edge.
+	temp[0] = Q[0] - v2[0];
+	temp[1] = Q[1] - v2[1];
+	temp[2] = Q[2] - v2[2];
+
+	determinant = ((edgeNormal[0] * temp[0]) + (edgeNormal[1] * temp[1]) + (edgeNormal[2] * temp[2]));
+
+	// Check if it is outside.
+	if(determinant &gt; 0.001f)
+	{
+		return false;
+	}
+
+	// Now we have our height.
+	height = Q[1];
+
+	return true;
+}
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Zoneclass.h</u></font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: zoneclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _ZONECLASS_H_
+#define _ZONECLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "inputclass.h"
+#include "shadermanagerclass.h"
+#include "texturemanagerclass.h"
+#include "timerclass.h"
+#include "userinterfaceclass.h"
+#include "cameraclass.h"
+#include "lightclass.h"
+#include "positionclass.h"
+#include "frustumclass.h"
+#include "skydomeclass.h"
+#include "terrainclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ZoneClass
+////////////////////////////////////////////////////////////////////////////////
+class ZoneClass
+{
+public:
+	ZoneClass();
+	ZoneClass(const ZoneClass&amp;);
+	~ZoneClass();
+
+	bool Initialize(D3DClass*, HWND, int, int, float);
+	void Shutdown();
+	bool Frame(D3DClass*, InputClass*, ShaderManagerClass*, TextureManagerClass*, float, int);
+
+private:
+	void HandleMovementInput(InputClass*, float);
+	bool Render(D3DClass*, ShaderManagerClass*, TextureManagerClass*);
+
+private:
+	UserInterfaceClass* m_UserInterface;
+	CameraClass* m_Camera;
+	LightClass* m_Light;
+	PositionClass* m_Position;
+	FrustumClass* m_Frustum;
+	SkyDomeClass* m_SkyDome;
+	TerrainClass* m_Terrain;
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have added a new boolean variable for indicating if the camera should be locked to the height of the terrain or not.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	bool m_displayUI, m_wireFrame, m_cellLines, m_heightLocked;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Zoneclass.cpp</u></font></p><pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: zoneclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "zoneclass.h"
+
+
+ZoneClass::ZoneClass()
+{
+	m_UserInterface = 0;
+	m_Camera = 0;
+	m_Light = 0;
+	m_Position = 0;
+	m_Frustum = 0;
+	m_SkyDome = 0;
+	m_Terrain = 0;
+}
+
+
+ZoneClass::ZoneClass(const ZoneClass&amp; other)
+{
+}
+
+
+ZoneClass::~ZoneClass()
+{
+}
+
+
+bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int screenHeight, float screenDepth)
+{
+	bool result;
+
+
+	// Create the user interface object.
+	m_UserInterface = new UserInterfaceClass;
+	if(!m_UserInterface)
+	{
+		return false;
+	}
+
+	// Initialize the user interface object.
+	result = m_UserInterface-&gt;Initialize(Direct3D, screenHeight, screenWidth);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the user interface object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera and build the matrices needed for rendering.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	m_Camera-&gt;Render();
+	m_Camera-&gt;RenderBaseViewMatrix();
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetDirection(-0.5f, -1.0f, -0.5f);
+
+	// Create the position object.
+	m_Position = new PositionClass;
+	if(!m_Position)
+	{
+		return false;
+	}
+
+	// Set the initial position and rotation.
+	m_Position-&gt;SetPosition(512.5f, 30.0f, 10.0f);
+	m_Position-&gt;SetRotation(0.0f, 0.0f, 0.0f);
+
+	// Create the frustum object.
+	m_Frustum = new FrustumClass;
+	if(!m_Frustum)
+	{
+		return false;
+	}
+
+	// Initialize the frustum object.
+	m_Frustum-&gt;Initialize(screenDepth);
+
+	// Create the sky dome object.
+	m_SkyDome = new SkyDomeClass;
+	if(!m_SkyDome)
+	{
+		return false;
+	}
+
+	// Initialize the sky dome object.
+	result = m_SkyDome-&gt;Initialize(Direct3D-&gt;GetDevice());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sky dome object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the terrain object.
+	m_Terrain = new TerrainClass;
+	if(!m_Terrain)
+	{
+		return false;
+	}
+
+	// Initialize the terrain object.
+	result = m_Terrain-&gt;Initialize(Direct3D-&gt;GetDevice(), "../Engine/data/setup.txt");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
+		return false;
+	}
+	
+	// Set the UI to display by default.
+	m_displayUI = true;
+
+	// Set wire frame rendering initially to disabled.
+	m_wireFrame = false;
+
+	// Set the rendering of cell lines initially to disabled.
+	m_cellLines = false;
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the height locked to initially true.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Set the user locked to the terrain height for movement.
+	m_heightLocked = true;</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void ZoneClass::Shutdown()
+{
+	// Release the terrain object.
+	if(m_Terrain)
+	{
+		m_Terrain-&gt;Shutdown();
+		delete m_Terrain;
+		m_Terrain = 0;
+	}
+
+	// Release the sky dome object.
+	if(m_SkyDome)
+	{
+		m_SkyDome-&gt;Shutdown();
+		delete m_SkyDome;
+		m_SkyDome = 0;
+	}
+
+	// Release the frustum object.
+	if(m_Frustum)
+	{
+		delete m_Frustum;
+		m_Frustum = 0;
+	}
+
+	// Release the position object.
+	if(m_Position)
+	{
+		delete m_Position;
+		m_Position = 0;
+	}
+
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the user interface object.
+	if(m_UserInterface)
+	{
+		m_UserInterface-&gt;Shutdown();
+		delete m_UserInterface;
+		m_UserInterface = 0;
+	}
+
+	return;
+}
+
+
+bool ZoneClass::Frame(D3DClass* Direct3D, InputClass* Input, ShaderManagerClass* ShaderManager, TextureManagerClass* TextureManager, 
+		      float frameTime, int fps)
+{</font><font face="arial" color="#aaaaff" size="2">
+	bool result, foundHeight;</font><font face="arial" color="#aaffaa" size="2">
+	float posX, posY, posZ, rotX, rotY, rotZ, height;
+
+
+	// Do the frame input processing.
+	HandleMovementInput(Input, frameTime);
+
+	// Get the view point position/rotation.
+	m_Position-&gt;GetPosition(posX, posY, posZ);
+	m_Position-&gt;GetRotation(rotX, rotY, rotZ);
+
+	// Do the frame processing for the user interface.
+	result = m_UserInterface-&gt;Frame(Direct3D-&gt;GetDeviceContext(), fps, posX, posY, posZ, rotX, rotY, rotZ);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Do the terrain frame processing.
+	m_Terrain-&gt;Frame();
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Each frame we use the updated position as input to determine the height the camera should be located at.
+We then set the height of the camera slightly above the terrain height by 1.0f.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// If the height is locked to the terrain then position the camera on top of it.
+	if(m_heightLocked)
+	{
+		// Get the height of the triangle that is directly underneath the given camera position.
+		foundHeight = m_Terrain-&gt;GetHeightAtPosition(posX, posZ, height);
+		if(foundHeight)
+		{
+			// If there was a triangle under the camera then position the camera just above it by one meter.
+			m_Position-&gt;SetPosition(posX, height + 1.0f, posZ);
+			m_Camera-&gt;SetPosition(posX, height + 1.0f, posZ);
+		}
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Render the graphics.
+	result = Render(Direct3D, ShaderManager, TextureManager);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void ZoneClass::HandleMovementInput(InputClass* Input, float frameTime)
+{
+	bool keyDown;
+	float posX, posY, posZ, rotX, rotY, rotZ;
+
+
+	// Set the frame time for calculating the updated position.
+	m_Position-&gt;SetFrameTime(frameTime);
+
+	// Handle the input.
+	keyDown = Input-&gt;IsLeftPressed();
+	m_Position-&gt;TurnLeft(keyDown);
+
+	keyDown = Input-&gt;IsRightPressed();
+	m_Position-&gt;TurnRight(keyDown);
+
+	keyDown = Input-&gt;IsUpPressed();
+	m_Position-&gt;MoveForward(keyDown);
+
+	keyDown = Input-&gt;IsDownPressed();
+	m_Position-&gt;MoveBackward(keyDown);
+
+	keyDown = Input-&gt;IsAPressed();
+	m_Position-&gt;MoveUpward(keyDown);
+
+	keyDown = Input-&gt;IsZPressed();
+	m_Position-&gt;MoveDownward(keyDown);
+
+	keyDown = Input-&gt;IsPgUpPressed();
+	m_Position-&gt;LookUpward(keyDown);
+
+	keyDown = Input-&gt;IsPgDownPressed();
+	m_Position-&gt;LookDownward(keyDown);
+
+	// Get the view point position/rotation.
+	m_Position-&gt;GetPosition(posX, posY, posZ);
+	m_Position-&gt;GetRotation(rotX, rotY, rotZ);
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(posX, posY, posZ);
+	m_Camera-&gt;SetRotation(rotX, rotY, rotZ);
+
+	// Determine if the user interface should be displayed or not.
+	if(Input-&gt;IsF1Toggled())
+	{
+		m_displayUI = !m_displayUI;
+	}
+
+	// Determine if the terrain should be rendered in wireframe or not.
+	if(Input-&gt;IsF2Toggled())
+	{
+		m_wireFrame = !m_wireFrame;
+	}
+
+	// Determine if we should render the lines around each terrain cell.
+	if(Input-&gt;IsF3Toggled())
+	{
+		m_cellLines = !m_cellLines;
+	}
+</font></pre><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We use the F4 key to toggle height locking the camera to just above the terrain.
+</font></p><pre><font face="arial" color="#aaaaff" size="2">	// Determine if we should be locked to the terrain height when we move around or not.
+	if(Input-&gt;IsF4Toggled())
+	{
+		m_heightLocked = !m_heightLocked;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return;
+}
+
+
+bool ZoneClass::Render(D3DClass* Direct3D, ShaderManagerClass* ShaderManager, TextureManagerClass* TextureManager)
+{
+	XMMATRIX worldMatrix, viewMatrix, projectionMatrix, baseViewMatrix, orthoMatrix;
+	bool result;
+	XMFLOAT3 cameraPosition;
+	int i;
+
+	
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	Direct3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	Direct3D-&gt;GetProjectionMatrix(projectionMatrix);
+	m_Camera-&gt;GetBaseViewMatrix(baseViewMatrix);
+	Direct3D-&gt;GetOrthoMatrix(orthoMatrix);
+	
+	// Get the position of the camera.
+	cameraPosition = m_Camera-&gt;GetPosition();
+	
+	// Construct the frustum.
+	m_Frustum-&gt;ConstructFrustum(projectionMatrix, viewMatrix);
+
+	// Clear the buffers to begin the scene.
+	Direct3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Turn off back face culling and turn off the Z buffer.
+	Direct3D-&gt;TurnOffCulling();
+	Direct3D-&gt;TurnZBufferOff();
+
+	// Translate the sky dome to be centered around the camera position.
+	worldMatrix = XMMatrixTranslation(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+	// Render the sky dome using the sky dome shader.
+	m_SkyDome-&gt;Render(Direct3D-&gt;GetDeviceContext());
+	result = ShaderManager-&gt;RenderSkyDomeShader(Direct3D-&gt;GetDeviceContext(), m_SkyDome-&gt;GetIndexCount(), worldMatrix, viewMatrix, 
+						    projectionMatrix, m_SkyDome-&gt;GetApexColor(), m_SkyDome-&gt;GetCenterColor());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the world matrix.
+	Direct3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Turn the Z buffer back and back face culling on.
+	Direct3D-&gt;TurnZBufferOn();
+	Direct3D-&gt;TurnOnCulling();
+	
+	// Turn on wire frame rendering of the terrain if needed.
+	if(m_wireFrame)
+	{
+		Direct3D-&gt;EnableWireframe();
+	}
+
+	// Render the terrain cells (and cell lines if needed).
+	for(i=0; i&lt;m_Terrain-&gt;GetCellCount(); i++)
+	{
+		// Render each terrain cell if it is visible only.
+		result = m_Terrain-&gt;RenderCell(Direct3D-&gt;GetDeviceContext(), i, m_Frustum);
+		if(result)
+		{
+			// Render the cell buffers using the terrain shader.
+			result = ShaderManager-&gt;RenderTerrainShader(Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetCellIndexCount(i), worldMatrix, viewMatrix,
+								    projectionMatrix, TextureManager-&gt;GetTexture(0), TextureManager-&gt;GetTexture(1),
+								    m_Light-&gt;GetDirection(), m_Light-&gt;GetDiffuseColor());
+			if(!result)
+			{
+				return false;
+			}
+
+			// If needed then render the bounding box around this terrain cell using the color shader. 
+			if(m_cellLines)
+			{
+				m_Terrain-&gt;RenderCellLines(Direct3D-&gt;GetDeviceContext(), i);
+				ShaderManager-&gt;RenderColorShader(Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetCellLinesIndexCount(i), worldMatrix, 
+								 viewMatrix, projectionMatrix);
+				if(!result)
+				{
+					return false;
+				}
+			}
+		}
+	}
+	
+	// Turn off wire frame rendering of the terrain if it was on.
+	if(m_wireFrame)
+	{
+		Direct3D-&gt;DisableWireframe();  
+	}
+
+	// Update the render counts in the UI.
+	result = m_UserInterface-&gt;UpdateRenderCounts(Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetRenderCount(), m_Terrain-&gt;GetCellsDrawn(), 
+						     m_Terrain-&gt;GetCellsCulled());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the user interface.
+	if(m_displayUI)
+	{
+		result = m_UserInterface-&gt;Render(Direct3D, ShaderManager, worldMatrix, baseViewMatrix, orthoMatrix);
+		if(!result)
+		{
+			return false;
+		}
+	}
+
+	// Present the rendered scene to the screen.
+	Direct3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With the ability to determine the exact height of any location in the terrain we can now constantly position the camera just above the terrain. 
+</font></p><p align="left"><img border="0" src="./Tutorial 11_ Height Based Movement_files/pic4042.gif" width="800" height="450"></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the code in 64 bit mode and run the program.  Move around the terrain and you will find your height automatically adjusts to the changing height. Press escape to quit.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Change the amount of fixed height that the camera is over the terrain. 
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Place an object that randomly moves around the terrain adjusting its height based on information from the terrain cell it is currently inside. 
+</font></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11ter11_src.zip">dx11ter11_src.zip</a></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11ter11_exe.zip">dx11ter11_exe.zip</a></font></p><table align="center" border="0" width="1024"><tbody><tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</tr></tbody></table>
+
+<p align="center"><img border="0" src="./Tutorial 11_ Height Based Movement_files/pic3002.gif" width="1024" height="1"></p>
+
+<p align="center"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutdx11s2ter.html">Back to Tutorial Index</a></font></p>
+
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 11_ Height Based Movement_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

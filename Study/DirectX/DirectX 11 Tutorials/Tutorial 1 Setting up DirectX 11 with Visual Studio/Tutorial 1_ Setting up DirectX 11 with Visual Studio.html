@@ -1,0 +1,327 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut01.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 1: Setting up DirectX 11 with Visual Studio</title><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 1: Setting up DirectX 11 with Visual Studio
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 1_ Setting up DirectX 11 with Visual Studio_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Before writing any graphics code we'll need to have the tools to do so.  The first of these tools is a compiler that is preferably built into a nice IDE.
+The one I use and will be supplying project files for is Visual Studio 2010.  There are several others available and some are even free off the net.
+I'll leave that up to you to decide which one you prefer.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The second tool you will need is the DirectX SDK.  It can be downloaded from Microsoft's website for free.  
+After downloading and installing the SDK you will have the files necessary to compile DirectX programs.
+You will also notice it comes with samples, tools, and documentation.
+The documentation is pretty good, it also has some very simple examples under the DirectX 10 tutorials section which also applies to DirectX 11.
+The tools that come with it are also useful, we'll be using the DDS texture tool quite often.
+The sample browser also provides some simple examples to achieve certain effects you may be looking to do.
+The samples will generally also have some of the new features of the latest SDK demonstrated.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With both installed you can now setup your IDE to work with the DirectX 11 SDK.  
+Please note that some IDEs will need to be installed first before installing the DirectX SDK.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Setting Up Visual Studio 2010</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In Visual Studio 2010 I used the following steps:
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First you need to create an empty Win32 project so select File -&gt; New -&gt; Project.
+Then select Win32 project from the choices.  Give the project a name (I called mine Engine) and a location and then click on "Ok".
+Click "Next" and you will be given another menu.  Under "Additional options" put a check mark in the "Empty project" box and click on "Finish" and then click "Next".
+You should now have an basic Win32 empty project setup.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now click "View" from the menu and select "Property Manager".
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next click on the arrow to the left of your project name (mine was called Engine) in the property manager window on the left part of the screen.
+This will display the solution configurations you have.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Select the "Debug | Win32" folder and double click "Microsoft.Cpp.Win32.user".
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the window that pops up select "VC++ Directories" from the menu on the left side.  This will then display the directories that the project uses.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now select "Include Directories" from the directory list and click on the down arrow that appears to the left.  From the choices it pops up choose "Edit".
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Click on the folder icon at the top (called New Line if you mouse over it) and click on the "..." that appears to the right side.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Navigate to the DirectX SDK include folder, different versions are named differently but on my system it was: C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next click on "Select Folder" and then click "Ok".
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The libraries directory is also needed so now select "Library Directories" from the directory list and click on the down arrow that appears to the left.  From the choices it pops up choose "Edit".
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Click on the folder icon at the top (called New Line if you mouse over it) and click on the "..." that appears to the right side.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Navigate to the DirectX SDK library folder, different versions are named differently but on my system it was: C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next click on "Select Folder" and then click "Ok".
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Finally click on the "Apply" button in the bottom right of the Property Pages window.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now click "Ok" to close the window and your settings will be complete.  From the menu click "View" and then "Solution Explorer" to return to your code.
+All DirectX projects should now compile fine and the error of "Cannot open include file: 'd3d11.h': No such file or directory" should disappear.
+Also note that these settings will automatically be applied to the Release | Win32 solution configuration so you don't need to set them there.
+As well it should be persistent permanently for all new projects and will never need to be setup again.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Setting Up Visual Studio 2008</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In Visual Studio 2008 I used the following steps:
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Click "Tools" from the menu.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Select "Options" at the bottom of the list.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Click "Projects and Solutions" from the list on the left side.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Click "VC++ Directories" from the expanded list.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+On the right side under "Show Directories for:" select the drop down choice "Include files".
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now add the location of the include directory to the top of the list.  
+On my setup it was the following but may be different on yours (month released, etc.), make sure to double check:
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+After you have added that include directory you now need to add the library directory also.
+On the right side under "Show Directories for:" select the drop down choice "Library files".
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+On my setup it was the following but may be different on yours (month released, etc.), make sure to double check:
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With these two directories setup in Visual Studio you should now be able to compile DirectX 11 code without any issues.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Compile and run Tutorial #2 from the DirectX 11 SDK Documentation (source is located: (SDK root)\Samples\C++\Direct3D10\Tutorials\Tutorial02)
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 1_ Setting up DirectX 11 with Visual Studio_files/pic1002.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 1_ Setting up DirectX 11 with Visual Studio_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

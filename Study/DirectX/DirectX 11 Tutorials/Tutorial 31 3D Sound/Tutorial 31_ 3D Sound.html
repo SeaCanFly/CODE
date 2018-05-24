@@ -1,0 +1,843 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut31.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 31: 3D Sound</title><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 31: 3D Sound
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 31_ 3D Sound_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover how to implement 3D sound using Direct Sound in DirectX 11 with C++.
+The code in this tutorial is based on the earlier Direct Sound tutorial.
+We will modify the original code so that sounds are now 3D instead of 2D.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The first concept with 3D sound is that all sounds now have a 3D position in the world.
+The x, y, and z position of the sound are the same as the left handed coordinate system DirectX uses for graphics.
+This makes it very easier to create "sound bubbles" around 3D models.
+For example you might have a river located at a specific position in the world.
+You could then create a bounding sphere around the river location and any one who enters that sphere then hears the sound of the river.
+And the closer they get to the center of the sound in the sound bubble the louder the volume is of that sound.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The next important concept when implementing 3D sound using Direct Sound is the use of a listener.
+The listener is an interface that represents where the person that is listening is positioned in the 3D world.
+Direct Sound uses the listener's distance from the position of 3D sounds that are playing to make proper calculations so the sound playing is correct for 3D audio.
+There can only be a single listener ever.
+Most 3D applications will set the listener position to be the same as the first person camera view location.
+Then as the camera moves the listener position is updated and Direct Sound automatically takes care of mixing the 3D audio sounds using the updated listener position.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The audio format for 3D sounds can be anything just like 2D sounds, all you need to do is write the importer for the sound format.
+However there is one restriction for 3D sounds which is that they must be single channel (mono) only.  
+Dual channel (stereo) sounds will cause Direct Sound to send back errors.
+In this tutorial we will use the .wav sound format with sound files recorded at 44100 KHz, 16bit, and mono.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The final concept is the use of the IDirectSound3DBuffer8 interface.
+We still load sounds into a secondary sound buffer of type IDirectSoundBuffer8 except in the buffer description we bitwise the DSBCAPS_CTRL3D parameter to let Direct Sound know that we will be manipulating the sound in a 3D manner.
+Then once the sound is loaded into the secondary sound buffer we then get a IDirectSound3DBuffer8 interface to that sound buffer which then lets us control the 3D parameters.
+The IDirectSoundBuffer8 is still used for controlling the regular aspects of the sound such as volume but to modify 3D aspects such as 3D position we use the IDirectSound3DBuffer8 interface.
+Just think of it as two different purpose controllers to the same sound buffer.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frame work has stayed the same as the original Direct Sound tutorial.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 31_ 3D Sound_files/pic0039.gif" width="278" height="194"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Soundclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: soundclass.h
+///////////////////////////////////////////////////////////////////////////////
+#ifndef _SOUNDCLASS_H_
+#define _SOUNDCLASS_H_
+
+
+/////////////
+// LINKING //
+/////////////
+#pragma comment(lib, "dsound.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "winmm.lib")
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;windows.h&gt;
+#include &lt;mmsystem.h&gt;
+#include &lt;dsound.h&gt;
+#include &lt;stdio.h&gt;
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Class name: SoundClass
+///////////////////////////////////////////////////////////////////////////////
+class SoundClass
+{
+private:
+	struct WaveHeaderType
+	{
+		char chunkId[4];
+		unsigned long chunkSize;
+		char format[4];
+		char subChunkId[4];
+		unsigned long subChunkSize;
+		unsigned short audioFormat;
+		unsigned short numChannels;
+		unsigned long sampleRate;
+		unsigned long bytesPerSecond;
+		unsigned short blockAlign;
+		unsigned short bitsPerSample;
+		char dataChunkId[4];
+		unsigned long dataSize;
+	};
+
+public:
+	SoundClass();
+	SoundClass(const SoundClass&amp;);
+	~SoundClass();
+
+	bool Initialize(HWND);
+	void Shutdown();
+
+private:
+	bool InitializeDirectSound(HWND);
+	void ShutdownDirectSound();
+
+	bool LoadWaveFile(char*, IDirectSoundBuffer8**, IDirectSound3DBuffer8**);
+	void ShutdownWaveFile(IDirectSoundBuffer8**, IDirectSound3DBuffer8**);
+
+	bool PlayWaveFile();
+
+private:
+	IDirectSound8* m_DirectSound;
+	IDirectSoundBuffer* m_primaryBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a new listener interface for 3D sound.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	IDirectSound3DListener8* m_listener;
+	IDirectSoundBuffer8* m_secondaryBuffer1;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have also added a 3D buffer interface for 3D sound manipulation.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	IDirectSound3DBuffer8* m_secondary3DBuffer1;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Soundclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will just cover where the code has been modified from the original Direct Sound tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: soundclass.cpp
+///////////////////////////////////////////////////////////////////////////////
+#include "soundclass.h"
+
+
+SoundClass::SoundClass()
+{
+	m_DirectSound = 0;
+	m_primaryBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the listener interface to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_listener = 0;
+	m_secondaryBuffer1 = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the 3D secondary sound buffer interface to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_secondary3DBuffer1 = 0;
+}
+
+
+SoundClass::SoundClass(const SoundClass&amp; other)
+{
+}
+
+
+SoundClass::~SoundClass()
+{
+}
+
+
+bool SoundClass::Initialize(HWND hwnd)
+{
+	bool result;
+
+
+	// Initialize direct sound and the primary sound buffer.
+	result = InitializeDirectSound(hwnd);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now when we load a 3D sound it needs both the secondary sound buffer and the secondary 3D sound buffer interface as both are now used for controlling the sound buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Load a wave audio file onto a secondary buffer.
+	result = LoadWaveFile("../Engine/data/sound02.wav", &amp;m_secondaryBuffer1, &amp;m_secondary3DBuffer1);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Play the wave file now that it has been loaded.
+	result = PlayWaveFile();
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void SoundClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ShutdownWaveFile function now releases both the secondary sound buffer and the secondary 3D sound buffer interface.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the secondary buffer.
+	ShutdownWaveFile(&amp;m_secondaryBuffer1, &amp;m_secondary3DBuffer1);
+
+	// Shutdown the Direct Sound API.
+	ShutdownDirectSound();
+
+	return;
+}
+
+
+bool SoundClass::InitializeDirectSound(HWND hwnd)
+{
+	HRESULT result;
+	DSBUFFERDESC bufferDesc;
+	WAVEFORMATEX waveFormat;
+
+
+	// Initialize the direct sound interface pointer for the default sound device.
+	result = DirectSoundCreate8(NULL, &amp;m_DirectSound, NULL);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set the cooperative level to priority so the format of the primary sound buffer can be modified.
+	result = m_DirectSound-&gt;SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The primary sound buffer has been modified to use the DSBCAPS_CTRL3D in the description so that when the buffer is created it now has 3D capabilities.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the primary buffer description.
+	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
+	bufferDesc.dwFlags = DSBCAPS_PRIMARYBUFFER | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRL3D;
+	bufferDesc.dwBufferBytes = 0;
+	bufferDesc.dwReserved = 0;
+	bufferDesc.lpwfxFormat = NULL;
+	bufferDesc.guid3DAlgorithm = GUID_NULL;
+
+	// Get control of the primary sound buffer on the default sound device.
+	result = m_DirectSound-&gt;CreateSoundBuffer(&amp;bufferDesc, &amp;m_primaryBuffer, NULL);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The format of the primary buffer stays the same, only secondary buffers are required to be mono.
+Direct Sound will take care of mixing different format secondary buffers into the primary buffer automatically.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the format of the primary sound bufffer.
+	// In this case it is a .WAV file recorded at 44,100 samples per second in 16-bit stereo (cd audio format).
+	waveFormat.wFormatTag = WAVE_FORMAT_PCM;
+	waveFormat.nSamplesPerSec = 44100;
+	waveFormat.wBitsPerSample = 16;
+	waveFormat.nChannels = 2;
+	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
+	waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
+	waveFormat.cbSize = 0;
+
+	// Set the primary buffer to be the wave format specified.
+	result = m_primaryBuffer-&gt;SetFormat(&amp;waveFormat);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Once the primary buffer is created we can obtain a listener interface from it.
+This will allow us to position the listener in 3D space in relation to the other 3D positioned sounds.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Obtain a listener interface.
+	result = m_primaryBuffer-&gt;QueryInterface(IID_IDirectSound3DListener8, (LPVOID*)&amp;m_listener);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To start we set the initial position of the listener at the origin of the world.
+The DS3D_IMMEDIATE parameter tells DirectSound to set it right away and not to defer it for batch processing later.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the initial position of the listener to be in the middle of the scene.
+	m_listener-&gt;SetPosition(0.0f, 0.0f, 0.0f, DS3D_IMMEDIATE);
+
+	return true;
+}
+
+
+void SoundClass::ShutdownDirectSound()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new listener interface is released in the ShutdownDirectSound function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the listener interface.
+	if(m_listener)
+	{
+		m_listener-&gt;Release();
+		m_listener = 0;
+	}
+
+	// Release the primary sound buffer pointer.
+	if(m_primaryBuffer)
+	{
+		m_primaryBuffer-&gt;Release();
+		m_primaryBuffer = 0;
+	}
+
+	// Release the direct sound interface pointer.
+	if(m_DirectSound)
+	{
+		m_DirectSound-&gt;Release();
+		m_DirectSound = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The LoadWaveFile function also takes as input an IDirectSound3DBuffer8 interface pointer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool SoundClass::LoadWaveFile(char* filename, IDirectSoundBuffer8** secondaryBuffer, IDirectSound3DBuffer8** secondary3DBuffer)
+{
+	int error;
+	FILE* filePtr;
+	unsigned int count;
+	WaveHeaderType waveFileHeader;
+	WAVEFORMATEX waveFormat;
+	DSBUFFERDESC bufferDesc;
+	HRESULT result;
+	IDirectSoundBuffer* tempBuffer;
+	unsigned char* waveData;
+	unsigned char* bufferPtr;
+	unsigned long bufferSize;
+
+
+	// Open the wave file in binary.
+	error = fopen_s(&amp;filePtr, filename, "rb");
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Read in the wave file header.
+	count = fread(&amp;waveFileHeader, sizeof(waveFileHeader), 1, filePtr);
+	if(count != 1)
+	{
+		return false;
+	}
+
+	// Check that the chunk ID is the RIFF format.
+	if((waveFileHeader.chunkId[0] != 'R') || (waveFileHeader.chunkId[1] != 'I') || 
+	   (waveFileHeader.chunkId[2] != 'F') || (waveFileHeader.chunkId[3] != 'F'))
+	{
+		return false;
+	}
+
+	// Check that the file format is the WAVE format.
+	if((waveFileHeader.format[0] != 'W') || (waveFileHeader.format[1] != 'A') ||
+	   (waveFileHeader.format[2] != 'V') || (waveFileHeader.format[3] != 'E'))
+	{
+		return false;
+	}
+
+	// Check that the sub chunk ID is the fmt format.
+	if((waveFileHeader.subChunkId[0] != 'f') || (waveFileHeader.subChunkId[1] != 'm') ||
+	   (waveFileHeader.subChunkId[2] != 't') || (waveFileHeader.subChunkId[3] != ' '))
+	{
+		return false;
+	}
+
+	// Check that the audio format is WAVE_FORMAT_PCM.
+	if(waveFileHeader.audioFormat != WAVE_FORMAT_PCM)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3D sound files must be recorded as single channel (mono).
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Check that the wave file was recorded in mono format.
+	if(waveFileHeader.numChannels != 1)
+	{
+		return false;
+	}
+
+	// Check that the wave file was recorded at a sample rate of 44.1 KHz.
+	if(waveFileHeader.sampleRate != 44100)
+	{
+		return false;
+	}
+
+	// Ensure that the wave file was recorded in 16 bit format.
+	if(waveFileHeader.bitsPerSample != 16)
+	{
+		return false;
+	}
+
+	// Check for the data chunk header.
+	if((waveFileHeader.dataChunkId[0] != 'd') || (waveFileHeader.dataChunkId[1] != 'a') ||
+	   (waveFileHeader.dataChunkId[2] != 't') || (waveFileHeader.dataChunkId[3] != 'a'))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The secondary buffer format uses single channel now for 3D sounds instead of dual channel (stereo).
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the wave format of secondary buffer that this wave file will be loaded onto.
+	waveFormat.wFormatTag = WAVE_FORMAT_PCM;
+	waveFormat.nSamplesPerSec = 44100;
+	waveFormat.wBitsPerSample = 16;
+	waveFormat.nChannels = 1;
+	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
+	waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
+	waveFormat.cbSize = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The buffer will require 3D capabilities.  We use the DSBCAPS_CTRL3D bitwised with the other options for the dwFlags parameter.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the buffer description of the secondary sound buffer that the wave file will be loaded onto.
+	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
+	bufferDesc.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRL3D;
+	bufferDesc.dwBufferBytes = waveFileHeader.dataSize;
+	bufferDesc.dwReserved = 0;
+	bufferDesc.lpwfxFormat = &amp;waveFormat;
+	bufferDesc.guid3DAlgorithm = GUID_NULL;
+
+	// Create a temporary sound buffer with the specific buffer settings.
+	result = m_DirectSound-&gt;CreateSoundBuffer(&amp;bufferDesc, &amp;tempBuffer, NULL);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Test the buffer format against the direct sound 8 interface and create the secondary buffer.
+	result = tempBuffer-&gt;QueryInterface(IID_IDirectSoundBuffer8, (void**)&amp;*secondaryBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the temporary buffer.
+	tempBuffer-&gt;Release();
+	tempBuffer = 0;
+
+	// Move to the beginning of the wave data which starts at the end of the data chunk header.
+	fseek(filePtr, sizeof(WaveHeaderType), SEEK_SET);
+
+	// Create a temporary buffer to hold the wave file data.
+	waveData = new unsigned char[waveFileHeader.dataSize];
+	if(!waveData)
+	{
+		return false;
+	}
+
+	// Read in the wave file data into the newly created buffer.
+	count = fread(waveData, 1, waveFileHeader.dataSize, filePtr);
+	if(count != waveFileHeader.dataSize)
+	{
+		return false;
+	}
+
+	// Close the file once done reading.
+	error = fclose(filePtr);
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Lock the secondary buffer to write wave data into it.
+	result = (*secondaryBuffer)-&gt;Lock(0, waveFileHeader.dataSize, (void**)&amp;bufferPtr, (DWORD*)&amp;bufferSize, NULL, 0, 0);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Copy the wave data into the buffer.
+	memcpy(bufferPtr, waveData, waveFileHeader.dataSize);
+
+	// Unlock the secondary buffer after the data has been written to it.
+	result = (*secondaryBuffer)-&gt;Unlock((void*)bufferPtr, bufferSize, NULL, 0);
+	if(FAILED(result))
+	{
+		return false;
+	}
+	
+	// Release the wave data since it was copied into the secondary buffer.
+	delete [] waveData;
+	waveData = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that the secondary sound buffer has the .wav file loaded into it we obtain a 3D interface to the secondary sound buffer.
+This interface will give us the 3D sound controls.  However all other functions such as volume need to be set using the original secondary sound buffer interface.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Get the 3D interface to the secondary sound buffer.
+	result = (*secondaryBuffer)-&gt;QueryInterface(IID_IDirectSound3DBuffer8, (void**)&amp;*secondary3DBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void SoundClass::ShutdownWaveFile(IDirectSoundBuffer8** secondaryBuffer, IDirectSound3DBuffer8** secondary3DBuffer)
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+When we release the sound buffer we also need to release the new 3D interface to it as well.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the 3D interface to the secondary sound buffer.
+	if(*secondary3DBuffer)
+	{
+		(*secondary3DBuffer)-&gt;Release();
+		*secondary3DBuffer = 0;
+	}
+
+	// Release the secondary sound buffer.
+	if(*secondaryBuffer)
+	{
+		(*secondaryBuffer)-&gt;Release();
+		*secondaryBuffer = 0;
+	}
+
+	return;
+}
+
+
+bool SoundClass::PlayWaveFile()
+{
+	HRESULT result;
+	float positionX, positionY, positionZ;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Setup the position where we want the 3D sound to be located.
+In this case it will be set over to the left.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the 3D position of where the sound should be located.
+	positionX = -2.0f;
+	positionY = 0.0f;
+	positionZ = 0.0f;
+
+	// Set position at the beginning of the sound buffer.
+	result = m_secondaryBuffer1-&gt;SetCurrentPosition(0);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set volume of the buffer to 100%.
+	result = m_secondaryBuffer1-&gt;SetVolume(DSBVOLUME_MAX);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now use the position and set the 3D sound position using the 3D interface.
+The DS3D_IMMEDIATE flag sets the sound position immediately instead of deferring it for later batch processing.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the 3D position of the sound.
+	m_secondary3DBuffer1-&gt;SetPosition(positionX, positionY, positionZ, DS3D_IMMEDIATE);
+
+	// Play the contents of the secondary sound buffer.
+	result = m_secondaryBuffer1-&gt;Play(0, 0, 0);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The sound engine now has 3D sound capabilities through the use of Direct Sound.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile and run the program.  You should hear a 3D sound to the left side.  Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Change the position of the sound to other 3D locations.  If you have a good sound setup it should sound very 3D, however if you have just a headset or 2 speakers the 3D audio effect will be less pronounced.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Change the position of the listener.  Listen for the difference in respect to the position of the 3D sound.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Load four different sounds and play them in the four different corners around the listener.  For example put the listener at (0,0,0) and the sounds at (-1,0,-1), (1,0,-1), (-1,0,1), and (1,0,1).
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Modify the program to load in your sound format (mp3, 22050 KHz, 24bit, etc.)
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+6. Modify the program to use both 2D stereo and 3D mono sounds.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2008 Project: <a href="http://www.rastertek.com/dx11tut31.zip">dx11tut31.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src31.zip">dx11src31.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe31.zip">dx11exe31.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 31_ 3D Sound_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 31_ 3D Sound_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

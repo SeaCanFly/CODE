@@ -1,0 +1,604 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut34.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 34: Billboarding</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 34: Billboarding
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 34_ Billboarding_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Billboarding in DirectX 11 is the process of using a single textured quad to represent 3D geometry at generally far distances.
+This is done for performance gain and sometimes out of necessity to represent a fairly complex scene that could normally not be rendered due to the 
+high polygon requirements.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To illustrate the use of billboarding take for example the scene of a forest with thousands of trees in it.
+To render in real time a complex forest with high polygon trees is generally beyond the capabilities of most video cards.
+So what is done instead is the 50 or so closest trees will be rendered normally and then the remainder of trees are rendered as billboards.
+This allows the scene polygon count to remain low while still rendering in real time the entire forest.
+Now as the user moves through the forest and moves past the 50 closest trees then the next 50 trees will do a gradual blend between the billboard
+and the actual full polygon tree model.
+This way the closest trees are always high detailed models and the distant trees are always low polygon billboards.
+The blend process between the model and the billboard quad helps eliminate the pop that would otherwise occur.
+This process can be used for many other objects such as buildings, clouds, mountains, structures, planetary bodies, particles, and so forth.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now what differentiates the different billboarding techniques is how the textured quad is rotated.
+Sometimes the quad is rotated in accordance with the user's view, most particle systems use this.
+Other times it is rotated to always face the screen in a 2D manner such as 3D text.
+However in this tutorial we are going to cover a third method which instead keeps the quad rotated to always 
+face the user based upon the user's position in the world.
+This is the method you would use for the tree example.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frame work for this tutorial does not introduce any new classes.  
+Almost all the billboarding work is done in the GraphicsClass.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 34_ Billboarding_files/pic0167.gif" width="387" height="206"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+#include "textureshaderclass.h"
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame(float, float, float);
+
+private:
+	bool Render();
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	TextureShaderClass* m_TextureShader;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will use two models.
+The first model is the model of a flat grid on a floor, this is to provide perspective when the user moves left to right.
+The second model is a quad made out of two triangles with a texture on it, this will be the billboard model that will be rotated to always face the user.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	ModelClass *m_FloorModel, *m_BillboardModel;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_TextureShader = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the two models to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_FloorModel = 0;
+	m_BillboardModel = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	
+	// Create the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+	if(!m_TextureShader)
+	{
+		return false;
+	}
+
+	// Initialize the texture shader object.
+	result = m_TextureShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the floor model first.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the floor model object.
+	m_FloorModel = new ModelClass;
+	if(!m_FloorModel)
+	{
+		return false;
+	}
+
+	// Initialize the floor model object.
+	result = m_FloorModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/floor.txt", L"../Engine/data/grid01.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the floor model object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the billboard model next.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the billboard model object.
+	m_BillboardModel = new ModelClass;
+	if(!m_BillboardModel)
+	{
+		return false;
+	}
+
+	// Initialize the billboard model object.
+	result = m_BillboardModel-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/square.txt", L"../Engine/data/seafloor.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the billboard model object.", L"Error", MB_OK);
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Release the floor and billboard model in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Release the billboard model object.
+	if(m_BillboardModel)
+	{
+		m_BillboardModel-&gt;Shutdown();
+		delete m_BillboardModel;
+		m_BillboardModel = 0;
+	}
+
+	// Release the floor model object.
+	if(m_FloorModel)
+	{
+		m_FloorModel-&gt;Shutdown();
+		delete m_FloorModel;
+		m_FloorModel = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the texture shader object.
+	if(m_TextureShader)
+	{
+		m_TextureShader-&gt;Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}</font><font face="arial" color="#aaaaff" size="2">
+
+
+bool GraphicsClass::Frame(float positionX, float positionY, float positionZ)</font><font face="arial" color="#aaffaa" size="2">
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the position of the camera based on the position input from the SystemClass.
+The user will be using the left and right arrow keys to strafe, therefore the billboard model needs rotate in relation to the updated position of the camera.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Update the position of the camera.
+	m_Camera-&gt;SetPosition(positionX, positionY, positionZ);</font><font face="arial" color="#aaffaa" size="2">
+
+	// Render the graphics scene.
+	result = Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool GraphicsClass::Render()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, translateMatrix;
+	bool result;</font><font face="arial" color="#aaaaff" size="2">
+	D3DXVECTOR3 cameraPosition, modelPosition;
+	double angle;
+	float rotation;</font><font face="arial" color="#aaffaa" size="2">
+
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First render the floor model normally.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Put the floor model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_FloorModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the floor model using the texture shader.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_FloorModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+					 m_FloorModel-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now retrieve and set the position of the camera and the position of the billboard model in the world.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Get the position of the camera.
+	cameraPosition = m_Camera-&gt;GetPosition();
+
+	// Set the position of the billboard model.
+	modelPosition.x = 0.0f;
+	modelPosition.y = 1.5f;
+	modelPosition.z = 0.0f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next determine the rotation for the billboard so it faces the camera based on the camera's position.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Calculate the rotation that needs to be applied to the billboard model to face the current camera position using the arc tangent function.
+	angle = atan2(modelPosition.x - cameraPosition.x, modelPosition.z - cameraPosition.z) * (180.0 / D3DX_PI);
+
+	// Convert rotation into radians.
+	rotation = (float)angle * 0.0174532925f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Use the rotation to first rotate the world matrix accordingly, and then translate to the position of the billboard in the world.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Setup the rotation the billboard at the origin using the world matrix.
+	D3DXMatrixRotationY(&amp;worldMatrix, rotation);
+
+	// Setup the translation matrix from the billboard model.
+	D3DXMatrixTranslation(&amp;translateMatrix, modelPosition.x, modelPosition.y, modelPosition.z);
+
+	// Finally combine the rotation and translation matrices to create the final world matrix for the billboard model.
+	D3DXMatrixMultiply(&amp;worldMatrix, &amp;worldMatrix, &amp;translateMatrix); 
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now render the billboard model.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_BillboardModel-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the model using the texture shader.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_BillboardModel-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+					 m_BillboardModel-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+As you move left and right the billboard model turns to always face the camera based on the current position of the camera.
+Note that there are alternative billboarding techniques to achieve other billboarding effects.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 34_ Billboarding_files/pic0168.gif" width="786" height="340"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile and run the program.  Use the left and right arrow keys to strafe to either side and the billboard will rotate accordingly.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Change the billboard texture to a picture of a tree with alpha blending enabled.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Create a small forest using the tree billboards on flat terrain.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Create a blend effect to transition between the tree billboard and the actual tree model based on distance of the camera from each tree.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Investigate view based billboarding.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11src34.zip">dx11src34.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11exe34.zip">dx11exe34.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 34_ Billboarding_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 34_ Billboarding_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

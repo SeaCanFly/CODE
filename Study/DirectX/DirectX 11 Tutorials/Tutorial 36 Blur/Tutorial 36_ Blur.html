@@ -1,0 +1,3170 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut36.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 36: Blur</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 36: Blur
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 36_ Blur_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The blur effect is used for blurring the full screen scene or blurring individual objects in that scene.
+But more importantly the blur effect is also the base effect for numerous other effects.
+Some of those effects are bloom, depth of field blurs, full screen glow, glow mapping, halo/edge glows, softening shadow edges, blurred light trails, 
+under water effects, and many more.
+However this tutorial will just cover how to perform a basic full screen blur.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In DirectX 11 the real time blur effect is performed by first rendering the scene to a texture, performing the blur on that texture, and then 
+rendering that texture back to the screen.
+Whenever we perform 2D image operations on a scene that has been rendered to texture it is called post processing.
+To perform any post processing it is generally quite expensive and requires heavy optimization in the shaders.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now this tutorial is not optimized, I broke it out into separate areas so that you could clearly understand how the blur effect works.
+Once you understand how it works your task will be to optimize it for your own use.
+There will be many ways to do so (such as using less render to textures, making the shader multi-pass, precalculating normalization of weights) but I 
+will leave that for you to think about and implement.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>The Blur Algorithm</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">1. Render the scene to texture.</font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">2. Down sample the texture to to half its size or less.</font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">3. Perform a horizontal blur on the down sampled texture.</font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">4. Perform a vertical blur.</font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">5. Up sample the texture back to the original screen size.</font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">6. Render that texture to the screen.</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will now discuss each of these points.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the first step we render our entire scene to a texture.
+This is fairly straight forward and has already been covered in Tutorial 22: Render to Texture, so you may want to review that if you have not already done so.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The second step is to down sample the render to texture of the scene to a smaller size.
+To do this we first create a 2D square model composed of two triangles (in this tutorial I call the class that contains that 2D model OrthoWindowClass).
+We make the size of that 2D square model the smaller size we require (for example 256x256, or half the screen width and half the screen height).
+Next we render the full screen texture to the smaller 2D square model and the filtering in the shader sampler will handle down sampling it for us.
+You have already seen how this works in Tutorial 11: 2D Rendering.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now you may wonder why we are down sampling and what that actually has to do with the blurring algorithm.
+The first reason is that it is computationally far less expensive to perform a blur on a smaller texture than a large one (by magnitudes).
+And secondly is that shrinking the texture down and then expanding it back up performs a blur on its own that makes the end result look twice as good.
+In fact back in the day that was one of the only few options you had to perform a real time blur.
+You would just shrink the texture down and then blow it back up.  This was heavily pixelated and didn't look great but there weren't many other options
+before programmable graphics hardware showed up.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Once we have the down sampled texture we can now perform the blur.
+The method we are going to use for blurring is to take a weighted average all the neighbor pixels 
+around each pixel to determine the value the current pixel should be.
+Already you can tell this is going to be fairly expensive to perform but we have a way of reducing the computational complexity by doing it in two linear passes.
+We first do one horizontal pass and one then vertical instead of doing a single circular neighborhood pass.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To understand the difference in the speed between the two different pass methods take for example just a 100x100 pixel image.
+Two linear passes on a 100x100 image requires reading 100 + 100 = 200 pixels.
+Doing a single circular pass requires reading 100 * 100 = 10,000 pixels.  
+Now expand that same example to a full screen high definition image and you see why two linear passes are the better way to go.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The first linear pass is going to be a horizontal blur.  For example we will take a single pixel such as:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 36_ Blur_files/pic0178.gif" width="114" height="18"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Then we will perform a weighted blur of its 3 closest horizontal neighbors to produce something similar to the following for each pixel:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 36_ Blur_files/pic0179.gif" width="114" height="18"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We do this for the entire down sampled texture.
+The resulting horizontally blurred image is then rendered to a second render to texture I call the HorizontalBlurTexture.
+This will be used as an input texture for the next vertical blur pass.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now for the blur weights that were used for each pixel during the horizontal blur you can increase or decrease each one of them for each neighbor pixel.  
+For example you could set the middle pixel to be 1.0, then first left and right neighbor to be 0.9, then the further two neighbors to be 0.8, and so forth.
+Or you could be more aggressive with the blur and set the weights to be 1.0, 0.75, 0.5, and so on.
+The weights are up to you and it can have drastically different results.
+In fact you could use a sine wave or saw tooth pattern for the weights instead, it is completely up to you and will produce different interesting blurs.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The other variable here is how many neighbors you blur.  In the example here we only blurred the first 3 neighbors.
+However we could have extended it to blur the first 20 neighbors if we wanted to.  
+Once again the change to this number will have a considerable effect on the final blur result.
+In the shader code for this tutorial we use four neighbors.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that we have a horizontally blurred image on a separate render to texture object we can then proceed with the vertical blur.
+It works exactly the same way as the horizontal blur except that it goes vertically and uses the horizontal blur render to texture as input instead of
+the original down sampled scene texture.
+The vertical blur is also rendered to another new render to texture object I call the VerticalBlurTexture.
+Separating each render to texture also allows you to display the results of each blur pass on the screen for debugging purpose.
+Now using the same example as before and applying the vertical blur would then produce the following blur for each pixel:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 36_ Blur_files/pic0180.gif" width="114" height="114"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Once this process is complete we have the final blurred low resolution image, but we are going to now need to sample it back to the original screen size.
+This is performed the exact same way that the down sample was originally performed.
+We create a 2D square model composed of two triangles and make the size of the 2D square model the same size as the full resolution screen.
+We then render the small blurred texture onto the full screen square model and the filtering in the shader sampler will handle the up sampling.
+The process is now complete and the up sampled texture can be rendered to the screen in 2D.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Other Considerations</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now as you may have guessed there will be some aliasing issues that arise due to the up sampling process.
+These aliasing issues may not be apparent if your original down sample was half the screen size.
+However if your original down sample was a quarter of the screen size (or less for an aggressive blur) then you will see 
+some artifacts when it is sampled back up.
+These artifacts become even more apparent with movement and specifically movement in the distance, you will see flickering/shimmering occurring.
+One of the ways to deal with this problem is to write your own up sampling shader which just like the blur technique 
+samples a large number of pixels around it to determine what value the pixel should actually have instead of just a quick linear interpolation.
+As well there are other sampling filters available which can reduce the amount of aliasing that occurs.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now if you are blurring per object instead of the entire screen then you will need to billboard the 2D texture based on the location of each object.
+You can refer to the billboarding tutorial I wrote to see how to do this.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+And one last thing to mention before getting into the frame work and code is that if you want an even more aggressive blur you can run 
+the horizontal and vertical blur twice on the down sampled image instead of just once.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There are three new classes for this tutorial.
+The first two classes handle the horizontal and vertical blurring in the shader, they are called HorizontalBlurClass and VerticalBlurClass.
+I could have made this a single BlurClass but separating them helps make the tutorial clearer.
+The third new class is OrthoWindowClass.
+This class is just a 2D square model made out of two triangles.
+It allows you to size it however you want and can then be used to render textures onto it.
+It can be used for down sampling, up sampling, and just plain rendering 2D to the screen.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 36_ Blur_files/pic0177.gif" width="550" height="228"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will start the code section with the HLSL horizontal blur shader.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Horizontalblur.vs</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: horizontalblur.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This shader requires the width of the screen (or render to texture width) so it can determine the UV location of the individual pixels in the texture (called texels).
+We store the screen width in the following constant buffer.  The padding is used to keep it a multiple of 16.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer ScreenSizeBuffer
+{
+    float screenWidth;
+    float3 padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The pixel input structure contains the UV location of the center pixel and the four neighbor pixels on either side of the pixel being processed.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float2 texCoord1 : TEXCOORD1;
+    float2 texCoord2 : TEXCOORD2;
+    float2 texCoord3 : TEXCOORD3;
+    float2 texCoord4 : TEXCOORD4;
+    float2 texCoord5 : TEXCOORD5;
+    float2 texCoord6 : TEXCOORD6;
+    float2 texCoord7 : TEXCOORD7;
+    float2 texCoord8 : TEXCOORD8;
+    float2 texCoord9 : TEXCOORD9;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType HorizontalBlurVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    float texelSize;
+
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we determine the texel size which is just one divided by the screen width (or render to texture width). 
+With this value we can now determine the UV coordinates of each horizontal neighbor pixel.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Determine the floating point size of a texel for a screen with this specific width.
+    texelSize = 1.0f / screenWidth;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we generate the UV coordinates for the center pixel and four neighbors on either side. 
+We take the current texture coordinates and add the horizontal offset to all nine coordinates. 
+The horizontal offset is the texel size multiplied by the distance of the neighbor. 
+For example the neighbor that is 3 pixels to the left is calculated by texelSize * -3.0f. 
+Note the vertical coordinate in the offset is just zero so we don't move off the horizontal line we are sampling on.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Create UV coordinates for the pixel and its four horizontal neighbors on either side.
+    output.texCoord1 = input.tex + float2(texelSize * -4.0f, 0.0f);
+    output.texCoord2 = input.tex + float2(texelSize * -3.0f, 0.0f);
+    output.texCoord3 = input.tex + float2(texelSize * -2.0f, 0.0f);
+    output.texCoord4 = input.tex + float2(texelSize * -1.0f, 0.0f);
+    output.texCoord5 = input.tex + float2(texelSize *  0.0f, 0.0f);
+    output.texCoord6 = input.tex + float2(texelSize *  1.0f, 0.0f);
+    output.texCoord7 = input.tex + float2(texelSize *  2.0f, 0.0f);
+    output.texCoord8 = input.tex + float2(texelSize *  3.0f, 0.0f);
+    output.texCoord9 = input.tex + float2(texelSize *  4.0f, 0.0f);
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Horizontalblur.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: horizontalblur.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The shader texture will be the input texture that we are blurring.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">Texture2D shaderTexture;
+SamplerState SampleType;
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float2 texCoord1 : TEXCOORD1;
+    float2 texCoord2 : TEXCOORD2;
+    float2 texCoord3 : TEXCOORD3;
+    float2 texCoord4 : TEXCOORD4;
+    float2 texCoord5 : TEXCOORD5;
+    float2 texCoord6 : TEXCOORD6;
+    float2 texCoord7 : TEXCOORD7;
+    float2 texCoord8 : TEXCOORD8;
+    float2 texCoord9 : TEXCOORD9;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 HorizontalBlurPixelShader(PixelInputType input) : SV_TARGET
+{
+    float weight0, weight1, weight2, weight3, weight4;
+    float normalization;
+    float4 color;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+As discussed in the algorithm we determine the color of this pixel by averaging the eight total neighbors and the center pixel. 
+However the value we use for each neighbor is also modified by a weight. 
+The weights we use for this tutorial give the closest neighbors a greater effect on the average than the more distant neighbors.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Create the weights that each neighbor pixel will contribute to the blur.
+    weight0 = 1.0f;
+    weight1 = 0.9f;
+    weight2 = 0.55f;
+    weight3 = 0.18f;
+    weight4 = 0.1f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With the weight values set we will then normalize them to create a smoother transition in the blur.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Create a normalized value to average the weights out a bit.
+    normalization = (weight0 + 2.0f * (weight1 + weight2 + weight3 + weight4));
+
+    // Normalize the weights.
+    weight0 = weight0 / normalization;
+    weight1 = weight1 / normalization;
+    weight2 = weight2 / normalization;
+    weight3 = weight3 / normalization;
+    weight4 = weight4 / normalization;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To create the blurred pixel we first set the color to black and then we add the center pixel and the eight neighbors to the final color based on the weight of each.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Initialize the color to black.
+    color = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+    // Add the nine horizontal pixels to the color by the specific weight of each.
+    color += shaderTexture.Sample(SampleType, input.texCoord1) * weight4;
+    color += shaderTexture.Sample(SampleType, input.texCoord2) * weight3;
+    color += shaderTexture.Sample(SampleType, input.texCoord3) * weight2;
+    color += shaderTexture.Sample(SampleType, input.texCoord4) * weight1;
+    color += shaderTexture.Sample(SampleType, input.texCoord5) * weight0;
+    color += shaderTexture.Sample(SampleType, input.texCoord6) * weight1;
+    color += shaderTexture.Sample(SampleType, input.texCoord7) * weight2;
+    color += shaderTexture.Sample(SampleType, input.texCoord8) * weight3;
+    color += shaderTexture.Sample(SampleType, input.texCoord9) * weight4;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Finally we set the alpha value.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Set the alpha channel to one.
+    color.a = 1.0f;
+
+    return color;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Horizontalblurshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The HorizontalBlurShaderClass is just the TextureShaderClass modified to handle the blur effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: horizontalblurshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _HORIZONTALBLURSHADERCLASS_H_
+#define _HORIZONTALBLURSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: HorizontalBlurShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class HorizontalBlurShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a new structure for the screen size constant buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct ScreenSizeBufferType
+	{
+		float screenWidth;
+		D3DXVECTOR3 padding;
+	};
+
+public:
+	HorizontalBlurShaderClass();
+	HorizontalBlurShaderClass(const HorizontalBlurShaderClass&amp;);
+	~HorizontalBlurShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, float);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, float);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleState;
+	ID3D11Buffer* m_matrixBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The major difference between the HorizontalBlurShaderClass and the TextureShaderClass 
+header is that we have a constant buffer that will be used for the screen width information which is required for the horizontal blur shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11Buffer* m_screenSizeBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Horizontalblurshaderclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will make comments on the areas of difference between the TextureShaderClass and the HorizontalShaderClass as this 
+class is just a slightly changed version of the original TextureShaderClass.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: horizontalblurshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "horizontalblurshaderclass.h"
+
+
+HorizontalBlurShaderClass::HorizontalBlurShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleState = 0;
+	m_matrixBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the screen size constant buffer to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_screenSizeBuffer = 0;
+}
+
+
+HorizontalBlurShaderClass::HorizontalBlurShaderClass(const HorizontalBlurShaderClass&amp; other)
+{
+}
+
+
+HorizontalBlurShaderClass::~HorizontalBlurShaderClass()
+{
+}
+
+
+bool HorizontalBlurShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the horizontalblur.vs and horizontalblur.ps HLSL shader programs.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/horizontalblur.vs", L"../Engine/horizontalblur.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void HorizontalBlurShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function takes the screen width (or possible render to texture width) as input and sets it in the shader using the SetShaderParameters function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool HorizontalBlurShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+				       D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenWidth)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, screenWidth);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool HorizontalBlurShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC screenSizeBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the horizontal blur vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "HorizontalBlurVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the horizontal blur pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "HorizontalBlurPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	// This setup needs to match the VertexType stucture in the ModelClass and in the shader.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We setup the screen size constant buffer so we can access and modify the screen size buffer inside the HLSL horizontal blur vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the description of the dynamic screen size constant buffer that is in the vertex shader.
+	screenSizeBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	screenSizeBufferDesc.ByteWidth = sizeof(ScreenSizeBufferType);
+	screenSizeBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	screenSizeBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	screenSizeBufferDesc.MiscFlags = 0;
+	screenSizeBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;screenSizeBufferDesc, NULL, &amp;m_screenSizeBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void HorizontalBlurShaderClass::ShutdownShader()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The screen size constant buffer is released in the ShutdownShader function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the screen size constant buffer.
+	if(m_screenSizeBuffer)
+	{
+		m_screenSizeBuffer-&gt;Release();
+		m_screenSizeBuffer = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void HorizontalBlurShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetShaderParameters function now takes as input the width of the screen or render to texture. 
+It then sets the width in the shader using the screen size constant buffer that was setup during initialization.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool HorizontalBlurShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+						    D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenWidth)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* dataPtr;
+	unsigned int bufferNumber;
+	ScreenSizeBufferType* dataPtr2;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the matrix constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where the screen width is set in the screen size constant buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Lock the screen size constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_screenSizeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (ScreenSizeBufferType*)mappedResource.pData;
+
+	// Copy the data into the constant buffer.
+	dataPtr2-&gt;screenWidth = screenWidth;
+	dataPtr2-&gt;padding = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_screenSizeBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 1;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_screenSizeBuffer);
+
+	// Set shader texture resource in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;texture);
+
+	return true;
+}
+
+
+void HorizontalBlurShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Verticalblur.vs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The vertical blur HLSL program is the exact same as the horizontal blur shader except that it deals with height instead of width.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: verticalblur.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The vertical blur shader requires the screen (or render to texture) height instead of width that the horizontal blur shader used.
+Note the buffer is called the same as in the horizontal shader but the height is used in the first variable instead of the width.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">cbuffer ScreenSizeBuffer
+{
+    float screenHeight;
+    float3 padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float2 texCoord1 : TEXCOORD1;
+    float2 texCoord2 : TEXCOORD2;
+    float2 texCoord3 : TEXCOORD3;
+    float2 texCoord4 : TEXCOORD4;
+    float2 texCoord5 : TEXCOORD5;
+    float2 texCoord6 : TEXCOORD6;
+    float2 texCoord7 : TEXCOORD7;
+    float2 texCoord8 : TEXCOORD8;
+    float2 texCoord9 : TEXCOORD9;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType VerticalBlurVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    float texelSize;
+
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The texel size is based on the height value.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Determine the floating point size of a texel for a screen with this specific height.
+    texelSize = 1.0f / screenHeight;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The offsets are modified by only the height value, the width stays at its current value.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Create UV coordinates for the pixel and its four vertical neighbors on either side.
+    output.texCoord1 = input.tex + float2(0.0f, texelSize * -4.0f);
+    output.texCoord2 = input.tex + float2(0.0f, texelSize * -3.0f);
+    output.texCoord3 = input.tex + float2(0.0f, texelSize * -2.0f);
+    output.texCoord4 = input.tex + float2(0.0f, texelSize * -1.0f);
+    output.texCoord5 = input.tex + float2(0.0f, texelSize *  0.0f);
+    output.texCoord6 = input.tex + float2(0.0f, texelSize *  1.0f);
+    output.texCoord7 = input.tex + float2(0.0f, texelSize *  2.0f);
+    output.texCoord8 = input.tex + float2(0.0f, texelSize *  3.0f);
+    output.texCoord9 = input.tex + float2(0.0f, texelSize *  4.0f);
+
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Verticalblur.ps</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: verticalblur.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+Texture2D shaderTexture;
+SamplerState SampleType;
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float2 texCoord1 : TEXCOORD1;
+    float2 texCoord2 : TEXCOORD2;
+    float2 texCoord3 : TEXCOORD3;
+    float2 texCoord4 : TEXCOORD4;
+    float2 texCoord5 : TEXCOORD5;
+    float2 texCoord6 : TEXCOORD6;
+    float2 texCoord7 : TEXCOORD7;
+    float2 texCoord8 : TEXCOORD8;
+    float2 texCoord9 : TEXCOORD9;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 VerticalBlurPixelShader(PixelInputType input) : SV_TARGET
+{
+    float weight0, weight1, weight2, weight3, weight4;
+    float normalization;
+    float4 color;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We use the same weighting system/values that the horizontal blur shader also used.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">    // Create the weights that each neighbor pixel will contribute to the blur.
+    weight0 = 1.0f;
+    weight1 = 0.9f;
+    weight2 = 0.55f;
+    weight3 = 0.18f;
+    weight4 = 0.1f;
+
+    // Create a normalized value to average the weights out a bit.
+    normalization = (weight0 + 2.0f * (weight1 + weight2 + weight3 + weight4));
+
+    // Normalize the weights.
+    weight0 = weight0 / normalization;
+    weight1 = weight1 / normalization;
+    weight2 = weight2 / normalization;
+    weight3 = weight3 / normalization;
+    weight4 = weight4 / normalization;
+
+    // Initialize the color to black.
+    color = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+    // Add the nine vertical pixels to the color by the specific weight of each.
+    color += shaderTexture.Sample(SampleType, input.texCoord1) * weight4;
+    color += shaderTexture.Sample(SampleType, input.texCoord2) * weight3;
+    color += shaderTexture.Sample(SampleType, input.texCoord3) * weight2;
+    color += shaderTexture.Sample(SampleType, input.texCoord4) * weight1;
+    color += shaderTexture.Sample(SampleType, input.texCoord5) * weight0;
+    color += shaderTexture.Sample(SampleType, input.texCoord6) * weight1;
+    color += shaderTexture.Sample(SampleType, input.texCoord7) * weight2;
+    color += shaderTexture.Sample(SampleType, input.texCoord8) * weight3;
+    color += shaderTexture.Sample(SampleType, input.texCoord9) * weight4;
+
+    // Set the alpha channel to one.
+    color.a = 1.0f;
+
+    return color;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Verticalblurshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The VerticalBlurShaderClass is identical to the HorizontalBlurShaderClass except that height is used instead of width.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: verticalblurshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _VERTICALBLURSHADERCLASS_H_
+#define _VERTICALBLURSHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: VerticalBlurShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class VerticalBlurShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ScreenSizeBufferType uses height instead of width which will be used in the HLSL vertical blur shader to calculate texel size.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct ScreenSizeBufferType
+	{
+		float screenHeight;
+		D3DXVECTOR3 padding;
+	};
+
+public:
+	VerticalBlurShaderClass();
+	VerticalBlurShaderClass(const VerticalBlurShaderClass&amp;);
+	~VerticalBlurShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, float);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, float);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleState;
+	ID3D11Buffer* m_matrixBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Just like the HorizontalBlurShaderClass we use a buffer for the screen size constant buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11Buffer* m_screenSizeBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Verticalblurshaderclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: verticalblurshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "verticalblurshaderclass.h"
+
+
+VerticalBlurShaderClass::VerticalBlurShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleState = 0;
+	m_matrixBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the screen size constant buffer to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_screenSizeBuffer = 0;
+}
+
+
+VerticalBlurShaderClass::VerticalBlurShaderClass(const VerticalBlurShaderClass&amp; other)
+{
+}
+
+
+VerticalBlurShaderClass::~VerticalBlurShaderClass()
+{
+}
+
+
+bool VerticalBlurShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the vertical blur HLSL program files. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/verticalblur.vs", L"../Engine/verticalblur.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void VerticalBlurShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function takes as input the screen height (or render to texture render height) for use in the vertical blur shader to determine the vertical texel size.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool VerticalBlurShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+				     D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenHeight)
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, screenHeight);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool VerticalBlurShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC screenSizeBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the vertical blur vertex shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "VerticalBlurVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Load the vertical blur pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "VerticalBlurPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	// This setup needs to match the VertexType stucture in the ModelClass and in the shader.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we setup the buffer to access the global screen height variable inside the vertical blur shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the description of the dynamic screen size constant buffer that is in the vertex shader.
+	screenSizeBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	screenSizeBufferDesc.ByteWidth = sizeof(ScreenSizeBufferType);
+	screenSizeBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	screenSizeBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	screenSizeBufferDesc.MiscFlags = 0;
+	screenSizeBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;screenSizeBufferDesc, NULL, &amp;m_screenSizeBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void VerticalBlurShaderClass::ShutdownShader()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We release the screen size constant buffer in the ShutdownShader function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the screen size constant buffer.
+	if(m_screenSizeBuffer)
+	{
+		m_screenSizeBuffer-&gt;Release();
+		m_screenSizeBuffer = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void VerticalBlurShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We use the SetShaderParameters function to set the screen height (as well as the other variables) inside the HLSL shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool VerticalBlurShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+						  D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, float screenHeight)
+{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* dataPtr;
+	unsigned int bufferNumber;
+	ScreenSizeBufferType* dataPtr2;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the matrix constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we set the screen height in the constant buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Lock the screen size constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_screenSizeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr2 = (ScreenSizeBufferType*)mappedResource.pData;
+
+	// Copy the data into the constant buffer.
+	dataPtr2-&gt;screenHeight = screenHeight;
+	dataPtr2-&gt;padding = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_screenSizeBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 1;
+
+	// Now set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_screenSizeBuffer);
+
+	// Set shader texture resource in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;texture);
+
+	return true;
+}
+
+
+void VerticalBlurShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render this triangle.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangle.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Orthowindowclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The OrthoWindowClass is the 3D model of a flat square window made up of two triangles that 
+we use for 2D rendering for things such as render to texture or 2D graphics. 
+It uses the prefix ortho since we are projecting the 3D coordinates of the square into a two dimensional space (the 2D screen). 
+This can be used to be a full screen window or a smaller window depending on the size it is initialized at. 
+Most of the code and structure is identical to the ModelClass that we usually use.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: orthowindowclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _ORTHOWINDOWCLASS_H_
+#define _ORTHOWINDOWCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: OrthoWindowClass
+////////////////////////////////////////////////////////////////////////////////
+class OrthoWindowClass
+{
+private:
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The vertex type only requires position and texture coordinates, no normal vectors are needed.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
+	};
+
+public:
+	OrthoWindowClass();
+	OrthoWindowClass(const OrthoWindowClass&amp;);
+	~OrthoWindowClass();
+
+	bool Initialize(ID3D11Device*, int, int);
+	void Shutdown();
+	void Render(ID3D11DeviceContext*);
+
+	int GetIndexCount();
+
+private:
+	bool InitializeBuffers(ID3D11Device*, int, int);
+	void ShutdownBuffers();
+	void RenderBuffers(ID3D11DeviceContext*);
+
+private:
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The OrthoWindowClass uses a vertex and index buffer just like regular three dimensional models do.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+	int m_vertexCount, m_indexCount;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Orthowindowclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: orthowindowclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "orthowindowclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the vertex and index buffer pointers to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">OrthoWindowClass::OrthoWindowClass()
+{
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+}
+
+
+OrthoWindowClass::OrthoWindowClass(const OrthoWindowClass&amp; other)
+{
+}
+
+
+OrthoWindowClass::~OrthoWindowClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function takes as input the width and height for creating the size of the 2D window and then calls InitializeBuffers with those parameters.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool OrthoWindowClass::Initialize(ID3D11Device* device, int windowWidth, int windowHeight)
+{
+	bool result;
+
+
+	// Initialize the vertex and index buffer that hold the geometry for the ortho window model.
+	result = InitializeBuffers(device, windowWidth, windowHeight);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function just calls the ShutdownBuffers function to release the vertex and index buffers when we are done using this object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void OrthoWindowClass::Shutdown()
+{
+	// Release the vertex and index buffers.
+	ShutdownBuffers();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function calls the RenderBuffers function to draw the 2D window to the screen.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void OrthoWindowClass::Render(ID3D11DeviceContext* deviceContext)
+{
+	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	RenderBuffers(deviceContext);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetIndexCount returns the index count to shaders that will be rendering this 2D window model.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">int OrthoWindowClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The InitializeBuffers function is where we setup the vertex and index buffers for the 2D window using the width and height inputs.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool OrthoWindowClass::InitializeBuffers(ID3D11Device* device, int windowWidth, int windowHeight)
+{
+	float left, right, top, bottom;
+	VertexType* vertices;
+	unsigned long* indices;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+	int i;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+As with all 2D rendering we need to figure out the left, right, top, and bottom coordinates of the 2D window using the screen dimensions 
+and accounting for the fact that the middle of the screen is the 0,0 coordinate.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Calculate the screen coordinates of the left side of the window.
+	left = (float)((windowWidth / 2) * -1);
+
+	// Calculate the screen coordinates of the right side of the window.
+	right = left + (float)windowWidth;
+
+	// Calculate the screen coordinates of the top of the window.
+	top = (float)(windowHeight / 2);
+
+	// Calculate the screen coordinates of the bottom of the window.
+	bottom = top - (float)windowHeight;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Next we manually set the vertex and index count. Since the 2D window is composed of two triangles it will have six vertices and six indices.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the number of vertices in the vertex array.
+	m_vertexCount = 6;
+
+	// Set the number of indices in the index array.
+	m_indexCount = m_vertexCount;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create the temporary vertex and index arrays for storing the 2D window model data.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Store the vertices and indices of the 2D window in the vertex and index array.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Load the vertex array with data.
+	// First triangle.
+	vertices[0].position = D3DXVECTOR3(left, top, 0.0f);  // Top left.
+	vertices[0].texture = D3DXVECTOR2(0.0f, 0.0f);
+
+	vertices[1].position = D3DXVECTOR3(right, bottom, 0.0f);  // Bottom right.
+	vertices[1].texture = D3DXVECTOR2(1.0f, 1.0f);
+
+	vertices[2].position = D3DXVECTOR3(left, bottom, 0.0f);  // Bottom left.
+	vertices[2].texture = D3DXVECTOR2(0.0f, 1.0f);
+
+	// Second triangle.
+	vertices[3].position = D3DXVECTOR3(left, top, 0.0f);  // Top left.
+	vertices[3].texture = D3DXVECTOR2(0.0f, 0.0f);
+
+	vertices[4].position = D3DXVECTOR3(right, top, 0.0f);  // Top right.
+	vertices[4].texture = D3DXVECTOR2(1.0f, 0.0f);
+
+	vertices[5].position = D3DXVECTOR3(right, bottom, 0.0f);  // Bottom right.
+	vertices[5].texture = D3DXVECTOR2(1.0f, 1.0f);
+
+	// Load the index array with data.
+	for(i=0; i&lt;m_indexCount; i++)
+	{
+		indices[i] = i;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now create the vertex and index buffers using the prepared vertex and index arrays. Note they are not created dynamic since the size will not be changing.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set up the description of the vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now finally create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Release the vertex and index arrays now that the vertex and index buffers have been created.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ShutdownBuffers function is used for releasing the vertex and index buffers once we done are using them.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void OrthoWindowClass::ShutdownBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+RenderBuffers sets the vertex and index of this OrthoWindowClass as the data that should be rendered by the shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void OrthoWindowClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType); 
+	offset = 0;
+    
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+#include "textureshaderclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now include the two new blur shaders as well as both the render to texture and ortho window class headers in the GraphicsClass header.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">#include "horizontalblurshaderclass.h"
+#include "verticalblurshaderclass.h"
+#include "rendertextureclass.h"
+#include "orthowindowclass.h"</font><font face="arial" color="#aaffaa" size="2">
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool Render(float);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+You will notice I have quite a few new functions in the GraphicsClass. 
+The reason for this is that I wanted to separate the rendering into logical steps just like the algorithm for ease of understanding the tutorial. 
+You of course can optimize this in your own project.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	bool RenderSceneToTexture(float);
+	bool DownSampleTexture();
+	bool RenderHorizontalBlurToTexture();
+	bool RenderVerticalBlurToTexture();
+	bool UpSampleTexture();
+	bool Render2DTextureScene();</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	ModelClass* m_Model;
+	TextureShaderClass* m_TextureShader;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The two new shaders are defined here as private class objects. 
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	HorizontalBlurShaderClass* m_HorizontalBlurShader;
+	VerticalBlurShaderClass* m_VerticalBlurShader;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a number of render to texture objects defined here. 
+Once again I did this so each step of the algorithm gets drawn to its own texture.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	RenderTextureClass *m_RenderTexture, *m_DownSampleTexure, *m_HorizontalBlurTexture, *m_VerticalBlurTexture, *m_UpSampleTexure;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There are two 2D windows we need to use for this tutorial. 
+The full screen window is for drawing to the entire screen. 
+The small window is for down sampling to a smaller window/texture.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	OrthoWindowClass *m_SmallWindow, *m_FullScreenWindow;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_Model = 0;
+	m_TextureShader = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the new shaders, render to textures, and ortho windows to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_HorizontalBlurShader = 0;
+	m_VerticalBlurShader = 0;
+	m_RenderTexture = 0;
+	m_DownSampleTexure = 0;
+	m_HorizontalBlurTexture = 0;
+	m_VerticalBlurTexture = 0;
+	m_UpSampleTexure = 0;
+	m_SmallWindow = 0;
+	m_FullScreenWindow = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;</font><font face="arial" color="#aaaaff" size="2">
+	int downSampleWidth, downSampleHeight;</font><font face="arial" color="#aaffaa" size="2">
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here I define the down sample size before getting started with the initialization. 
+The render to textures and ortho window used for down sampling and blurring will receive these values as input. 
+I set the values to half the size of the screen, you can of course set them to different values to see the different results that you get from doing so. 
+These values also greatly affect the speed that this blur effect will run at.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Set the size to sample down to.
+	downSampleWidth = screenWidth / 2;
+	downSampleHeight = screenHeight / 2;</font><font face="arial" color="#aaffaa" size="2">
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	
+	// Create the model object.
+	m_Model = new ModelClass;
+	if(!m_Model)
+	{
+		return false;
+	}
+
+	// Initialize the model object.
+	result = m_Model-&gt;Initialize(m_D3D-&gt;GetDevice(), "../Engine/data/cube.txt", L"../Engine/data/seafloor.dds");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+	if(!m_TextureShader)
+	{
+		return false;
+	}
+
+	// Initialize the texture shader object.
+	result = m_TextureShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the horizontal blur shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the horizontal blur shader object.
+	m_HorizontalBlurShader = new HorizontalBlurShaderClass;
+	if(!m_HorizontalBlurShader)
+	{
+		return false;
+	}
+
+	// Initialize the horizontal blur shader object.
+	result = m_HorizontalBlurShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the horizontal blur shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the vertical blur shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the vertical blur shader object.
+	m_VerticalBlurShader = new VerticalBlurShaderClass;
+	if(!m_VerticalBlurShader)
+	{
+		return false;
+	}
+
+	// Initialize the vertical blur shader object.
+	result = m_VerticalBlurShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the vertical blur shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the full screen render to texture object. Use the full screen size as input.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the render to texture object.
+	m_RenderTexture = new RenderTextureClass;
+	if(!m_RenderTexture)
+	{
+		return false;
+	}
+
+	// Initialize the render to texture object.
+	result = m_RenderTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the down sampled render to texture object. Use the down sample size as input.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the down sample render to texture object.
+	m_DownSampleTexure = new RenderTextureClass;
+	if(!m_DownSampleTexure)
+	{
+		return false;
+	}
+
+	// Initialize the down sample render to texture object.
+	result = m_DownSampleTexure-&gt;Initialize(m_D3D-&gt;GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the down sample render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the render to texture for the horizontal blur to be rendered to. Use the down sample size as input.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the horizontal blur render to texture object.
+	m_HorizontalBlurTexture = new RenderTextureClass;
+	if(!m_HorizontalBlurTexture)
+	{
+		return false;
+	}
+
+	// Initialize the horizontal blur render to texture object.
+	result = m_HorizontalBlurTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the horizontal blur render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the render to texture for the vertical blur to be rendered to. Use the down sample size as input.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the vertical blur render to texture object.
+	m_VerticalBlurTexture = new RenderTextureClass;
+	if(!m_VerticalBlurTexture)
+	{
+		return false;
+	}
+
+	// Initialize the vertical blur render to texture object.
+	result = m_VerticalBlurTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), downSampleWidth, downSampleHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the vertical blur render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the up sampled render to texture object. Use the full screen size as input.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the up sample render to texture object.
+	m_UpSampleTexure = new RenderTextureClass;
+	if(!m_UpSampleTexure)
+	{
+		return false;
+	}
+
+	// Initialize the up sample render to texture object.
+	result = m_UpSampleTexure-&gt;Initialize(m_D3D-&gt;GetDevice(), screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the up sample render to texture object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the small 2D window model for down sampling and rendering the full scene render to texture onto. Use the down sample size as input.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the small ortho window object.
+	m_SmallWindow = new OrthoWindowClass;
+	if(!m_SmallWindow)
+	{
+		return false;
+	}
+
+	// Initialize the small ortho window object.
+	result = m_SmallWindow-&gt;Initialize(m_D3D-&gt;GetDevice(), downSampleWidth, downSampleHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the small ortho window object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the full screen 2D window model for rendering textures full screen. Use the full screen size as input.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the full screen ortho window object.
+	m_FullScreenWindow = new OrthoWindowClass;
+	if(!m_FullScreenWindow)
+	{
+		return false;
+	}
+
+	// Initialize the full screen ortho window object.
+	result = m_FullScreenWindow-&gt;Initialize(m_D3D-&gt;GetDevice(), screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the full screen ortho window object.", L"Error", MB_OK);
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We use the Shutdown function to release all the new shader, render to texture, and ortho window objects that were created 
+in the Initialize function when the application is finished running.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Release the full screen ortho window object.
+	if(m_FullScreenWindow)
+	{
+		m_FullScreenWindow-&gt;Shutdown();
+		delete m_FullScreenWindow;
+		m_FullScreenWindow = 0;
+	}
+
+	// Release the small ortho window object.
+	if(m_SmallWindow)
+	{
+		m_SmallWindow-&gt;Shutdown();
+		delete m_SmallWindow;
+		m_SmallWindow = 0;
+	}
+	
+	// Release the up sample render to texture object.
+	if(m_UpSampleTexure)
+	{
+		m_UpSampleTexure-&gt;Shutdown();
+		delete m_UpSampleTexure;
+		m_UpSampleTexure = 0;
+	}
+
+	// Release the vertical blur render to texture object.
+	if(m_VerticalBlurTexture)
+	{
+		m_VerticalBlurTexture-&gt;Shutdown();
+		delete m_VerticalBlurTexture;
+		m_VerticalBlurTexture = 0;
+	}
+
+	// Release the horizontal blur render to texture object.
+	if(m_HorizontalBlurTexture)
+	{
+		m_HorizontalBlurTexture-&gt;Shutdown();
+		delete m_HorizontalBlurTexture;
+		m_HorizontalBlurTexture = 0;
+	}
+
+	// Release the down sample render to texture object.
+	if(m_DownSampleTexure)
+	{
+		m_DownSampleTexure-&gt;Shutdown();
+		delete m_DownSampleTexure;
+		m_DownSampleTexure = 0;
+	}
+	
+	// Release the render to texture object.
+	if(m_RenderTexture)
+	{
+		m_RenderTexture-&gt;Shutdown();
+		delete m_RenderTexture;
+		m_RenderTexture = 0;
+	}
+	
+	// Release the vertical blur shader object.
+	if(m_VerticalBlurShader)
+	{
+		m_VerticalBlurShader-&gt;Shutdown();
+		delete m_VerticalBlurShader;
+		m_VerticalBlurShader = 0;
+	}
+
+	// Release the horizontal blur shader object.
+	if(m_HorizontalBlurShader)
+	{
+		m_HorizontalBlurShader-&gt;Shutdown();
+		delete m_HorizontalBlurShader;
+		m_HorizontalBlurShader = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the texture shader object.
+	if(m_TextureShader)
+	{
+		m_TextureShader-&gt;Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
+	}
+
+	// Release the model object.
+	if(m_Model)
+	{
+		m_Model-&gt;Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame()
+{
+	bool result;
+	static float rotation = 0.0f;
+
+
+	// Update the rotation variable each frame.
+	rotation += (float)D3DX_PI * 0.005f;
+	if(rotation &gt; 360.0f)
+	{
+		rotation -= 360.0f;
+	}
+
+	// Render the graphics scene.
+	result = Render(rotation);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Render function is where all the work in the tutorial is done. 
+We render the scene in the steps that were mentioned in the algorithm. 
+I have broken each step into its own function, and each function has its own render to texture object. 
+Having a render to texture object for each step in this tutorial allows you to view the intermediate results which helps in debugging.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::Render(float rotation)
+{</font><font face="arial" color="#aaaaff" size="2">
+	bool result;
+
+
+	// First render the scene to a render texture.
+	result = RenderSceneToTexture(rotation);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Next down sample the render texture to a smaller sized texture.
+	result = DownSampleTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Perform a horizontal blur on the down sampled render texture.
+	result = RenderHorizontalBlurToTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Now perform a vertical blur on the horizontal blur render texture.
+	result = RenderVerticalBlurToTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Up sample the final blurred render texture to screen size again.
+	result = UpSampleTexture();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the blurred up sampled render texture to the screen.
+	result = Render2DTextureScene();
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The first function performs the first step of the algorithm by rendering the scene of the spinning cube to a full screen sized render to texture.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool GraphicsClass::RenderSceneToTexture(float rotation)
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_RenderTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_RenderTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Rotate the world matrix by the rotation value so that the cube will spin.
+	D3DXMatrixRotationY(&amp;worldMatrix, rotation);
+
+	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the model using the texture shader.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+					 m_Model-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The second function performs the next step of the algorithm by rendering the full screen render to texture down to a smaller window (down sampling) which was 
+defined as half the size of the screen in the Initialize function. 
+Notice also that when we get the projection matrix it is now an ortho matrix from the render to texture with smaller dimensions.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool GraphicsClass::DownSampleTexture()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_DownSampleTexure-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_DownSampleTexure-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 1.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	
+	// Get the ortho matrix from the render to texture since texture has different dimensions being that it is smaller.
+	m_DownSampleTexure-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_SmallWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the small ortho window using the texture shader and the render to texture of the scene as the texture resource.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SmallWindow-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+					 m_RenderTexture-&gt;GetShaderResourceView());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+	
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The third function performs the horizontal blur on the down sampled texture and stores the result in separate 
+render to texture object which will be used as input to the vertical blur shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool GraphicsClass::RenderHorizontalBlurToTexture()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	float screenSizeX;
+	bool result;
+
+
+	// Store the screen width in a float that will be used in the horizontal blur shader.
+	screenSizeX = (float)m_HorizontalBlurTexture-&gt;GetTextureWidth();
+	
+	// Set the render target to be the render to texture.
+	m_HorizontalBlurTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_HorizontalBlurTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Get the ortho matrix from the render to texture since texture has different dimensions.
+	m_HorizontalBlurTexture-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_SmallWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	
+	// Render the small ortho window using the horizontal blur shader and the down sampled render to texture resource.
+	result = m_HorizontalBlurShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SmallWindow-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+						m_DownSampleTexure-&gt;GetShaderResourceView(), screenSizeX);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The fourth function performs the vertical blur on the horizontally blurred render to texture. 
+The result is stored in yet another render to texture object.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool GraphicsClass::RenderVerticalBlurToTexture()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	float screenSizeY;
+	bool result;
+
+
+	// Store the screen height in a float that will be used in the vertical blur shader.
+	screenSizeY = (float)m_VerticalBlurTexture-&gt;GetTextureHeight();
+	
+	// Set the render target to be the render to texture.
+	m_VerticalBlurTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_VerticalBlurTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Get the ortho matrix from the render to texture since texture has different dimensions.
+	m_VerticalBlurTexture-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the small ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_SmallWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+	
+	// Render the small ortho window using the vertical blur shader and the horizontal blurred render to texture resource.
+	result = m_VerticalBlurShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_SmallWindow-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+					      m_HorizontalBlurTexture-&gt;GetShaderResourceView(), screenSizeY);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The fifth function performs the up sampling of the small horizontally and vertically blurred texture. 
+The up sample is done by just rendering the small blurred texture to a full screen 2D window model. 
+The result of this is rendered to another render to texture object called m_UpSampleTexture.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool GraphicsClass::UpSampleTexture()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_UpSampleTexure-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext());
+
+	// Clear the render to texture.
+	m_UpSampleTexure-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), 0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world and view matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+
+	// Get the ortho matrix from the render to texture since texture has different dimensions.
+	m_UpSampleTexure-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the full screen ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_FullScreenWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the full screen ortho window using the texture shader and the small sized final blurred render to texture resource.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_FullScreenWindow-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+					 m_VerticalBlurTexture-&gt;GetShaderResourceView());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+	
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	// Reset the viewport back to the original.
+	m_D3D-&gt;ResetViewport();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The sixth and final function draws the up sampled blurred texture to the full screen completing the full screen blur effect.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool GraphicsClass::Render2DTextureScene()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	bool result;
+
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(1.0f, 0.0f, 0.0f, 0.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and ortho matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Put the full screen ortho window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_FullScreenWindow-&gt;Render(m_D3D-&gt;GetDeviceContext());
+
+	// Render the full screen ortho window using the texture shader and the full screen sized blurred render to texture resource.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_FullScreenWindow-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, 
+					 m_UpSampleTexure-&gt;GetShaderResourceView());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+	
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+You can now perform full screen blur effects which opens the door to a number of other more complex effects that use blurring as their basis.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 36_ Blur_files/pic0176.gif" width="275" height="275"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile and run the program.  You should see a full screen blurred cube spinning.  Press escape to quit.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Play with the down sample size to see the effect it produces on the full screen blur and speed of the application.
+Try not down sampling at all.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Change the weights and number of neighbors in the vertical and horizontal blur HLSL files to see how they affect the blur.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Optimize the tutorial and remove some of the unnecessary steps.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Extend this effect into a full screen glow (just add the blur texture on top of the normal rendered scene).
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+6. Use a different method of up sampling instead of using the linear sampler.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+7. Try a dual pass of the horizontal and vertical blur for a more aggressive blur.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+8. Blur individual objects instead of the entire scene.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/dx11src36.zip">dx11src36.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/dx11exe36.zip">dx11exe36.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 36_ Blur_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 36_ Blur_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

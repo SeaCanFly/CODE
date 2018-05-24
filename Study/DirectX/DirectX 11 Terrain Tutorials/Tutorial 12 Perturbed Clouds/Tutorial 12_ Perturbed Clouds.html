@@ -1,0 +1,2222 @@
+
+<!-- saved from url=(0038)http://www.rastertek.com/tertut12.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 12: Perturbed Clouds</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 12: Perturbed Clouds
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 12_ Perturbed Clouds_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This DirectX 11 cloud tutorial is based on the previous bitmap clouds tutorial.
+We will be doing just some slight modifications to the previous tutorial code to implement perturbed clouds.
+Note that if you have already looked over and understand the fire tutorial in the DirectX 11 section then you already understand how to implement perturbed clouds.
+I recommend reading that tutorial if you want a more in-depth understanding of how the shader works.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the previous tutorial we used two cloud textures and scrolled them at different speeds along the sky plane to simulate a basic cloud system.
+However as clouds move through the sky their formation modifies slightly.
+So for this tutorial we will just use a single cloud texture but then perturb the sampling of the texture by a secondary noise texture.
+By slightly offsetting where we sample the clouds from it gives the effect of the edges and insides of the clouds expanding and collapsing 
+as they move over the sky plane.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The bitmap cloud texture that we will use is the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 12_ Perturbed Clouds_files/pic0209.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Then we will use a perlin style noise texture for the perturbed sampling:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 12_ Perturbed Clouds_files/pic0210.gif" width="256" height="256"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+By offsetting where we sample the cloud texture from using the noise texture as the perturbed coordinates we will get the desired effect of clouds that change
+their formation as they scroll over the sky plane.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Skyplane.vs</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The vertex shader is the same as the previous tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: skyplane.vs
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+cbuffer MatrixBuffer
+{
+    matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct VertexInputType
+{
+    float4 position : POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Vertex Shader
+////////////////////////////////////////////////////////////////////////////////
+PixelInputType SkyPlaneVertexShader(VertexInputType input)
+{
+    PixelInputType output;
+    
+
+    // Change the position vector to be 4 units for proper matrix calculations.
+    input.position.w = 1.0f;
+
+    // Calculate the position of the vertex against the world, view, and projection matrices.
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+    
+    // Store the texture coordinates for the pixel shader.
+    output.tex = input.tex;
+	
+    return output;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Skyplane.ps</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The pixel shader is where we do all the work in this tutorial to create the perturbed cloud effect.
+The shader now takes a cloud and a noise texture as input textures.
+The sky constant buffer has also been modified since we are only translating one cloud layer.
+In the shader itself we start by sampling the noise texture to get the base perturb value that we will use to offset the sampling of the cloud texture.
+We then multiply it by the perturb scale and add the texture coordinates.  This gives us the perturbed coordinate that we then sample the cloud texture from.
+Note that both are translated by the translation value from the constant buffer to create the scrolling clouds effect.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: skyplane.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
+Texture2D cloudTexture : register(t0);
+Texture2D perturbTexture : register(t1);
+SamplerState SampleType;
+
+cbuffer SkyBuffer
+{
+    float translation;
+    float scale;
+    float brightness;
+    float padding;
+};
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 SkyPlanePixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 perturbValue;
+    float4 cloudColor;
+
+
+    // Translate the texture coordinate sampling location by the translation value.
+    input.tex.x = input.tex.x + translation;
+
+    // Sample the texture value from the perturb texture using the translated texture coordinates.
+    perturbValue = perturbTexture.Sample(SampleType, input.tex);
+
+    // Multiply the perturb value by the perturb scale.
+    perturbValue = perturbValue * scale;
+
+    // Add the texture coordinates as well as the translation value to get the perturbed texture coordinate sampling location.
+    perturbValue.xy = perturbValue.xy + input.tex.xy + translation;
+
+    // Now sample the color from the cloud texture using the perturbed sampling coordinates.
+    cloudColor = cloudTexture.Sample(SampleType, perturbValue.xy);
+
+    // Reduce the color cloud by the brightness value.
+    cloudColor = cloudColor * brightness;
+
+    return cloudColor;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Skyplaneshaderclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SkyPlaneShaderClass header has been modified a bit to handle the slightly different inputs into the pixel shader.
+The SkyBufferType now just has a single translation value and the new perturb scale value.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: skyplaneshaderclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SKYPLANESHADERCLASS_H_
+#define _SKYPLANESHADERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+#include &lt;d3dx11async.h&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: SkyPlaneShaderClass
+////////////////////////////////////////////////////////////////////////////////
+class SkyPlaneShaderClass
+{
+private:
+	struct MatrixBufferType
+	{
+		D3DXMATRIX world;
+		D3DXMATRIX view;
+		D3DXMATRIX projection;
+	};
+
+	struct SkyBufferType
+	{
+		float translation;
+		float scale;
+		float brightness;
+		float padding;
+	};
+
+public:
+	SkyPlaneShaderClass();
+	SkyPlaneShaderClass(const SkyPlaneShaderClass&amp;);
+	~SkyPlaneShaderClass();
+
+	bool Initialize(ID3D11Device*, HWND);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, float, float, float);
+
+private:
+	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
+	void ShutdownShader();
+	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+
+	bool SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*, ID3D11ShaderResourceView*, float, float, 
+				 float);
+	void RenderShader(ID3D11DeviceContext*, int);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_layout;
+	ID3D11SamplerState* m_sampleState;
+	ID3D11Buffer* m_matrixBuffer;
+	ID3D11Buffer* m_skyBuffer;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Skyplaneshaderclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SkyPlaneShaderClass has been modified a bit to handle the slightly different inputs into the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: skyplaneshaderclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "skyplaneshaderclass.h"
+
+
+SkyPlaneShaderClass::SkyPlaneShaderClass()
+{
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_sampleState = 0;
+	m_matrixBuffer = 0;
+	m_skyBuffer = 0;
+}
+
+
+SkyPlaneShaderClass::SkyPlaneShaderClass(const SkyPlaneShaderClass&amp; other)
+{
+}
+
+
+SkyPlaneShaderClass::~SkyPlaneShaderClass()
+{
+}
+
+
+bool SkyPlaneShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+{
+	bool result;
+
+
+	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/skyplane.vs", L"../Engine/skyplane.ps");
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void SkyPlaneShaderClass::Shutdown()
+{
+	// Shutdown the vertex and pixel shaders as well as the related objects.
+	ShutdownShader();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The inputs to the Render function have been changed.
+There is now just a single cloud texture and a single translation value.
+We also have a noise texture and a perturb scale value.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool SkyPlaneShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+				 D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* cloudTexture, ID3D11ShaderResourceView* perturbTexture, 
+				 float translation, float scale, float brightness)</font><font face="arial" color="#aaffaa" size="2">
+{
+	bool result;
+
+
+	// Set the shader parameters that it will use for rendering.</font><font face="arial" color="#aaaaff" size="2">
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, cloudTexture, perturbTexture, translation, scale, brightness);
+</font><font face="arial" color="#aaffaa" size="2">	if(!result)
+	{
+		return false;
+	}
+
+	// Now render the prepared buffers with the shader.
+	RenderShader(deviceContext, indexCount);
+
+	return true;
+}
+
+
+bool SkyPlaneShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+{
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	unsigned int numElements;
+	D3D11_SAMPLER_DESC samplerDesc;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	D3D11_BUFFER_DESC skyBufferDesc;
+
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+
+	// Compile the vertex shader code.
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "SkyPlaneVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;vertexShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);
+		}
+		// If there was  nothing in the error message then it simply could not find the shader file itself.
+		else
+		{
+			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Compile the pixel shader code.
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "SkyPlanePixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
+				       &amp;pixelShaderBuffer, &amp;errorMessage, NULL);
+	if(FAILED(result))
+	{
+		// If the shader failed to compile it should have writen something to the error message.
+		if(errorMessage)
+		{
+			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
+		}
+		// If there was nothing in the error message then it simply could not find the file itself.
+		else
+		{
+			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		}
+
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = device-&gt;CreateVertexShader(vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_vertexShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = device-&gt;CreatePixelShader(pixelShaderBuffer-&gt;GetBufferPointer(), pixelShaderBuffer-&gt;GetBufferSize(), NULL, &amp;m_pixelShader);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the vertex input layout description.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = device-&gt;CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer-&gt;GetBufferPointer(), vertexShaderBuffer-&gt;GetBufferSize(), 
+					   &amp;m_layout);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer-&gt;Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer-&gt;Release();
+	pixelShaderBuffer = 0;
+
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = device-&gt;CreateSamplerState(&amp;samplerDesc, &amp;m_sampleState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;matrixBufferDesc, NULL, &amp;m_matrixBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the dynamic sky constant buffer that is in the pixel shader.
+	skyBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	skyBufferDesc.ByteWidth = sizeof(SkyBufferType);
+	skyBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	skyBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	skyBufferDesc.MiscFlags = 0;
+	skyBufferDesc.StructureByteStride = 0;
+
+	// Create the sky buffer pointer so we can access the pixel shader constant buffer from within this class.
+	result = device-&gt;CreateBuffer(&amp;skyBufferDesc, NULL, &amp;m_skyBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void SkyPlaneShaderClass::ShutdownShader()
+{
+	// Release the sky constant buffer.
+	if(m_skyBuffer)
+	{
+		m_skyBuffer-&gt;Release();
+		m_skyBuffer = 0;
+	}
+
+	// Release the matrix constant buffer.
+	if(m_matrixBuffer)
+	{
+		m_matrixBuffer-&gt;Release();
+		m_matrixBuffer = 0;
+	}
+
+	// Release the sampler states.
+	if(m_sampleState)
+	{
+		m_sampleState-&gt;Release();
+		m_sampleState = 0;
+	}
+
+	// Release the layout.
+	if(m_layout)
+	{
+		m_layout-&gt;Release();
+		m_layout = 0;
+	}
+
+	// Release the pixel shader.
+	if(m_pixelShader)
+	{
+		m_pixelShader-&gt;Release();
+		m_pixelShader = 0;
+	}
+
+	// Release the vertex shader.
+	if(m_vertexShader)
+	{
+		m_vertexShader-&gt;Release();
+		m_vertexShader = 0;
+	}
+
+	return;
+}
+
+
+void SkyPlaneShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+{
+	char* compileErrors;
+	unsigned long bufferSize, i;
+	ofstream fout;
+
+
+	// Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errorMessage-&gt;GetBufferPointer());
+
+	// Get the length of the message.
+	bufferSize = errorMessage-&gt;GetBufferSize();
+
+	// Open a file to write the error message to.
+	fout.open("shader-error.txt");
+
+	// Write out the error message.
+	for(i=0; i&lt;bufferSize; i++)
+	{
+		fout &lt;&lt; compileErrors[i];
+	}
+
+	// Close the file.
+	fout.close();
+
+	// Release the error message.
+	errorMessage-&gt;Release();
+	errorMessage = 0;
+
+	// Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The inputs to SetShaderParameters have also changed.
+There is now just a single cloud texture and a single translation value.
+We also have a noise texture and a perturb scale value.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">bool SkyPlaneShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+					      D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* cloudTexture, 
+					      ID3D11ShaderResourceView* perturbTexture, float translation, float scale, float brightness)
+</font><font face="arial" color="#aaffaa" size="2">{
+	HRESULT result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* dataPtr;
+	SkyBufferType* dataPtr2;
+	unsigned int bufferNumber;
+
+
+	// Transpose the matrices to prepare them for the shader.
+	D3DXMatrixTranspose(&amp;worldMatrix, &amp;worldMatrix);
+	D3DXMatrixTranspose(&amp;viewMatrix, &amp;viewMatrix);
+	D3DXMatrixTranspose(&amp;projectionMatrix, &amp;projectionMatrix);
+
+	// Lock the constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	// Copy the matrices into the constant buffer.
+	dataPtr-&gt;world = worldMatrix;
+	dataPtr-&gt;view = viewMatrix;
+	dataPtr-&gt;projection = projectionMatrix;
+
+	// Unlock the constant buffer.
+	deviceContext-&gt;Unmap(m_matrixBuffer, 0);
+
+	// Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	// Finally set the constant buffer in the vertex shader with the updated values.
+	deviceContext-&gt;VSSetConstantBuffers(bufferNumber, 1, &amp;m_matrixBuffer);
+	
+	// Lock the sky constant buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_skyBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the sky constant buffer.
+	dataPtr2 = (SkyBufferType*)mappedResource.pData;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The constant buffer inputs are set here with the new parameters.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Copy the data into the sky constant buffer.
+</font><font face="arial" color="#aaaaff" size="2">	dataPtr2-&gt;translation = translation;
+	dataPtr2-&gt;scale = scale;</font><font face="arial" color="#aaffaa" size="2">
+	dataPtr2-&gt;brightness = brightness;
+	dataPtr2-&gt;padding = 0.0f;
+
+	// Unlock the sky constant buffer.
+	deviceContext-&gt;Unmap(m_skyBuffer, 0);
+
+	// Set the position of the sky constant buffer in the pixel shader.
+	bufferNumber = 0;
+
+	// Now set the sky constant buffer in the pixel shader with the updated values.
+	deviceContext-&gt;PSSetConstantBuffers(bufferNumber, 1, &amp;m_skyBuffer);
+	
+	// Set the shader texture resources in the pixel shader.
+	deviceContext-&gt;PSSetShaderResources(0, 1, &amp;cloudTexture);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We set the noise texture in the pixel shader instead of the second cloud layer.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	deviceContext-&gt;PSSetShaderResources(1, 1, &amp;perturbTexture);
+</font><font face="arial" color="#aaffaa" size="2">
+	return true;
+}
+
+
+void SkyPlaneShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	// Set the vertex input layout.
+	deviceContext-&gt;IASetInputLayout(m_layout);
+
+	// Set the vertex and pixel shaders that will be used to render the triangles.
+	deviceContext-&gt;VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext-&gt;PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader.
+	deviceContext-&gt;PSSetSamplers(0, 1, &amp;m_sampleState);
+
+	// Render the triangles.
+	deviceContext-&gt;DrawIndexed(indexCount, 0, 0);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Skyplaneclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SkyPlaneClass has some changes also to accommodate the new input values into the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: skyplaneclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SKYPLANECLASS_H_
+#define _SKYPLANECLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "textureclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: SkyPlaneClass
+////////////////////////////////////////////////////////////////////////////////
+class SkyPlaneClass
+{
+private:
+	struct SkyPlaneType
+	{
+		float x, y, z;
+		float tu, tv;
+	};
+
+	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
+	};
+
+public:
+	SkyPlaneClass();
+	SkyPlaneClass(const SkyPlaneClass&amp;);
+	~SkyPlaneClass();
+
+	bool Initialize(ID3D11Device*, WCHAR*, WCHAR*);
+	void Shutdown();
+	void Render(ID3D11DeviceContext*);
+	void Frame();
+
+	int GetIndexCount();
+	ID3D11ShaderResourceView* GetCloudTexture();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a new function that returns the perturb/noise texture instead of the second cloud layer.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	ID3D11ShaderResourceView* GetPerturbTexture();</font><font face="arial" color="#aaffaa" size="2">
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We also have three new functions to pass the perturb scale, brightness, and translation into the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	float GetScale();
+	float GetBrightness();
+	float GetTranslation();</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	bool InitializeSkyPlane(int, float, float, float, int);
+	void ShutdownSkyPlane();
+
+	bool InitializeBuffers(ID3D11Device*, int);
+	void ShutdownBuffers();
+	void RenderBuffers(ID3D11DeviceContext*);
+
+	bool LoadTextures(ID3D11Device*, WCHAR*, WCHAR*);
+	void ReleaseTextures();
+
+private:
+	SkyPlaneType* m_skyPlane;
+	int m_vertexCount, m_indexCount;
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There are new variables for the noise texture, the scale, and the single translation value.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	TextureClass *m_CloudTexture, *m_PerturbTexture;
+	float m_scale, m_brightness, m_translation;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Skyplaneclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: skyplaneclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "skyplaneclass.h"
+
+
+SkyPlaneClass::SkyPlaneClass()
+{
+	m_skyPlane = 0;
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+	m_CloudTexture = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the new perturb texture to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_PerturbTexture = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+SkyPlaneClass::SkyPlaneClass(const SkyPlaneClass&amp; other)
+{
+}
+
+
+SkyPlaneClass::~SkyPlaneClass()
+{
+}
+
+
+bool SkyPlaneClass::Initialize(ID3D11Device* device, WCHAR* cloudTextureFilename, WCHAR* perturbTextureFilename)
+{
+	int skyPlaneResolution, textureRepeat;
+	float skyPlaneWidth, skyPlaneTop, skyPlaneBottom;
+	bool result;
+
+
+	// Set the sky plane parameters.
+	skyPlaneResolution = 50;
+	skyPlaneWidth = 10.0f;
+	skyPlaneTop = 0.5f;
+	skyPlaneBottom = 0.0f;
+	textureRepeat = 2;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Set the perturb scale value, note that this has a drastic effect on how the perturbed sampling coordinates are selected.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Set the sky plane shader related parameters.
+	m_scale = 0.3f;</font><font face="arial" color="#aaffaa" size="2">
+	m_brightness = 0.5f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We are only using a single translation value in this tutorial.  We initialize it to zero here.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Initialize the translation to zero.
+	m_translation = 0.0f;</font><font face="arial" color="#aaffaa" size="2">
+
+	// Create the sky plane.
+	result = InitializeSkyPlane(skyPlaneResolution, skyPlaneWidth, skyPlaneTop, skyPlaneBottom, textureRepeat);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Create the vertex and index buffer for the sky plane.
+	result = InitializeBuffers(device, skyPlaneResolution);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We load the textures here and send in the perturb texture as the second texture input.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Load the sky plane textures.</font><font face="arial" color="#aaaaff" size="2">
+	result = LoadTextures(device, cloudTextureFilename, perturbTextureFilename);</font><font face="arial" color="#aaffaa" size="2">
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void SkyPlaneClass::Shutdown()
+{
+	// Release the sky plane textures.
+	ReleaseTextures();
+
+	// Release the vertex and index buffer that were used for rendering the sky plane.
+	ShutdownBuffers();
+
+	// Release the sky plane array.
+	ShutdownSkyPlane();
+
+	return;
+}
+
+
+void SkyPlaneClass::Render(ID3D11DeviceContext* deviceContext)
+{
+	// Render the sky plane.
+	RenderBuffers(deviceContext);
+
+	return;
+}
+
+
+void SkyPlaneClass::Frame()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Each frame we increase the translation by a small amount.
+If you are going to expand on this you will want to modify the translation amount to be based on the frame time.
+You will also want to slow it down a bit as I made it fast for this tutorial so that the effect is very clear to see due to the high speed time lapse.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Increment the texture translation value each frame.
+	m_translation += 0.0001f;
+	if(m_translation &gt; 1.0f)
+	{
+		m_translation -= 1.0f;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return;
+}
+
+
+int SkyPlaneClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+
+
+ID3D11ShaderResourceView* SkyPlaneClass::GetCloudTexture()
+{
+	return m_CloudTexture-&gt;GetTexture();
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new GetPerturbTexture function returns the noise texture used for perturbing the cloud sampling.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">ID3D11ShaderResourceView* SkyPlaneClass::GetPerturbTexture()
+{
+	return m_PerturbTexture-&gt;GetTexture();
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetScale return the perturb scale for the pixel shader rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">float SkyPlaneClass::GetScale()
+{
+	return m_scale;
+}</font><font face="arial" color="#aaffaa" size="2">
+
+
+float SkyPlaneClass::GetBrightness()
+{
+
+	return m_brightness;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GetTranslation function returns the single translation value we used for rotating the clouds over the sky plane.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">float SkyPlaneClass::GetTranslation()
+{
+
+	return m_translation;
+}</font><font face="arial" color="#aaffaa" size="2">
+
+
+bool SkyPlaneClass::InitializeSkyPlane(int skyPlaneResolution, float skyPlaneWidth, float skyPlaneTop, float skyPlaneBottom, int textureRepeat)
+{
+	float quadSize, radius, constant, textureDelta;
+	int i, j, index;
+	float positionX, positionY, positionZ, tu, tv;
+
+
+	// Create the array to hold the sky plane coordinates.
+	m_skyPlane = new SkyPlaneType[(skyPlaneResolution + 1) * (skyPlaneResolution + 1)];
+	if(!m_skyPlane)
+	{
+		return false;
+	}
+
+	// Determine the size of each quad on the sky plane.
+	quadSize = skyPlaneWidth / (float)skyPlaneResolution;
+
+	// Calculate the radius of the sky plane based on the width.
+	radius = skyPlaneWidth / 2.0f;
+
+	// Calculate the height constant to increment by.
+	constant = (skyPlaneTop - skyPlaneBottom) / (radius * radius);
+
+	// Calculate the texture coordinate increment value.
+	textureDelta = (float)textureRepeat / (float)skyPlaneResolution;
+
+	// Loop through the sky plane and build the coordinates based on the increment values given.
+	for(j=0; j&lt;=skyPlaneResolution; j++)
+	{
+		for(i=0; i&lt;=skyPlaneResolution; i++)
+		{
+			// Calculate the vertex coordinates.
+			positionX = (-0.5f * skyPlaneWidth) + ((float)i * quadSize);
+			positionZ = (-0.5f * skyPlaneWidth) + ((float)j * quadSize);
+			positionY = skyPlaneTop - (constant * ((positionX * positionX) + (positionZ * positionZ)));
+
+			// Calculate the texture coordinates.
+			tu = (float)i * textureDelta;
+			tv = (float)j * textureDelta;
+
+			// Calculate the index into the sky plane array to add this coordinate.
+			index = j * (skyPlaneResolution + 1) + i;
+
+			// Add the coordinates to the sky plane array.
+			m_skyPlane[index].x = positionX;
+			m_skyPlane[index].y = positionY;
+			m_skyPlane[index].z = positionZ;
+			m_skyPlane[index].tu = tu;
+			m_skyPlane[index].tv = tv;
+		}
+	}
+
+	return true;
+}
+
+
+void SkyPlaneClass::ShutdownSkyPlane()
+{
+	// Release the sky plane array.
+	if(m_skyPlane)
+	{
+		delete [] m_skyPlane;
+		m_skyPlane = 0;
+	}
+
+	return;
+}
+
+
+bool SkyPlaneClass::InitializeBuffers(ID3D11Device* device, int skyPlaneResolution)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+	int i, j, index, index1, index2, index3, index4;
+
+
+	// Calculate the number of vertices in the sky plane mesh.
+	m_vertexCount = (skyPlaneResolution + 1) * (skyPlaneResolution + 1) * 6;
+
+	// Set the index count to the same as the vertex count.
+	m_indexCount = m_vertexCount;
+		
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+
+	// Initialize the index into the vertex array.
+	index = 0;
+
+	// Load the vertex and index array with the sky plane array data.
+	for(j=0; j&lt;skyPlaneResolution; j++)
+	{
+		for(i=0; i&lt;skyPlaneResolution; i++)
+		{
+			index1 = j * (skyPlaneResolution + 1) + i;
+			index2 = j * (skyPlaneResolution + 1) + (i+1);
+			index3 = (j+1) * (skyPlaneResolution + 1) + i;
+			index4 = (j+1) * (skyPlaneResolution + 1) + (i+1);
+
+			// Triangle 1 - Upper Left
+			vertices[index].position = D3DXVECTOR3(m_skyPlane[index1].x, m_skyPlane[index1].y, m_skyPlane[index1].z);
+			vertices[index].texture = D3DXVECTOR2(m_skyPlane[index1].tu, m_skyPlane[index1].tv);
+			indices[index] = index;
+			index++;
+
+			// Triangle 1 - Upper Right
+			vertices[index].position = D3DXVECTOR3(m_skyPlane[index2].x, m_skyPlane[index2].y, m_skyPlane[index2].z);
+			vertices[index].texture = D3DXVECTOR2(m_skyPlane[index2].tu, m_skyPlane[index2].tv);
+			indices[index] = index;
+			index++;
+
+			// Triangle 1 - Bottom Left
+			vertices[index].position = D3DXVECTOR3(m_skyPlane[index3].x, m_skyPlane[index3].y, m_skyPlane[index3].z);
+			vertices[index].texture = D3DXVECTOR2(m_skyPlane[index3].tu, m_skyPlane[index3].tv);
+			indices[index] = index;
+			index++;
+
+			// Triangle 2 - Bottom Left
+			vertices[index].position = D3DXVECTOR3(m_skyPlane[index3].x, m_skyPlane[index3].y, m_skyPlane[index3].z);
+			vertices[index].texture = D3DXVECTOR2(m_skyPlane[index3].tu, m_skyPlane[index3].tv);
+			indices[index] = index;
+			index++;
+
+			// Triangle 2 - Upper Right
+			vertices[index].position = D3DXVECTOR3(m_skyPlane[index2].x, m_skyPlane[index2].y, m_skyPlane[index2].z);
+			vertices[index].texture = D3DXVECTOR2(m_skyPlane[index2].tu, m_skyPlane[index2].tv);
+			indices[index] = index;
+			index++;
+
+			// Triangle 2 - Bottom Right
+			vertices[index].position = D3DXVECTOR3(m_skyPlane[index4].x, m_skyPlane[index4].y, m_skyPlane[index4].z);
+			vertices[index].texture = D3DXVECTOR2(m_skyPlane[index4].tu, m_skyPlane[index4].tv);
+			indices[index] = index;
+			index++;
+		}
+	}
+
+	// Set up the description of the vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now finally create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+
+
+void SkyPlaneClass::ShutdownBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+
+
+void SkyPlaneClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType); 
+	offset = 0;
+    
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	return;
+}
+
+
+bool SkyPlaneClass::LoadTextures(ID3D11Device* device, WCHAR* textureFilename1, WCHAR* textureFilename2)
+{
+	bool result;
+
+
+	// Create the cloud texture object.
+	m_CloudTexture = new TextureClass;
+	if(!m_CloudTexture)
+	{
+		return false;
+	}
+
+	// Initialize the cloud texture object.
+	result = m_CloudTexture-&gt;Initialize(device, textureFilename1);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We load the new noise texture here.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the perturb texture object.
+	m_PerturbTexture = new TextureClass;
+	if(!m_PerturbTexture)
+	{
+		return false;
+	}
+
+	// Initialize the perturb texture object.
+	result = m_PerturbTexture-&gt;Initialize(device, textureFilename2);
+	if(!result)
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void SkyPlaneClass::ReleaseTextures()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The new noise texture is released here in the ReleaseTextures function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Release the texture objects.
+	if(m_PerturbTexture)
+	{
+		m_PerturbTexture-&gt;Shutdown();
+		delete m_PerturbTexture;
+		m_PerturbTexture = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	if(m_CloudTexture)
+	{
+		m_CloudTexture-&gt;Shutdown();
+		delete m_CloudTexture;
+		m_CloudTexture = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ApplicationClass header has not changed for this tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _APPLICATIONCLASS_H_
+#define _APPLICATIONCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "inputclass.h"
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "terrainclass.h"
+#include "timerclass.h"
+#include "positionclass.h"
+#include "fpsclass.h"
+#include "cpuclass.h"
+#include "fontshaderclass.h"
+#include "textclass.h"
+#include "terrainshaderclass.h"
+#include "lightclass.h"
+#include "skydomeclass.h"
+#include "skydomeshaderclass.h"
+#include "skyplaneclass.h"
+#include "skyplaneshaderclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: ApplicationClass
+////////////////////////////////////////////////////////////////////////////////
+class ApplicationClass
+{
+public:
+	ApplicationClass();
+	ApplicationClass(const ApplicationClass&amp;);
+	~ApplicationClass();
+
+	bool Initialize(HINSTANCE, HWND, int, int);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool HandleInput(float);
+	bool RenderGraphics();
+
+private:
+	InputClass* m_Input;
+	D3DClass* m_Direct3D;
+	CameraClass* m_Camera;
+	TerrainClass* m_Terrain;
+	TimerClass* m_Timer;
+	PositionClass* m_Position;
+	FpsClass* m_Fps;
+	CpuClass* m_Cpu;
+	FontShaderClass* m_FontShader;
+	TextClass* m_Text;
+	TerrainShaderClass* m_TerrainShader;
+	LightClass* m_Light;
+	SkyDomeClass* m_SkyDome;
+	SkyDomeShaderClass* m_SkyDomeShader;
+	SkyPlaneClass *m_SkyPlane;
+	SkyPlaneShaderClass* m_SkyPlaneShader;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Applicationclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: applicationclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "applicationclass.h"
+
+
+ApplicationClass::ApplicationClass()
+{
+	m_Input = 0;
+	m_Direct3D = 0;
+	m_Camera = 0;
+	m_Terrain = 0;
+	m_Timer = 0;
+	m_Position = 0;
+	m_Fps = 0;
+	m_Cpu = 0;
+	m_FontShader = 0;
+	m_Text = 0;
+	m_TerrainShader = 0;
+	m_Light = 0;
+	m_SkyDome = 0;
+	m_SkyDomeShader = 0;
+	m_SkyPlane = 0;
+	m_SkyPlaneShader = 0;
+}
+
+
+ApplicationClass::ApplicationClass(const ApplicationClass&amp; other)
+{
+}
+
+
+ApplicationClass::~ApplicationClass()
+{
+}
+
+
+bool ApplicationClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeight)
+{
+	bool result;
+	float cameraX, cameraY, cameraZ;
+	D3DXMATRIX baseViewMatrix;
+	char videoCard[128];
+	int videoMemory;
+
+	
+	// Create the input object.  The input object will be used to handle reading the keyboard and mouse input from the user.
+	m_Input = new InputClass;
+	if(!m_Input)
+	{
+		return false;
+	}
+
+	// Initialize the input object.
+	result = m_Input-&gt;Initialize(hinstance, hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the Direct3D object.
+	m_Direct3D = new D3DClass;
+	if(!m_Direct3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_Direct3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize DirectX 11.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Initialize a base view matrix with the camera for 2D user interface rendering.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -1.0f);
+	m_Camera-&gt;Render();
+	m_Camera-&gt;GetViewMatrix(baseViewMatrix);
+
+	// Set the initial position of the camera.
+	cameraX = 50.0f;
+	cameraY = 2.0f;
+	cameraZ = -7.0f;
+
+	m_Camera-&gt;SetPosition(cameraX, cameraY, cameraZ);
+
+	// Create the terrain object.
+	m_Terrain = new TerrainClass;
+	if(!m_Terrain)
+	{
+		return false;
+	}
+
+	// Initialize the terrain object.
+	result = m_Terrain-&gt;Initialize(m_Direct3D-&gt;GetDevice(), "../Engine/data/heightmap01.bmp", L"../Engine/data/dirt01.dds", "../Engine/data/colorm01.bmp");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the timer object.
+	m_Timer = new TimerClass;
+	if(!m_Timer)
+	{
+		return false;
+	}
+
+	// Initialize the timer object.
+	result = m_Timer-&gt;Initialize();
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the timer object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the position object.
+	m_Position = new PositionClass;
+	if(!m_Position)
+	{
+		return false;
+	}
+
+	// Set the initial position of the viewer to the same as the initial camera position.
+	m_Position-&gt;SetPosition(cameraX, cameraY, cameraZ);
+
+	// Create the fps object.
+	m_Fps = new FpsClass;
+	if(!m_Fps)
+	{
+		return false;
+	}
+
+	// Initialize the fps object.
+	m_Fps-&gt;Initialize();
+
+	// Create the cpu object.
+	m_Cpu = new CpuClass;
+	if(!m_Cpu)
+	{
+		return false;
+	}
+
+	// Initialize the cpu object.
+	m_Cpu-&gt;Initialize();
+
+	// Create the font shader object.
+	m_FontShader = new FontShaderClass;
+	if(!m_FontShader)
+	{
+		return false;
+	}
+
+	// Initialize the font shader object.
+	result = m_FontShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the font shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the text object.
+	m_Text = new TextClass;
+	if(!m_Text)
+	{
+		return false;
+	}
+
+	// Initialize the text object.
+	result = m_Text-&gt;Initialize(m_Direct3D-&gt;GetDevice(), m_Direct3D-&gt;GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Retrieve the video card information.
+	m_Direct3D-&gt;GetVideoCardInfo(videoCard, videoMemory);
+
+	// Set the video card information in the text object.
+	result = m_Text-&gt;SetVideoCardInfo(videoCard, videoMemory, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not set video card info in the text object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the terrain shader object.
+	m_TerrainShader = new TerrainShaderClass;
+	if(!m_TerrainShader)
+	{
+		return false;
+	}
+
+	// Initialize the terrain shader object.
+	result = m_TerrainShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the terrain shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetAmbientColor(0.05f, 0.05f, 0.05f, 1.0f);
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetDirection(-0.5f, -1.0f, 0.0f);
+
+	// Create the sky dome object.
+	m_SkyDome = new SkyDomeClass;
+	if(!m_SkyDome)
+	{
+		return false;
+	}
+
+	// Initialize the sky dome object.
+	result = m_SkyDome-&gt;Initialize(m_Direct3D-&gt;GetDevice());
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sky dome object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the sky dome shader object.
+	m_SkyDomeShader = new SkyDomeShaderClass;
+	if(!m_SkyDomeShader)
+	{
+		return false;
+	}
+
+	// Initialize the sky dome shader object.
+	result = m_SkyDomeShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sky dome shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the sky plane object.
+	m_SkyPlane = new SkyPlaneClass;
+	if(!m_SkyPlane)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The perturb noise texture is now sent in as the second texture input.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the sky plane object.</font><font face="arial" color="#aaaaff" size="2">
+	result = m_SkyPlane-&gt;Initialize(m_Direct3D-&gt;GetDevice(), L"../Engine/data/cloud001.dds", L"../Engine/data/perturb001.dds");
+</font><font face="arial" color="#aaffaa" size="2">	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sky plane object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the sky plane shader object.
+	m_SkyPlaneShader = new SkyPlaneShaderClass;
+	if(!m_SkyPlaneShader)
+	{
+		return false;
+	}
+
+	// Initialize the sky plane shader object.
+	result = m_SkyPlaneShader-&gt;Initialize(m_Direct3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the sky plane shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+
+void ApplicationClass::Shutdown()
+{
+	// Release the sky plane shader object.
+	if(m_SkyPlaneShader)
+	{
+		m_SkyPlaneShader-&gt;Shutdown();
+		delete m_SkyPlaneShader;
+		m_SkyPlaneShader = 0;
+	}
+
+	// Release the sky plane object.
+	if(m_SkyPlane)
+	{
+		m_SkyPlane-&gt;Shutdown();
+		delete m_SkyPlane;
+		m_SkyPlane = 0;
+	}
+
+	// Release the sky dome shader object.
+	if(m_SkyDomeShader)
+	{
+		m_SkyDomeShader-&gt;Shutdown();
+		delete m_SkyDomeShader;
+		m_SkyDomeShader = 0;
+	}
+
+	// Release the sky dome object.
+	if(m_SkyDome)
+	{
+		m_SkyDome-&gt;Shutdown();
+		delete m_SkyDome;
+		m_SkyDome = 0;
+	}
+
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the terrain shader object.
+	if(m_TerrainShader)
+	{
+		m_TerrainShader-&gt;Shutdown();
+		delete m_TerrainShader;
+		m_TerrainShader = 0;
+	}
+
+	// Release the text object.
+	if(m_Text)
+	{
+		m_Text-&gt;Shutdown();
+		delete m_Text;
+		m_Text = 0;
+	}
+
+	// Release the font shader object.
+	if(m_FontShader)
+	{
+		m_FontShader-&gt;Shutdown();
+		delete m_FontShader;
+		m_FontShader = 0;
+	}
+
+	// Release the cpu object.
+	if(m_Cpu)
+	{
+		m_Cpu-&gt;Shutdown();
+		delete m_Cpu;
+		m_Cpu = 0;
+	}
+
+	// Release the fps object.
+	if(m_Fps)
+	{
+		delete m_Fps;
+		m_Fps = 0;
+	}
+
+	// Release the position object.
+	if(m_Position)
+	{
+		delete m_Position;
+		m_Position = 0;
+	}
+
+	// Release the timer object.
+	if(m_Timer)
+	{
+		delete m_Timer;
+		m_Timer = 0;
+	}
+
+	// Release the terrain object.
+	if(m_Terrain)
+	{
+		m_Terrain-&gt;Shutdown();
+		delete m_Terrain;
+		m_Terrain = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the Direct3D object.
+	if(m_Direct3D)
+	{
+		m_Direct3D-&gt;Shutdown();
+		delete m_Direct3D;
+		m_Direct3D = 0;
+	}
+
+	// Release the input object.
+	if(m_Input)
+	{
+		m_Input-&gt;Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+
+	return;
+}
+
+
+bool ApplicationClass::Frame()
+{
+	bool result;
+
+
+	// Read the user input.
+	result = m_Input-&gt;Frame();
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Check if the user pressed escape and wants to exit the application.
+	if(m_Input-&gt;IsEscapePressed() == true)
+	{
+		return false;
+	}
+
+	// Update the system stats.
+	m_Timer-&gt;Frame();
+	m_Fps-&gt;Frame();
+	m_Cpu-&gt;Frame();
+
+	// Update the FPS value in the text object.
+	result = m_Text-&gt;SetFps(m_Fps-&gt;GetFps(), m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+	
+	// Update the CPU usage value in the text object.
+	result = m_Text-&gt;SetCpu(m_Cpu-&gt;GetCpuPercentage(), m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Do the frame input processing.
+	result = HandleInput(m_Timer-&gt;GetTime());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Do the sky plane frame processing.
+	m_SkyPlane-&gt;Frame();
+
+	// Render the graphics.
+	result = RenderGraphics();
+	if(!result)
+	{
+		return false;
+	}
+
+	return result;
+}
+
+
+bool ApplicationClass::HandleInput(float frameTime)
+{
+	bool keyDown, result;
+	float posX, posY, posZ, rotX, rotY, rotZ;
+
+
+	// Set the frame time for calculating the updated position.
+	m_Position-&gt;SetFrameTime(frameTime);
+
+	// Handle the input.
+	keyDown = m_Input-&gt;IsLeftPressed();
+	m_Position-&gt;TurnLeft(keyDown);
+
+	keyDown = m_Input-&gt;IsRightPressed();
+	m_Position-&gt;TurnRight(keyDown);
+
+	keyDown = m_Input-&gt;IsUpPressed();
+	m_Position-&gt;MoveForward(keyDown);
+
+	keyDown = m_Input-&gt;IsDownPressed();
+	m_Position-&gt;MoveBackward(keyDown);
+
+	keyDown = m_Input-&gt;IsAPressed();
+	m_Position-&gt;MoveUpward(keyDown);
+
+	keyDown = m_Input-&gt;IsZPressed();
+	m_Position-&gt;MoveDownward(keyDown);
+
+	keyDown = m_Input-&gt;IsPgUpPressed();
+	m_Position-&gt;LookUpward(keyDown);
+
+	keyDown = m_Input-&gt;IsPgDownPressed();
+	m_Position-&gt;LookDownward(keyDown);
+	
+	// Get the view point position/rotation.
+	m_Position-&gt;GetPosition(posX, posY, posZ);
+	m_Position-&gt;GetRotation(rotX, rotY, rotZ);
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(posX, posY, posZ);
+	m_Camera-&gt;SetRotation(rotX, rotY, rotZ);
+
+	// Update the position values in the text object.
+	result = m_Text-&gt;SetCameraPosition(posX, posY, posZ, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Update the rotation values in the text object.
+	result = m_Text-&gt;SetCameraRotation(rotX, rotY, rotZ, m_Direct3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool ApplicationClass::RenderGraphics()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
+	D3DXVECTOR3 cameraPosition;
+	bool result;
+
+
+	// Clear the scene.
+	m_Direct3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, projection, and ortho matrices from the camera and Direct3D objects.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_Direct3D-&gt;GetProjectionMatrix(projectionMatrix);
+	m_Direct3D-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Get the position of the camera.
+	cameraPosition = m_Camera-&gt;GetPosition();
+
+	// Translate the sky dome to be centered around the camera position.
+	D3DXMatrixTranslation(&amp;worldMatrix, cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+	// Turn off back face culling.
+	m_Direct3D-&gt;TurnOffCulling();
+
+	// Turn off the Z buffer.
+	m_Direct3D-&gt;TurnZBufferOff();
+
+	// Render the sky dome using the sky dome shader.
+	m_SkyDome-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+	m_SkyDomeShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_SkyDome-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+				m_SkyDome-&gt;GetApexColor(), m_SkyDome-&gt;GetCenterColor());
+
+	// Turn back face culling back on.
+	m_Direct3D-&gt;TurnOnCulling();
+
+	// Enable additive blending so the clouds blend with the sky dome color.
+	m_Direct3D-&gt;EnableSecondBlendState();
+
+	// Render the sky plane using the sky plane shader.
+	m_SkyPlane-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The sky plane is now rendered using the new inputs for the pixel shader.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_SkyPlaneShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_SkyPlane-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+				 m_SkyPlane-&gt;GetCloudTexture(), m_SkyPlane-&gt;GetPerturbTexture(), m_SkyPlane-&gt;GetTranslation(), m_SkyPlane-&gt;GetScale(), 
+				 m_SkyPlane-&gt;GetBrightness());</font><font face="arial" color="#aaffaa" size="2">
+
+	// Turn off blending.
+	m_Direct3D-&gt;TurnOffAlphaBlending();
+
+	// Turn the Z buffer back on.
+	m_Direct3D-&gt;TurnZBufferOn();
+
+	// Reset the world matrix.
+	m_Direct3D-&gt;GetWorldMatrix(worldMatrix);
+	
+	// Render the terrain using the terrain shader.
+	m_Terrain-&gt;Render(m_Direct3D-&gt;GetDeviceContext());
+	result = m_TerrainShader-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_Terrain-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+					 m_Light-&gt;GetAmbientColor(), m_Light-&gt;GetDiffuseColor(), m_Light-&gt;GetDirection(), m_Terrain-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn off the Z buffer to begin all 2D rendering.
+	m_Direct3D-&gt;TurnZBufferOff();
+		
+	// Turn on the alpha blending before rendering the text.
+	m_Direct3D-&gt;TurnOnAlphaBlending();
+
+	// Render the text user interface elements.
+	result = m_Text-&gt;Render(m_Direct3D-&gt;GetDeviceContext(), m_FontShader, worldMatrix, orthoMatrix);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Turn off alpha blending after rendering the text.
+	m_Direct3D-&gt;TurnOffAlphaBlending();
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_Direct3D-&gt;TurnZBufferOn();
+
+	// Present the rendered scene to the screen.
+	m_Direct3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now have clouds that transform as they move across the sky plane.
+I did speed up the translation so the effect is very clear, but you will want to slow it down for a more realistic effect.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 12_ Perturbed Clouds_files/pic0208.gif" width="500" height="282"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Compile and run the program.  Use the PgUp keys to look up into the sky to see the effect.  Press escape to quit when done.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Modify the scale value in the SkyPlane class to see the effect it has on the pixel shader.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Modify the noise texture to see its effect on the sampling.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Add a second layer of perturbed clouds, make sure they have their own translation and perturb scale also.  Combine the layers just like the previous tutorial.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Use a higher resolution texture for the clouds and the noise to see the improved look you get.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Code and Data Files: <a href="http://www.rastertek.com/tersrc12.zip">tersrc12.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable: <a href="http://www.rastertek.com/terexe12.zip">terexe12.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 12_ Perturbed Clouds_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutterr.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 12_ Perturbed Clouds_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

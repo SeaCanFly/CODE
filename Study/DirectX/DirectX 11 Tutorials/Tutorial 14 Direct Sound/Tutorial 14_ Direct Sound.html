@@ -1,0 +1,1017 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut14.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 14: Direct Sound</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 14: Direct Sound
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 14_ Direct Sound_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover the basics of using Direct Sound in DirectX 11 as well as how to load and play .wav audio files.
+This tutorial is based on the code in the previous DirectX 11 tutorials.
+I will cover a couple basics about Direct Sound in DirectX 11 as well as a bit about sound formats before we start the code part of the tutorial.
+</font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The first thing you will notice is that in DirectX 11 the Direct Sound API is still the same one from DirectX 8.
+The only major difference is that hardware sound mixing is generally not available on the latest Windows operating systems.
+The reason being is for security and operating system consistency all hardware calls now have to go through a security layer.
+The older sound cards used to have DMA (direct memory access) which was very fast but doesn't work with this new Windows security model.
+So all sound mixing is now done at the software level and hence no hardware acceleration is directly available to this API.
+</font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The nice thing about Direct Sound is that you can play any audio format you want.
+In this tutorial I cover the .wav audio format but you can replace the .wav code with .mp3 or anything you prefer.
+You can even use your own audio format if you have created one.
+Direct Sound is so easy to use you just create a sound buffer with the play back format you would like and then copy your audio format
+into the buffer's format and then it is ready to play.
+You can see why so many applications use Direct Sound due to its pure simplicity.
+</font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Note that Direct Sound does use two different kinds of buffers which are primary and secondary buffers.
+The primary buffer is the main sound memory buffer on your default sound card, USB headset, and so forth.
+Secondary buffers are buffers you create in memory and load your sounds into.
+When you play a secondary buffer the Direct Sound API takes care of mixing that sound into the primary buffer which then plays the sound.
+If you play multiple secondary buffers at the same time it will mix them together and play them in the primary buffer.
+Also note that all buffers are circular so you can set them to repeat indefinitely.
+</font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To start the tutorial we will first look at the updated frame work.
+The only new class is the SoundClass which contains all the DirectSound and .wav format functionality.
+I have removed the other classes to simplify this tutorial.
+</font></p>
+ 
+<p align="left"><img border="0" src="./Tutorial 14_ Direct Sound_files/pic0039.gif" width="278" height="194"></p>
+ 
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Soundclass.h</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SoundClass encapsulates the DirectSound functionality as well as the .wav audio loading and playing capabilities.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: soundclass.h
+///////////////////////////////////////////////////////////////////////////////
+#ifndef _SOUNDCLASS_H_
+#define _SOUNDCLASS_H_
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The following libraries and headers are required for DirectSound to compile properly.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">/////////////
+// LINKING //
+/////////////
+#pragma comment(lib, "dsound.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "winmm.lib")
+ 
+ 
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;windows.h&gt;
+#include &lt;mmsystem.h&gt;
+#include &lt;dsound.h&gt;
+#include &lt;stdio.h&gt;
+ 
+ 
+///////////////////////////////////////////////////////////////////////////////
+// Class name: SoundClass
+///////////////////////////////////////////////////////////////////////////////
+class SoundClass
+{
+private:
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The WaveHeaderType structure used here is for the .wav file format.
+When loading in .wav files I first read in the header to determine the required information for loading in the .wav audio data.
+If you are using a different format you will want to replace this header with the one required for your audio format.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	struct WaveHeaderType
+	{
+		char chunkId[4];
+		unsigned long chunkSize;
+		char format[4];
+		char subChunkId[4];
+		unsigned long subChunkSize;
+		unsigned short audioFormat;
+		unsigned short numChannels;
+		unsigned long sampleRate;
+		unsigned long bytesPerSecond;
+		unsigned short blockAlign;
+		unsigned short bitsPerSample;
+		char dataChunkId[4];
+		unsigned long dataSize;
+	};
+ 
+public:
+	SoundClass();
+	SoundClass(const SoundClass&amp;);
+	~SoundClass();
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize and Shutdown will handle everything needed for this tutorial.
+The Initialize function will initialize DirectSound and load in the .wav audio file and then play it once.
+Shutdown will release the .wav file and shutdown DirectSound.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	bool Initialize(HWND);
+	void Shutdown();
+ 
+private:
+	bool InitializeDirectSound(HWND);
+	void ShutdownDirectSound();
+ 
+	bool LoadWaveFile(char*, IDirectSoundBuffer8**);
+	void ShutdownWaveFile(IDirectSoundBuffer8**);
+ 
+	bool PlayWaveFile();
+ 
+private:
+	IDirectSound8* m_DirectSound;
+	IDirectSoundBuffer* m_primaryBuffer;
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Note that I only have one secondary buffer as this tutorial only loads in one sound.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	IDirectSoundBuffer8* m_secondaryBuffer1;
+};
+ 
+#endif
+</font></pre>
+ 
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Soundclass.cpp</u></font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: soundclass.cpp
+///////////////////////////////////////////////////////////////////////////////
+#include "soundclass.h"
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Use the class constructor to initialize the private member variables that are used inside the sound class.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">SoundClass::SoundClass()
+{
+	m_DirectSound = 0;
+	m_primaryBuffer = 0;
+	m_secondaryBuffer1 = 0;
+}
+ 
+ 
+SoundClass::SoundClass(const SoundClass&amp; other)
+{
+}
+ 
+ 
+SoundClass::~SoundClass()
+{
+}
+ 
+ 
+bool SoundClass::Initialize(HWND hwnd)
+{
+	bool result;
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First initialize the DirectSound API as well as the primary buffer.
+Once that is initialized then the LoadWaveFile function can be called which will load in the .wav audio file
+and initialize the secondary buffer with the audio information from the .wav file.
+After loading is complete then PlayWaveFile is called which then plays the .wav file once.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize direct sound and the primary sound buffer.
+	result = InitializeDirectSound(hwnd);
+	if(!result)
+	{
+		return false;
+	}
+ 
+	// Load a wave audio file onto a secondary buffer.
+	result = LoadWaveFile("../Engine/data/sound01.wav", &amp;m_secondaryBuffer1);
+	if(!result)
+	{
+		return false;
+	}
+ 
+	// Play the wave file now that it has been loaded.
+	result = PlayWaveFile();
+	if(!result)
+	{
+		return false;
+	}
+ 
+	return true;
+}
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function first releases the secondary buffer which held the .wav file audio data using the ShutdownWaveFile function.
+Once that completes this function then called ShutdownDirectSound which releases the primary buffer and the DirectSound interface.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">void SoundClass::Shutdown()
+{
+	// Release the secondary buffer.
+	ShutdownWaveFile(&amp;m_secondaryBuffer1);
+
+	// Shutdown the Direct Sound API.
+	ShutdownDirectSound();
+ 
+	return;
+}
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+InitializeDirectSound handles getting an interface pointer to DirectSound and the default primary sound buffer.
+Note that you can query the system for all the sound devices and then grab the pointer to the primary sound buffer for a specific device,
+however I've kept this tutorial simple and just grabbed the pointer to the primary buffer of the default sound device.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">bool SoundClass::InitializeDirectSound(HWND hwnd)
+{
+	HRESULT result;
+	DSBUFFERDESC bufferDesc;
+	WAVEFORMATEX waveFormat;
+ 
+ 
+	// Initialize the direct sound interface pointer for the default sound device.
+	result = DirectSoundCreate8(NULL, &amp;m_DirectSound, NULL);
+	if(FAILED(result))
+	{
+		return false;
+	}
+ 
+	// Set the cooperative level to priority so the format of the primary sound buffer can be modified.
+	result = m_DirectSound-&gt;SetCooperativeLevel(hwnd, DSSCL_PRIORITY);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have to setup the description of how we want to access the primary buffer.
+The dwFlags are the important part of this structure.
+In this case we just want to setup a primary buffer description with the capability of adjusting its volume.
+There are other capabilities you can grab but we are keeping it simple for now.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the primary buffer description.
+	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
+	bufferDesc.dwFlags = DSBCAPS_PRIMARYBUFFER | DSBCAPS_CTRLVOLUME;
+	bufferDesc.dwBufferBytes = 0;
+	bufferDesc.dwReserved = 0;
+	bufferDesc.lpwfxFormat = NULL;
+	bufferDesc.guid3DAlgorithm = GUID_NULL;
+ 
+	// Get control of the primary sound buffer on the default sound device.
+	result = m_DirectSound-&gt;CreateSoundBuffer(&amp;bufferDesc, &amp;m_primaryBuffer, NULL);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that we have control of the primary buffer on the default sound device we want to change its format to our desired audio file format.
+Here I have decided we want high quality sound so we will set it to uncompressed CD audio quality.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	// Setup the format of the primary sound bufffer.
+	// In this case it is a .WAV file recorded at 44,100 samples per second in 16-bit stereo (cd audio format).
+	waveFormat.wFormatTag = WAVE_FORMAT_PCM;
+	waveFormat.nSamplesPerSec = 44100;
+	waveFormat.wBitsPerSample = 16;
+	waveFormat.nChannels = 2;
+	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
+	waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
+	waveFormat.cbSize = 0;
+ 
+	// Set the primary buffer to be the wave format specified.
+	result = m_primaryBuffer-&gt;SetFormat(&amp;waveFormat);
+	if(FAILED(result))
+	{
+		return false;
+	}
+ 
+	return true;
+}
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The ShutdownDirectSound function handles releasing the primary buffer and DirectSound interfaces.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">void SoundClass::ShutdownDirectSound()
+{
+	// Release the primary sound buffer pointer.
+	if(m_primaryBuffer)
+	{
+		m_primaryBuffer-&gt;Release();
+		m_primaryBuffer = 0;
+	}
+ 
+	// Release the direct sound interface pointer.
+	if(m_DirectSound)
+	{
+		m_DirectSound-&gt;Release();
+		m_DirectSound = 0;
+	}
+ 
+	return;
+}
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The LoadWaveFile function is what handles loading in a .wav audio file and then copies the data onto a new secondary buffer.
+If you are looking to do different formats you would replace this function or write a similar one.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">bool SoundClass::LoadWaveFile(char* filename, IDirectSoundBuffer8** secondaryBuffer)
+{
+	int error;
+	FILE* filePtr;
+	unsigned int count;
+	WaveHeaderType waveFileHeader;
+	WAVEFORMATEX waveFormat;
+	DSBUFFERDESC bufferDesc;
+	HRESULT result;
+	IDirectSoundBuffer* tempBuffer;
+	unsigned char* waveData;
+	unsigned char *bufferPtr;
+	unsigned long bufferSize;
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To start first open the .wav file and read in the header of the file.
+The header will contain all the information about the audio file so we can use that to create a secondary buffer to accommodate the audio data.
+The audio file header also tells us where the data begins and how big it is.
+You will notice I check for all the needed tags to ensure the audio file is not corrupt and is the proper wave file format
+containing RIFF, WAVE, fmt, data, and WAVE_FORMAT_PCM tags.
+I also do a couple other checks to ensure it is a 44.1KHz stereo 16bit audio file.
+If it is mono, 22.1 KHZ, 8bit, or anything else then it will fail ensuring we are only loading the exact format we want.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	// Open the wave file in binary.
+	error = fopen_s(&amp;filePtr, filename, "rb");
+	if(error != 0)
+	{
+		return false;
+	}
+ 
+	// Read in the wave file header.
+	count = fread(&amp;waveFileHeader, sizeof(waveFileHeader), 1, filePtr);
+	if(count != 1)
+	{
+		return false;
+	}
+ 
+	// Check that the chunk ID is the RIFF format.
+	if((waveFileHeader.chunkId[0] != 'R') || (waveFileHeader.chunkId[1] != 'I') || 
+	   (waveFileHeader.chunkId[2] != 'F') || (waveFileHeader.chunkId[3] != 'F'))
+	{
+		return false;
+	}
+ 
+	// Check that the file format is the WAVE format.
+	if((waveFileHeader.format[0] != 'W') || (waveFileHeader.format[1] != 'A') ||
+	   (waveFileHeader.format[2] != 'V') || (waveFileHeader.format[3] != 'E'))
+	{
+		return false;
+	}
+ 
+	// Check that the sub chunk ID is the fmt format.
+	if((waveFileHeader.subChunkId[0] != 'f') || (waveFileHeader.subChunkId[1] != 'm') ||
+	   (waveFileHeader.subChunkId[2] != 't') || (waveFileHeader.subChunkId[3] != ' '))
+	{
+		return false;
+	}
+ 
+	// Check that the audio format is WAVE_FORMAT_PCM.
+	if(waveFileHeader.audioFormat != WAVE_FORMAT_PCM)
+	{
+		return false;
+	}
+ 
+	// Check that the wave file was recorded in stereo format.
+	if(waveFileHeader.numChannels != 2)
+	{
+		return false;
+	}
+ 
+	// Check that the wave file was recorded at a sample rate of 44.1 KHz.
+	if(waveFileHeader.sampleRate != 44100)
+	{
+		return false;
+	}
+ 
+	// Ensure that the wave file was recorded in 16 bit format.
+	if(waveFileHeader.bitsPerSample != 16)
+	{
+		return false;
+	}
+ 
+	// Check for the data chunk header.
+	if((waveFileHeader.dataChunkId[0] != 'd') || (waveFileHeader.dataChunkId[1] != 'a') ||
+	   (waveFileHeader.dataChunkId[2] != 't') || (waveFileHeader.dataChunkId[3] != 'a'))
+	{
+		return false;
+	}
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that the wave header file has been verified we can setup the secondary buffer we will load the audio data onto.
+We have to first set the wave format and buffer description of the secondary buffer similar to how we did for the primary buffer.
+There are some changes though since this is secondary and not primary in terms of the dwFlags and dwBufferBytes.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the wave format of secondary buffer that this wave file will be loaded onto.
+	waveFormat.wFormatTag = WAVE_FORMAT_PCM;
+	waveFormat.nSamplesPerSec = 44100;
+	waveFormat.wBitsPerSample = 16;
+	waveFormat.nChannels = 2;
+	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
+	waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
+	waveFormat.cbSize = 0;
+ 
+	// Set the buffer description of the secondary sound buffer that the wave file will be loaded onto.
+	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
+	bufferDesc.dwFlags = DSBCAPS_CTRLVOLUME;
+	bufferDesc.dwBufferBytes = waveFileHeader.dataSize;
+	bufferDesc.dwReserved = 0;
+	bufferDesc.lpwfxFormat = &amp;waveFormat;
+	bufferDesc.guid3DAlgorithm = GUID_NULL;
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now the way to create a secondary buffer is fairly strange.
+First step is that you create a temporary IDirectSoundBuffer with the sound buffer description you setup for the secondary buffer.
+If this succeeds then you can use that temporary buffer to create a IDirectSoundBuffer8 secondary buffer by calling QueryInterface
+with the IID_IDirectSoundBuffer8 parameter.
+If this succeeds then you can release the temporary buffer and the secondary buffer is ready for use.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	// Create a temporary sound buffer with the specific buffer settings.
+	result = m_DirectSound-&gt;CreateSoundBuffer(&amp;bufferDesc, &amp;tempBuffer, NULL);
+	if(FAILED(result))
+	{
+		return false;
+	}
+ 
+	// Test the buffer format against the direct sound 8 interface and create the secondary buffer.
+	result = tempBuffer-&gt;QueryInterface(IID_IDirectSoundBuffer8, (void**)&amp;*secondaryBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+ 
+	// Release the temporary buffer.
+	tempBuffer-&gt;Release();
+	tempBuffer = 0;
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that the secondary buffer is ready we can load in the wave data from the audio file.
+First I load it into a memory buffer so I can check and modify the data if I need to.
+Once the data is in memory you then lock the secondary buffer, copy the data to it using a memcpy, and then unlock it.
+This secondary buffer is now ready for use.
+Note that locking the secondary buffer can actually take in two pointers and two positions to write to.
+This is because it is a circular buffer and if you start by writing to the middle of it you will need the size of the buffer from that point
+so that you don't write outside the bounds of it.  This is useful for streaming audio and such.
+In this tutorial we create a buffer that is the same size as the audio file and write from the beginning to make things simple.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	// Move to the beginning of the wave data which starts at the end of the data chunk header.
+	fseek(filePtr, sizeof(WaveHeaderType), SEEK_SET);
+ 
+	// Create a temporary buffer to hold the wave file data.
+	waveData = new unsigned char[waveFileHeader.dataSize];
+	if(!waveData)
+	{
+		return false;
+	}
+ 
+	// Read in the wave file data into the newly created buffer.
+	count = fread(waveData, 1, waveFileHeader.dataSize, filePtr);
+	if(count != waveFileHeader.dataSize)
+	{
+		return false;
+	}
+ 
+	// Close the file once done reading.
+	error = fclose(filePtr);
+	if(error != 0)
+	{
+		return false;
+	}
+ 
+	// Lock the secondary buffer to write wave data into it.
+	result = (*secondaryBuffer)-&gt;Lock(0, waveFileHeader.dataSize, (void**)&amp;bufferPtr, (DWORD*)&amp;bufferSize, NULL, 0, 0);
+	if(FAILED(result))
+	{
+		return false;
+	}
+ 
+	// Copy the wave data into the buffer.
+	memcpy(bufferPtr, waveData, waveFileHeader.dataSize);
+ 
+	// Unlock the secondary buffer after the data has been written to it.
+	result = (*secondaryBuffer)-&gt;Unlock((void*)bufferPtr, bufferSize, NULL, 0);
+	if(FAILED(result))
+	{
+		return false;
+	}
+	
+	// Release the wave data since it was copied into the secondary buffer.
+	delete [] waveData;
+	waveData = 0;
+ 
+	return true;
+}
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+ShutdownWaveFile just does a release of the secondary buffer.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">void SoundClass::ShutdownWaveFile(IDirectSoundBuffer8** secondaryBuffer)
+{
+	// Release the secondary sound buffer.
+	if(*secondaryBuffer)
+	{
+		(*secondaryBuffer)-&gt;Release();
+		*secondaryBuffer = 0;
+	}
+
+	return;
+}
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The PlayWaveFile function will play the audio file stored in the secondary buffer.
+The moment you use the Play function it will automatically mix the audio into the primary buffer and start it playing if it wasn't already.
+Also note that we set the position to start playing at the beginning of the secondary sound buffer otherwise it will continue from where
+it last stopped playing.  And since we set the capabilities of the buffer to allow us to control the sound we set the volume to maximum here.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">bool SoundClass::PlayWaveFile()
+{
+	HRESULT result;
+ 
+ 
+	// Set position at the beginning of the sound buffer.
+	result = m_secondaryBuffer1-&gt;SetCurrentPosition(0);
+	if(FAILED(result))
+	{
+		return false;
+	}
+ 
+	// Set volume of the buffer to 100%.
+	result = m_secondaryBuffer1-&gt;SetVolume(DSBVOLUME_MAX);
+	if(FAILED(result))
+	{
+		return false;
+	}
+ 
+	// Play the contents of the secondary sound buffer.
+	result = m_secondaryBuffer1-&gt;Play(0, 0, 0);
+	if(FAILED(result))
+	{
+		return false;
+	}
+ 
+	return true;
+}
+</font></pre>
+ 
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Systemclass.h</u></font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: systemclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SYSTEMCLASS_H_
+#define _SYSTEMCLASS_H_
+ 
+ 
+///////////////////////////////
+// PRE-PROCESSING DIRECTIVES //
+///////////////////////////////
+#define WIN32_LEAN_AND_MEAN
+ 
+ 
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;windows.h&gt;
+ 
+ 
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "inputclass.h"
+#include "graphicsclass.h"
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we include the new SoundClass header file.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">#include "soundclass.h"
+ 
+ 
+////////////////////////////////////////////////////////////////////////////////
+// Class name: SystemClass
+////////////////////////////////////////////////////////////////////////////////
+class SystemClass
+{
+public:
+	SystemClass();
+	SystemClass(const SystemClass&amp;);
+	~SystemClass();
+ 
+	bool Initialize();
+	void Shutdown();
+	void Run();
+ 
+	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
+ 
+private:
+	void Frame();
+	void InitializeWindows(int&amp;, int&amp;);
+	void ShutdownWindows();
+ 
+private:
+	LPCWSTR m_applicationName;
+	HINSTANCE m_hinstance;
+	HWND m_hwnd;
+ 
+	InputClass* m_Input;
+	GraphicsClass* m_Graphics;
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We create a new private variable for the SoundClass object.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	SoundClass* m_Sound;
+};
+ 
+ 
+/////////////////////////
+// FUNCTION PROTOTYPES //
+/////////////////////////
+static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+ 
+ 
+/////////////
+// GLOBALS //
+/////////////
+static SystemClass* ApplicationHandle = 0;
+ 
+ 
+#endif
+</font></pre>
+ 
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Systemclass.cpp</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will just cover the functions that have changed since the previous tutorial.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: systemclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "systemclass.h"
+ 
+ 
+SystemClass::SystemClass()
+{
+	m_Input = 0;
+	m_Graphics = 0;
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the new SoundClass object to null in the class constructor.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	m_Sound = 0;
+}
+ 
+ 
+bool SystemClass::Initialize()
+{
+	int screenWidth, screenHeight;
+	bool result;
+
+
+	// Initialize the width and height of the screen to zero before sending the variables into the function.
+	screenWidth = 0;
+	screenHeight = 0;
+
+	// Initialize the windows api.
+	InitializeWindows(screenWidth, screenHeight);
+
+	// Create the input object.  This object will be used to handle reading the keyboard input from the user.
+	m_Input = new InputClass;
+	if(!m_Input)
+	{
+		return false;
+	}
+
+	// Initialize the input object.
+	result = m_Input-&gt;Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(m_hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the graphics object.  This object will handle rendering all the graphics for this application.
+	m_Graphics = new GraphicsClass;
+	if(!m_Graphics)
+	{
+		return false;
+	}
+
+	// Initialize the graphics object.
+	result = m_Graphics-&gt;Initialize(screenWidth, screenHeight, m_hwnd);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we create the SoundClass object and then initialize it for use.
+Note that in this tutorial the initialization will also start the wave file playing.
+</font></p>
+	
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the sound object.
+	m_Sound = new SoundClass;
+	if(!m_Sound)
+	{
+		return false;
+	}
+ 
+	// Initialize the sound object.
+	result = m_Sound-&gt;Initialize(m_hwnd);
+	if(!result)
+	{
+		MessageBox(m_hwnd, L"Could not initialize Direct Sound.", L"Error", MB_OK);
+		return false;
+	}
+ 
+	return true;
+}
+ 
+ 
+void SystemClass::Shutdown()
+{
+</font></pre>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the SystemClass::Shutdown we also shutdown the SoundClass object and release it.
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the sound object.
+	if(m_Sound)
+	{
+		m_Sound-&gt;Shutdown();
+		delete m_Sound;
+		m_Sound = 0;
+	}
+ 
+	// Release the graphics object.
+	if(m_Graphics)
+	{
+		m_Graphics-&gt;Shutdown();
+		delete m_Graphics;
+		m_Graphics = 0;
+	}
+
+	// Release the input object.
+	if(m_Input)
+	{
+		m_Input-&gt;Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+
+	// Shutdown the window.
+	ShutdownWindows();
+	
+	return;
+}
+</font></pre>
+ 
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The engine now supports the basics of Direct Sound.  It currently just plays a single wave file once you start the program.
+</font></p>
+ 
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the program and ensure it plays the wave file in stereo sound.  Press escape to close the window after.
+</font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Replace the sound01.wav file with your own 44.1KHz 16bit 2channel audio wave file and run the program again.
+</font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Rewrite the program to load two wave files and play them simultaneously.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Change the wave to loop instead of playing just once.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2008 Project: <a href="http://www.rastertek.com/dx11tut14.zip">dx11tut14.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src14.zip">dx11src14.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe14.zip">dx11exe14.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 14_ Direct Sound_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 14_ Direct Sound_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

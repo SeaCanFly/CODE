@@ -1,0 +1,76 @@
+﻿Build started 8/31/2011 10:59:18 AM.
+     1>Project "C:\Users\Craig\Desktop\tertut07\Engine\Engine\Engine.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\Engine.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt applicationclass.cpp cameraclass.cpp cpuclass.cpp d3dclass.cpp fontclass.cpp fontshaderclass.cpp fpsclass.cpp inputclass.cpp lightclass.cpp main.cpp positionclass.cpp systemclass.cpp terrainclass.cpp terrainshaderclass.cpp textclass.cpp textureclass.cpp timerclass.cpp
+         timerclass.cpp
+         textureclass.cpp
+         textclass.cpp
+         terrainshaderclass.cpp
+         terrainclass.cpp
+         systemclass.cpp
+         positionclass.cpp
+         main.cpp
+         lightclass.cpp
+         inputclass.cpp
+         fpsclass.cpp
+         fontshaderclass.cpp
+         fontclass.cpp
+         d3dclass.cpp
+         cpuclass.cpp
+         cameraclass.cpp
+         applicationclass.cpp
+         Generating Code...
+       ManifestResourceCompile:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\Engine.exe.embed.manifest.res" Debug\Engine_manifest.rc 
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Craig\Desktop\tertut07\Engine\Debug\Engine.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Engine.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Craig\Desktop\tertut07\Engine\Debug\Engine.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Craig\Desktop\tertut07\Engine\Debug\Engine.lib" /MACHINE:X86 Debug\Engine.exe.embed.manifest.res
+         Debug\applicationclass.obj
+         Debug\cameraclass.obj
+         Debug\cpuclass.obj
+         Debug\d3dclass.obj
+         Debug\fontclass.obj
+         Debug\fontshaderclass.obj
+         Debug\fpsclass.obj
+         Debug\inputclass.obj
+         Debug\lightclass.obj
+         Debug\main.obj
+         Debug\positionclass.obj
+         Debug\systemclass.obj
+         Debug\terrainclass.obj
+         Debug\terrainshaderclass.obj
+         Debug\textclass.obj
+         Debug\textureclass.obj
+         Debug\timerclass.obj
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"Debug\Engine.exe.embed.manifest" /manifest Debug\Engine.exe.intermediate.manifest
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"Debug\Engine.exe.embed.manifest.res" Debug\Engine_manifest.rc 
+       LinkEmbedManifest:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Craig\Desktop\tertut07\Engine\Debug\Engine.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Engine.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Craig\Desktop\tertut07\Engine\Debug\Engine.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Craig\Desktop\tertut07\Engine\Debug\Engine.lib" /MACHINE:X86 Debug\Engine.exe.embed.manifest.res
+         Debug\applicationclass.obj
+         Debug\cameraclass.obj
+         Debug\cpuclass.obj
+         Debug\d3dclass.obj
+         Debug\fontclass.obj
+         Debug\fontshaderclass.obj
+         Debug\fpsclass.obj
+         Debug\inputclass.obj
+         Debug\lightclass.obj
+         Debug\main.obj
+         Debug\positionclass.obj
+         Debug\systemclass.obj
+         Debug\terrainclass.obj
+         Debug\terrainshaderclass.obj
+         Debug\textclass.obj
+         Debug\textureclass.obj
+         Debug\timerclass.obj
+         Engine.vcxproj -> C:\Users\Craig\Desktop\tertut07\Engine\Debug\Engine.exe
+       FinalizeBuildStatus:
+         Deleting file "Debug\Engine.unsuccessfulbuild".
+         Touching "Debug\Engine.lastbuildstate".
+     1>Done Building Project "C:\Users\Craig\Desktop\tertut07\Engine\Engine\Engine.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:14.97

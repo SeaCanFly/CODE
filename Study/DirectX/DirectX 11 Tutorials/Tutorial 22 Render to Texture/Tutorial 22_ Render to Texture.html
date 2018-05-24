@@ -1,0 +1,1440 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut22.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 22: Render to Texture</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 22: Render to Texture
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 22_ Render to Texture_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover how to implement render to texture in DirectX 11. 
+The code in this tutorial is based on the code in the model tutorial and the bitmap tutorial.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Render to texture allows you to render your scene to a texture resource instead of just the back buffer.
+You can then use that texture resource in your current scene to achieve numerous effects.
+For example you could render the scene from a different camera angle and then use that texture in a mirror or video screen.
+You can also do some processing on that texture or use a special shader to render it to achieve even more unique effects.
+The list of things you can do with render to texture is endless and is the reason why it is one of the most powerful tools in DirectX 11.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+However you will notice that render to texture is very expensive as you are now rendering your scene multiple times instead of just once.
+This is where most 3D engines will start to lose their speed, but the effects that can be done make it worth the cost.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For this tutorial we will render a spinning 3D cube model to a texture first.
+We will then render that texture as a 2D bitmap to the upper left corner of the screen.
+We will also render the 3D cube as normal to the screen.
+The render to texture will be given a blue background so you can see exactly what is the render to texture.
+We will start the tutorial by looking at the updated frame work.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Everything in the frame work should look familiar to you with the exception of RenderTextureClass and DebugWindowClass.
+RenderTextureClass is the new class that encapsulates the DirectX 11 render to texture capabilities.
+DebugWindowClass is the BitmapClass from the 2D rendering tutorials renamed, however it no longer has a texture
+since we will pass it the render to texture to use instead.  
+I call it DebugWindowClass since I usually have a couple of them on screen to help me debug new shaders or multipass effects I am working on
+that require render to texture.
+It always helps to see effects at each stage instead of guessing where you might be making mistakes.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 22_ Render to Texture_files/pic0074.gif" width="859" height="209"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Rendertextureclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The RenderTextureClass allows you to set it as the render target instead of the back buffer.
+It also allows you to retrieve the data rendered to it in the form of a ID3D11ShaderResourceView.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: rendertextureclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _RENDERTEXTURECLASS_H_
+#define _RENDERTEXTURECLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: RenderTextureClass
+////////////////////////////////////////////////////////////////////////////////
+class RenderTextureClass
+{
+public:
+	RenderTextureClass();
+	RenderTextureClass(const RenderTextureClass&amp;);
+	~RenderTextureClass();
+
+	bool Initialize(ID3D11Device*, int, int);
+	void Shutdown();
+
+	void SetRenderTarget(ID3D11DeviceContext*, ID3D11DepthStencilView*);
+	void ClearRenderTarget(ID3D11DeviceContext*, ID3D11DepthStencilView*, float, float, float, float);
+	ID3D11ShaderResourceView* GetShaderResourceView();
+
+private:
+	ID3D11Texture2D* m_renderTargetTexture;
+	ID3D11RenderTargetView* m_renderTargetView;
+	ID3D11ShaderResourceView* m_shaderResourceView;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Rendertextureclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: rendertextureclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "rendertextureclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor will initialize the private pointers to null.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">RenderTextureClass::RenderTextureClass()
+{
+	m_renderTargetTexture = 0;
+	m_renderTargetView = 0;
+	m_shaderResourceView = 0;
+}
+
+
+RenderTextureClass::RenderTextureClass(const RenderTextureClass&amp; other)
+{
+}
+
+
+RenderTextureClass::~RenderTextureClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function takes as input the width and height you want to make this render to texture.
+Important: Remember that if you are rendering your screen you should keep the aspect ratio of this render to texture the same as the aspect ratio of the screen
+or there will be some size distortion.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The function creates a render target texture by first setting up the description of the texture and then creating that texture.
+It then uses that texture to setup a render target view so that the texture can be drawn to as a render target.
+The third and final thing we do is create a shader resource view of that texture so that we can supply the rendered data to calling objects.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool RenderTextureClass::Initialize(ID3D11Device* device, int textureWidth, int textureHeight)
+{
+	D3D11_TEXTURE2D_DESC textureDesc;
+	HRESULT result;
+	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+
+
+	// Initialize the render target texture description.
+	ZeroMemory(&amp;textureDesc, sizeof(textureDesc));
+
+	// Setup the render target texture description.
+	textureDesc.Width = textureWidth;
+	textureDesc.Height = textureHeight;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+
+	// Create the render target texture.
+	result = device-&gt;CreateTexture2D(&amp;textureDesc, NULL, &amp;m_renderTargetTexture);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the render target view.
+	renderTargetViewDesc.Format = textureDesc.Format;
+	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	renderTargetViewDesc.Texture2D.MipSlice = 0;
+
+	// Create the render target view.
+	result = device-&gt;CreateRenderTargetView(m_renderTargetTexture, &amp;renderTargetViewDesc, &amp;m_renderTargetView);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the shader resource view.
+	shaderResourceViewDesc.Format = textureDesc.Format;
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+	// Create the shader resource view.
+	result = device-&gt;CreateShaderResourceView(m_renderTargetTexture, &amp;shaderResourceViewDesc, &amp;m_shaderResourceView);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Shutdown releases the three interfaces used by the RenderTextureClass.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void RenderTextureClass::Shutdown()
+{
+	if(m_shaderResourceView)
+	{
+		m_shaderResourceView-&gt;Release();
+		m_shaderResourceView = 0;
+	}
+
+	if(m_renderTargetView)
+	{
+		m_renderTargetView-&gt;Release();
+		m_renderTargetView = 0;
+	}
+
+	if(m_renderTargetTexture)
+	{
+		m_renderTargetTexture-&gt;Release();
+		m_renderTargetTexture = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetRenderTarget function sets the render target view in this class as the current rendering location for all graphics to be rendered to. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void RenderTextureClass::SetRenderTarget(ID3D11DeviceContext* deviceContext, ID3D11DepthStencilView* depthStencilView)
+{
+	// Bind the render target view and depth stencil buffer to the output render pipeline.
+	deviceContext-&gt;OMSetRenderTargets(1, &amp;m_renderTargetView, depthStencilView);
+	
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+ClearRenderTarget mimics the functionality of the D3DClass::BeginScene function except for that it operates on the render target view within this class.
+This should be called each frame before rendering to this render target view.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void RenderTextureClass::ClearRenderTarget(ID3D11DeviceContext* deviceContext, ID3D11DepthStencilView* depthStencilView, 
+					   float red, float green, float blue, float alpha)
+{
+	float color[4];
+
+
+	// Setup the color to clear the buffer to.
+	color[0] = red;
+	color[1] = green;
+	color[2] = blue;
+	color[3] = alpha;
+
+	// Clear the back buffer.
+	deviceContext-&gt;ClearRenderTargetView(m_renderTargetView, color);
+    
+	// Clear the depth buffer.
+	deviceContext-&gt;ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GetShaderResourceView function returns the render to texture data as a shader resource view.
+This way whatever has been rendered to the render target view can be used as a texture in different shaders that call this function.
+Where you would normally send a texture into a shader you can instead send a call to this function in its place and the render to texture will be used.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">ID3D11ShaderResourceView* RenderTextureClass::GetShaderResourceView()
+{
+	return m_shaderResourceView;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Debugwindowclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The DebugWindowClass is just the BitmapClass renamed and no longer has a TextureClass inside it.
+The intention is to treat this object as a 2D window that renders the render to texture image on the screen for debugging purposes instead of the 
+regular texture image.
+The code is exactly the same as the BitmapClass in the 2D rendering tutorial so if you want a more in depth explanation please see that tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: debugwindowclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _DEBUGWINDOWCLASS_H_
+#define _DEBUGWINDOWCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: DebugWindowClass
+////////////////////////////////////////////////////////////////////////////////
+class DebugWindowClass
+{
+private:
+	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
+	};
+
+public:
+	DebugWindowClass();
+	DebugWindowClass(const DebugWindowClass&amp;);
+	~DebugWindowClass();
+
+	bool Initialize(ID3D11Device*, int, int, int, int);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, int);
+
+	int GetIndexCount();
+
+private:
+	bool InitializeBuffers(ID3D11Device*);
+	void ShutdownBuffers();
+	bool UpdateBuffers(ID3D11DeviceContext*, int, int);
+	void RenderBuffers(ID3D11DeviceContext*);
+
+private:
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+	int m_vertexCount, m_indexCount;
+	int m_screenWidth, m_screenHeight;
+	int m_bitmapWidth, m_bitmapHeight;
+	int m_previousPosX, m_previousPosY;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Debugwindowclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: debugwindowclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "debugwindowclass.h"
+
+
+DebugWindowClass::DebugWindowClass()
+{
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+}
+
+
+DebugWindowClass::DebugWindowClass(const DebugWindowClass&amp; other)
+{
+}
+
+
+DebugWindowClass::~DebugWindowClass()
+{
+}
+
+
+bool DebugWindowClass::Initialize(ID3D11Device* device, int screenWidth, int screenHeight, int bitmapWidth, int bitmapHeight)
+{
+	bool result;
+
+
+	// Store the screen size.
+	m_screenWidth = screenWidth;
+	m_screenHeight = screenHeight;
+
+	// Store the size in pixels that this bitmap should be rendered at.
+	m_bitmapWidth = bitmapWidth;
+	m_bitmapHeight = bitmapHeight;
+
+	// Initialize the previous rendering position to negative one.
+	m_previousPosX = -1;
+	m_previousPosY = -1;
+
+	// Initialize the vertex and index buffers.
+	result = InitializeBuffers(device);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+void DebugWindowClass::Shutdown()
+{
+	// Shutdown the vertex and index buffers.
+	ShutdownBuffers();
+
+	return;
+}
+
+
+bool DebugWindowClass::Render(ID3D11DeviceContext* deviceContext, int positionX, int positionY)
+{
+	bool result;
+
+
+	// Re-build the dynamic vertex buffer for rendering to possibly a different location on the screen.
+	result = UpdateBuffers(deviceContext, positionX, positionY);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	RenderBuffers(deviceContext);
+
+	return true;
+}
+
+
+int DebugWindowClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+
+
+bool DebugWindowClass::InitializeBuffers(ID3D11Device* device)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+	int i;
+
+
+	// Set the number of vertices in the vertex array.
+	m_vertexCount = 6;
+
+	// Set the number of indices in the index array.
+	m_indexCount = m_vertexCount;
+
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+
+	// Initialize vertex array to zeros at first.
+	memset(vertices, 0, (sizeof(VertexType) * m_vertexCount));
+
+	// Load the index array with data.
+	for(i=0; i&lt;m_indexCount; i++)
+	{
+		indices[i] = i;
+	}
+
+	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+
+
+void DebugWindowClass::ShutdownBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+
+
+bool DebugWindowClass::UpdateBuffers(ID3D11DeviceContext* deviceContext, int positionX, int positionY)
+{
+	float left, right, top, bottom;
+	VertexType* vertices;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	VertexType* verticesPtr;
+	HRESULT result;
+
+
+	// If the position we are rendering this bitmap to has not changed then don't update the vertex buffer since it
+	// currently has the correct parameters.
+	if((positionX == m_previousPosX) &amp;&amp; (positionY == m_previousPosY))
+	{
+		return true;
+	}
+	
+	// If it has changed then update the position it is being rendered to.
+	m_previousPosX = positionX;
+	m_previousPosY = positionY;
+
+	// Calculate the screen coordinates of the left side of the bitmap.
+	left = (float)((m_screenWidth / 2) * -1) + (float)positionX;
+
+	// Calculate the screen coordinates of the right side of the bitmap.
+	right = left + (float)m_bitmapWidth;
+
+	// Calculate the screen coordinates of the top of the bitmap.
+	top = (float)(m_screenHeight / 2) - (float)positionY;
+
+	// Calculate the screen coordinates of the bottom of the bitmap.
+	bottom = top - (float)m_bitmapHeight;
+
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Load the vertex array with data.
+	// First triangle.
+	vertices[0].position = D3DXVECTOR3(left, top, 0.0f);  // Top left.
+	vertices[0].texture = D3DXVECTOR2(0.0f, 0.0f);
+
+	vertices[1].position = D3DXVECTOR3(right, bottom, 0.0f);  // Bottom right.
+	vertices[1].texture = D3DXVECTOR2(1.0f, 1.0f);
+
+	vertices[2].position = D3DXVECTOR3(left, bottom, 0.0f);  // Bottom left.
+	vertices[2].texture = D3DXVECTOR2(0.0f, 1.0f);
+
+	// Second triangle.
+	vertices[3].position = D3DXVECTOR3(left, top, 0.0f);  // Top left.
+	vertices[3].texture = D3DXVECTOR2(0.0f, 0.0f);
+
+	vertices[4].position = D3DXVECTOR3(right, top, 0.0f);  // Top right.
+	vertices[4].texture = D3DXVECTOR2(1.0f, 0.0f);
+
+	vertices[5].position = D3DXVECTOR3(right, bottom, 0.0f);  // Bottom right.
+	vertices[5].texture = D3DXVECTOR2(1.0f, 1.0f);
+
+	// Lock the vertex buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the vertex buffer.
+	verticesPtr = (VertexType*)mappedResource.pData;
+
+	// Copy the data into the vertex buffer.
+	memcpy(verticesPtr, (void*)vertices, (sizeof(VertexType) * m_vertexCount));
+
+	// Unlock the vertex buffer.
+	deviceContext-&gt;Unmap(m_vertexBuffer, 0);
+
+	// Release the vertex array as it is no longer needed.
+	delete [] vertices;
+	vertices = 0;
+
+	return true;
+}
+
+
+void DebugWindowClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType); 
+	offset = 0;
+    
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>D3dclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The D3DClass has been slightly modified.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: d3dclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _D3DCLASS_H_
+#define _D3DCLASS_H_
+
+
+/////////////
+// LINKING //
+/////////////
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dx11.lib")
+#pragma comment(lib, "d3dx10.lib")
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;dxgi.h&gt;
+#include &lt;d3dcommon.h&gt;
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: D3DClass
+////////////////////////////////////////////////////////////////////////////////
+class D3DClass
+{
+public:
+	D3DClass();
+	D3DClass(const D3DClass&amp;);
+	~D3DClass();
+
+	bool Initialize(int, int, bool, HWND, bool, float, float);
+	void Shutdown();
+	
+	void BeginScene(float, float, float, float);
+	void EndScene();
+
+	ID3D11Device* GetDevice();
+	ID3D11DeviceContext* GetDeviceContext();
+
+	void GetProjectionMatrix(D3DXMATRIX&amp;);
+	void GetWorldMatrix(D3DXMATRIX&amp;);
+	void GetOrthoMatrix(D3DXMATRIX&amp;);
+
+	void TurnZBufferOn();
+	void TurnZBufferOff();
+
+	void TurnOnAlphaBlending();
+	void TurnOffAlphaBlending();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There is now a new function called GetDepthStencilView for getting access to the depth stencil view and
+a new function called SetBackBufferRenderTarget for setting the back buffer render target in this class to be the active one.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	ID3D11DepthStencilView* GetDepthStencilView();
+	void SetBackBufferRenderTarget();
+
+private:
+	bool m_vsync_enabled;
+	
+	IDXGISwapChain* m_swapChain;
+	ID3D11Device* m_device;
+	ID3D11DeviceContext* m_deviceContext;
+	ID3D11RenderTargetView* m_renderTargetView;
+	ID3D11Texture2D* m_depthStencilBuffer;
+	ID3D11DepthStencilState* m_depthStencilState;
+	ID3D11DepthStencilView* m_depthStencilView;
+	ID3D11RasterizerState* m_rasterState;
+
+	D3DXMATRIX m_projectionMatrix;
+	D3DXMATRIX m_worldMatrix;
+	D3DXMATRIX m_orthoMatrix;
+
+	ID3D11DepthStencilState* m_depthDisabledStencilState;
+	ID3D11BlendState* m_alphaEnableBlendingState;
+	ID3D11BlendState* m_alphaDisableBlendingState;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>D3dclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will just cover the functions that have changed in this class since the previous tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: d3dclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "d3dclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetDepthStencilView gives calling objects access to the depth stencil view.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">ID3D11DepthStencilView* D3DClass::GetDepthStencilView()
+{
+	return m_depthStencilView;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetBackBufferRenderTarget function will set the back buffer in this class as the current render target.
+This will usually be called after the render to texture has completed and we want to render the scene to the back buffer again.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void D3DClass::SetBackBufferRenderTarget()
+{
+	// Bind the render target view and depth stencil buffer to the output render pipeline.
+	m_deviceContext-&gt;OMSetRenderTargets(1, &amp;m_renderTargetView, m_depthStencilView);
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have includes from the 3D model tutorial for rendering the 3D cube as well as includes to render the debug window and render to texture.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "modelclass.h"
+#include "lightshaderclass.h"
+#include "lightclass.h"
+#include "rendertextureclass.h"
+#include "debugwindowclass.h"
+#include "textureshaderclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+	bool Render();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Notice that we have two new private render functions.
+Since we are splitting the render into two passes (once for render to texture, once for normal rendering) we needed two functions.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">private:
+	bool RenderToTexture();
+	bool RenderScene();
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	ModelClass* m_Model;
+	LightShaderClass* m_LightShader;
+	LightClass* m_Light;
+	RenderTextureClass* m_RenderTexture;
+	DebugWindowClass* m_DebugWindow;
+	TextureShaderClass* m_TextureShader;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will just cover the functions that have changed in this class since the previous tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor initializes the private member variables to null.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_Model = 0;
+	m_LightShader = 0;
+	m_Light = 0;
+	m_RenderTexture = 0;
+	m_DebugWindow = 0;
+	m_TextureShader = 0;
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+		
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Create the model object.
+	m_Model = new ModelClass;
+	if(!m_Model)
+	{
+		return false;
+	}
+
+	// Initialize the model object.
+	result = m_Model-&gt;Initialize(m_D3D-&gt;GetDevice(), L"../Engine/data/seafloor.dds", "../Engine/data/cube.txt");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light shader object.
+	m_LightShader = new LightShaderClass;
+	if(!m_LightShader)
+	{
+		return false;
+	}
+
+	// Initialize the light shader object.
+	result = m_LightShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the light object.
+	m_Light = new LightClass;
+	if(!m_Light)
+	{
+		return false;
+	}
+
+	// Initialize the light object.
+	m_Light-&gt;SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light-&gt;SetDirection(0.0f, 0.0f, 1.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We create and initialize the new render to texture object here.
+Notice for the size of the texture I send in the screen width and height as I want to render the entire screen evenly to a texture of the same size.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the render to texture object.
+	m_RenderTexture = new RenderTextureClass;
+	if(!m_RenderTexture)
+	{
+		return false;
+	}
+
+	// Initialize the render to texture object.
+	result = m_RenderTexture-&gt;Initialize(m_D3D-&gt;GetDevice(), screenWidth, screenHeight);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we create and initialize a new debug window object.
+Notice I have made the window size 100x100.
+There will obviously be some distortion since we will be mapping a full screen image down to a 100x100 texture.
+To fix the aspect ratio (if it is important for your purposes) then just make sure the debug window is sized smaller but with the same aspect ratio.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the debug window object.
+	m_DebugWindow = new DebugWindowClass;
+	if(!m_DebugWindow)
+	{
+		return false;
+	}
+
+	// Initialize the debug window object.
+	result = m_DebugWindow-&gt;Initialize(m_D3D-&gt;GetDevice(), screenWidth, screenHeight, 100, 100);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the debug window object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+	if(!m_TextureShader)
+	{
+		return false;
+	}
+
+	// Initialize the texture shader object.
+	result = m_TextureShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+	// Release the texture shader object.
+	if(m_TextureShader)
+	{
+		m_TextureShader-&gt;Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We release the new DebugWindowClass and RenderTextureClass objects here in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the debug window object.
+	if(m_DebugWindow)
+	{
+		m_DebugWindow-&gt;Shutdown();
+		delete m_DebugWindow;
+		m_DebugWindow = 0;
+	}
+
+	// Release the render to texture object.
+	if(m_RenderTexture)
+	{
+		m_RenderTexture-&gt;Shutdown();
+		delete m_RenderTexture;
+		m_RenderTexture = 0;
+	}
+
+	// Release the light object.
+	if(m_Light)
+	{
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the light shader object.
+	if(m_LightShader)
+	{
+		m_LightShader-&gt;Shutdown();
+		delete m_LightShader;
+		m_LightShader = 0;
+	}
+
+	// Release the model object.
+	if(m_Model)
+	{
+		m_Model-&gt;Shutdown();
+		delete m_Model;
+		m_Model = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the Direct3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Render()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, orthoMatrix;
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The first pass of our render is to a texture now.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Render the entire scene to the texture first.
+	result = RenderToTexture();
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The second pass of our render is to the back buffer as normal.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Render the scene as normal to the back buffer.
+	result = RenderScene();
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Then after the rendering is complete we render the 2D debug window so we can see the render to texture as a 2D image at the 50x50 pixel location.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+
+	// Get the world, view, and ortho matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetOrthoMatrix(orthoMatrix);
+
+	// Put the debug window vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	result = m_DebugWindow-&gt;Render(m_D3D-GetDeviceContext(), 50, 50);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Render the debug window using the texture shader.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_DebugWindow-&gt;GetIndexCount(), worldMatrix, viewMatrix,
+					 orthoMatrix, m_RenderTexture-&gt;GetShaderResourceView());
+	if(!result)
+	{
+		return false;
+	}
+
+
+	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+RenderToTexture is one of the new private rendering functions.
+It sets the render to texture view as the location to render all graphics too.
+After the scene is rendered it sets the render location back to the normal back buffer using the D3DClass object.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::RenderToTexture()
+{
+	bool result;
+
+
+	// Set the render target to be the render to texture.
+	m_RenderTexture-&gt;SetRenderTarget(m_D3D-&gt;GetDeviceContext(), m_D3D-&gt;GetDepthStencilView());
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Clear the render to texture background to blue so we can differentiate it from the rest of the normal scene.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Clear the render to texture.
+	m_RenderTexture-&gt;ClearRenderTarget(m_D3D-&gt;GetDeviceContext(), m_D3D-&gt;GetDepthStencilView(), 0.0f, 0.0f, 1.0f, 1.0f);
+
+	// Render the scene now and it will draw to the render to texture instead of the back buffer.
+	result = RenderScene();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Reset the render target back to the original back buffer and not the render to texture anymore.
+	m_D3D-&gt;SetBackBufferRenderTarget();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The RenderScene function is another one of the new private rendering functions.
+It renders the entire scene in one function so we can just set where we want the scene rendered to and then call this function.
+In this tutorial we call this function once in the RenderToTexture function to render the scene to a texture, and then 
+we call it again in the Render function to render it to the back buffer as normal.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::RenderScene()
+{
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+	static float rotation = 0.0f;
+
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, and projection matrices from the camera and d3d objects.
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+
+	// Update the rotation variable each frame.
+	rotation += (float)D3DX_PI * 0.005f;
+	if(rotation &gt; 360.0f)
+	{
+		rotation -= 360.0f;
+	}
+
+	D3DXMatrixRotationY(&amp;worldMatrix, rotation);
+
+	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model-&gt;Render(m_D3D-GetDeviceContext());
+
+	// Render the model using the light shader.
+	result = m_LightShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Model-&gt;GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, 
+				       m_Model-&gt;GetTexture(), m_Light-&gt;GetDirection(), m_Light-&gt;GetDiffuseColor());
+	if(!result)
+	{
+		return false;
+	}
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now you should understand the basics of how to use render to texture as well as have an idea of how to implement the same concept in your projects to
+match your graphical needs.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 22_ Render to Texture_files/pic0073.gif" width="702" height="396"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the project and run it.  You should get a spinning cube as well as a smaller spinning cube on a blue background showing the render to texture effect.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Modify the debug window to ensure the aspect ratio is correct for different monitor resolutions.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Change the 3D scene and ensure it renders correctly to a render to texture object.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Change the camera angle at which the render to texture sees your 3D scene.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+5. Use the render to texture as a shader input to one of your own shaders and modify the result (maybe add noise, scan lines, or something easy like that).
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2008 Project: <a href="http://www.rastertek.com/dx11tut22.zip">dx11tut22.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src22.zip">dx11src22.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe22.zip">dx11exe22.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 22_ Render to Texture_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 22_ Render to Texture_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

@@ -1,0 +1,1271 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut15.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 15: FPS, CPU Usage, and Timers</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 15: FPS, CPU Usage, and Timers
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 15_ FPS, CPU Usage, and Timers_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will introduce three new classes that will encapsulate the functionality of a frames per second counter, a cpu usage counter, 
+and a high precision timer.  The code in this tutorial is based on the code from the Font Engine tutorial.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The first new class is the FpsClass. 
+The FpsClass will handle recording the frames per second that the application is running at.
+Knowing how many frames are rendered every second gives us a good metric for measuring our application's performance.
+This is one of the industry standard metrics that is used to determine acceptable graphics render speed.
+It is also useful when implementing new features to see how they impact the frame speed.
+If the new feature cuts the frame speed in half then you can immediately realize you have a major problem by using just this simple counter.
+Keep in mind that the current standard fps speed for computers is 60 fps.  
+Anything below 60 fps is considered to be performing poorly, and anything below 30 is very noticeable to the human eye.
+A general rule when coding is keep your fps maximized and if a properly implemented new feature makes a serious dent in that speed then it needs to be justified
+and at a minimum taken note of.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The second new class is the CpuClass. 
+This will handle recording the cpu usage so that we can display the current percentage of cpu use to the screen.
+Knowing the cpu usage can be useful for debugging new changes to the code similar to how fps is used.
+It provides a simple and immediate metric for identifying recently implemented poor code or algorithms.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The final new class is the TimerClass. 
+This is a high precision timer we can use for timing events and ensuring our application and its various components all synchronize to a common time frame.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The frame work for this tutorial with the three new classes looks like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 15_ FPS, CPU Usage, and Timers_files/pic0041.gif" width="439" height="261"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will start the tutorial by examining the three new classes.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Fpsclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The FpsClass is simply a counter with a timer associated with it. 
+It counts how many frames occur in a one second period and constantly updates that count.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: fpsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _FPSCLASS_H_
+#define _FPSCLASS_H_
+
+
+/////////////
+// LINKING //
+/////////////
+#pragma comment(lib, "winmm.lib")
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;windows.h&gt;
+#include &lt;mmsystem.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: FpsClass
+////////////////////////////////////////////////////////////////////////////////
+class FpsClass
+{
+public:
+	FpsClass();
+	FpsClass(const FpsClass&amp;);
+	~FpsClass();
+
+	void Initialize();
+	void Frame();
+	int GetFps();
+
+private:
+	int m_fps, m_count;
+	unsigned long m_startTime;
+};
+
+#endif
+</font></pre>
+ 
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Fpsclass.cpp</u></font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: fpsclass.cpp
+///////////////////////////////////////////////////////////////////////////////
+#include "fpsclass.h"
+
+
+FpsClass::FpsClass()
+{
+}
+
+
+FpsClass::FpsClass(const FpsClass&amp; other)
+{
+}
+
+
+FpsClass::~FpsClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function sets all the counters to zero and starts the timer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void FpsClass::Initialize()
+{
+	m_fps = 0;
+	m_count = 0;
+	m_startTime = timeGetTime();
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Frame function must be called each frame so that it can increment the frame count by 1.
+If it finds that one second has elapsed then it will store the frame count in the m_fps variable.
+It then resets the count and starts the timer again.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void FpsClass::Frame()
+{
+	m_count++;
+
+	if(timeGetTime() &gt;= (m_startTime + 1000))
+	{
+		m_fps = m_count;
+		m_count = 0;
+		
+		m_startTime = timeGetTime();
+	}
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetFps returns the frame per second speed for the last second that just passed.
+This function should be constantly queried so the latest fps can be displayed to the screen.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">int FpsClass::GetFps()
+{
+	return m_fps;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Cpuclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The CpuClass is used to determine the percentage of total cpu use that is occurring each second.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: cpuclass.h
+///////////////////////////////////////////////////////////////////////////////
+#ifndef _CPUCLASS_H_
+#define _CPUCLASS_H_
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We use the pdh library to query the cpu usage.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">/////////////
+// LINKING //
+/////////////
+#pragma comment(lib, "pdh.lib")
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;pdh.h&gt;
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Class name: CpuClass
+///////////////////////////////////////////////////////////////////////////////
+class CpuClass
+{
+public:
+	CpuClass();
+	CpuClass(const CpuClass&amp;);
+	~CpuClass();
+
+	void Initialize();
+	void Shutdown();
+	void Frame();
+	int GetCpuPercentage();
+
+private:
+	bool m_canReadCpu;
+	HQUERY m_queryHandle;
+	HCOUNTER m_counterHandle;
+	unsigned long m_lastSampleTime;
+	long m_cpuUsage;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Cpuclass.cpp</u></font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: cpuclass.cpp
+///////////////////////////////////////////////////////////////////////////////
+#include "cpuclass.h"
+
+
+CpuClass::CpuClass()
+{
+}
+
+
+CpuClass::CpuClass(const CpuClass&amp; other)
+{
+}
+
+
+CpuClass::~CpuClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function will setup the handle for querying the cpu on its usage. 
+The query setup here will combine the usage of all the cpus in the system and gives us back a total instead of each individual cpu's usage. 
+If it can't get a query handle or poll the cpu usage for whatever reason it will set the m_canReadCpu flag to false and just keep the cpu usage at zero percent. 
+Some cpus and operating systems privilege levels can cause this to fail.
+We also start the timer so we only sample the cpu usage once a second.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void CpuClass::Initialize()
+{
+	PDH_STATUS status;
+
+
+	// Initialize the flag indicating whether this object can read the system cpu usage or not.
+	m_canReadCpu = true;
+
+	// Create a query object to poll cpu usage.
+	status = PdhOpenQuery(NULL, 0, &amp;m_queryHandle);
+	if(status != ERROR_SUCCESS)
+	{
+		m_canReadCpu = false;
+	}
+
+	// Set query object to poll all cpus in the system.
+	status = PdhAddCounter(m_queryHandle, TEXT("\\Processor(_Total)\\% processor time"), 0, &amp;m_counterHandle);
+	if(status != ERROR_SUCCESS)
+	{
+		m_canReadCpu = false;
+	}
+
+	m_lastSampleTime = GetTickCount(); 
+
+	m_cpuUsage = 0;
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function releases the handle we used to query the cpu usage.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void CpuClass::Shutdown()
+{
+	if(m_canReadCpu)
+	{
+		PdhCloseQuery(m_queryHandle);
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Just like the FpsClass we have to call the Frame function each frame.
+But to reduce the amount of querying we use a m_lastSampleTime variable to ensure we only sample once a second. 
+So each second we ask the cpu for its usage and save that value in m_cpuUsage.
+More than this is not necessary.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void CpuClass::Frame()
+{
+	PDH_FMT_COUNTERVALUE value; 
+
+	if(m_canReadCpu)
+	{
+		if((m_lastSampleTime + 1000) &lt; GetTickCount())
+		{
+			m_lastSampleTime = GetTickCount(); 
+
+			PdhCollectQueryData(m_queryHandle);
+        
+			PdhGetFormattedCounterValue(m_counterHandle, PDH_FMT_LONG, NULL, &amp;value);
+
+			m_cpuUsage = value.longValue;
+		}
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GetCpuPercentage function returns the value of the current cpu usage to any calling function. 
+Once again if it couldn't read the cpu for whatever reason we just set the usage to zero.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">int CpuClass::GetCpuPercentage()
+{
+	int usage;
+
+	if(m_canReadCpu)
+	{
+		usage = (int)m_cpuUsage;
+	}
+	else
+	{
+		usage = 0;
+	}
+
+	return usage;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Timerclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The TimerClass is a high precision timer that measures the exact time between frames of execution. 
+Its primary use is for synchronizing objects that require a standard time frame for movement. 
+In this tutorial we won't have a use for it but we will implement it in the code so you can see how to apply it to your projects.
+The most common usage of the TimerClass is to use the frame time to figure out what percentage of a second has passed in the current frame
+and then move the objects by that percentage.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: timerclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _TIMERCLASS_H_
+#define _TIMERCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;windows.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: TimerClass
+////////////////////////////////////////////////////////////////////////////////
+class TimerClass
+{
+public:
+	TimerClass();
+	TimerClass(const TimerClass&amp;);
+	~TimerClass();
+
+	bool Initialize();
+	void Frame();
+
+	float GetTime();
+
+private:
+	INT64 m_frequency;
+	float m_ticksPerMs;
+	INT64 m_startTime;
+	float m_frameTime;
+};
+
+#endif
+</font></pre>
+ 
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Timerclass.cpp</u></font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: timerclass.cpp
+///////////////////////////////////////////////////////////////////////////////
+#include "timerclass.h"
+
+
+TimerClass::TimerClass()
+{
+}
+
+
+TimerClass::TimerClass(const TimerClass&amp; other)
+{
+}
+
+
+TimerClass::~TimerClass()
+{
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Initialize function will first query the system to see if it supports high frequency timers. 
+If it returns a frequency then we use that value to determine how many counter ticks will occur each millisecond.
+We can then use that value each frame to calculate the frame time.
+At the end of the Initialize function we query for the start time of this frame to start the timing.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool TimerClass::Initialize()
+{
+	// Check to see if this system supports high performance timers.
+	QueryPerformanceFrequency((LARGE_INTEGER*)&amp;m_frequency);
+	if(m_frequency == 0)
+	{
+		return false;
+	}
+
+	// Find out how many times the frequency counter ticks every millisecond.
+	m_ticksPerMs = (float)(m_frequency / 1000);
+
+	QueryPerformanceCounter((LARGE_INTEGER*)&amp;m_startTime);
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Frame function is called for every single loop of execution by the main program. 
+This way we can calculate the difference of time between loops and determine the time it took to execute this frame. 
+We query, calculate, and then store the time for this frame into m_frameTime so that it can be used by any calling object for synchronization.
+We then store the current time as the start of the next frame.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void TimerClass::Frame()
+{
+	INT64 currentTime;
+	float timeDifference;
+
+
+	QueryPerformanceCounter((LARGE_INTEGER*)&amp; currentTime);
+
+	timeDifference = (float)(currentTime - m_startTime);
+
+	m_frameTime = timeDifference / m_ticksPerMs;
+
+	m_startTime = currentTime;
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetTime returns the most recent frame time that was calculated.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">float TimerClass::GetTime()
+{
+	return m_frameTime;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Systemclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that we have looked at the three new classes we can examine how they fit into the framework. 
+For all three new classes they will all be located under SystemClass. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: systemclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _SYSTEMCLASS_H_
+#define _SYSTEMCLASS_H_
+
+
+///////////////////////////////
+// PRE-PROCESSING DIRECTIVES //
+///////////////////////////////
+#define WIN32_LEAN_AND_MEAN
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;windows.h&gt;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "inputclass.h"
+#include "graphicsclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We include the three new classes here.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">#include "fpsclass.h"
+#include "cpuclass.h"
+#include "timerclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: SystemClass
+////////////////////////////////////////////////////////////////////////////////
+class SystemClass
+{
+public:
+	SystemClass();
+	SystemClass(const SystemClass&amp;);
+	~SystemClass();
+
+	bool Initialize();
+	void Shutdown();
+	void Run();
+
+	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
+
+private:
+	bool Frame();
+	void InitializeWindows(int&amp;, int&amp;);
+	void ShutdownWindows();
+
+private:
+	LPCWSTR m_applicationName;
+	HINSTANCE m_hinstance;
+	HWND m_hwnd;
+
+	InputClass* m_Input;
+	GraphicsClass* m_Graphics;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We create a new object for each of the three new classes.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	FpsClass* m_Fps;
+	CpuClass* m_Cpu;
+	TimerClass* m_Timer;
+};
+
+
+/////////////////////////
+// FUNCTION PROTOTYPES //
+/////////////////////////
+static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+
+/////////////
+// GLOBALS //
+/////////////
+static SystemClass* ApplicationHandle = 0;
+
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Systemclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will cover just the changes to this class since the font tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: systemclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "systemclass.h"
+
+
+SystemClass::SystemClass()
+{
+	m_Input = 0;
+	m_Graphics = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the three new objects to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	m_Fps = 0;
+	m_Cpu = 0;
+	m_Timer = 0;
+}
+
+
+bool SystemClass::Initialize()
+{
+	int screenWidth, screenHeight;
+	bool result;
+
+
+	// Initialize the width and height of the screen to zero before sending the variables into the function.
+	screenWidth = 0;
+	screenHeight = 0;
+
+	// Initialize the windows api.
+	InitializeWindows(screenWidth, screenHeight);
+
+	// Create the input object.  This object will be used to handle reading the keyboard input from the user.
+	m_Input = new InputClass;
+	if(!m_Input)
+	{
+		return false;
+	}
+
+	// Initialize the input object.
+	result = m_Input-&gt;Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight);
+	if(!result)
+	{
+		MessageBox(m_hwnd, L"Could not initialize the input object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the graphics object.  This object will handle rendering all the graphics for this application.
+	m_Graphics = new GraphicsClass;
+	if(!m_Graphics)
+	{
+		return false;
+	}
+
+	// Initialize the graphics object.
+	result = m_Graphics-&gt;Initialize(screenWidth, screenHeight, m_hwnd);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the FpsClass.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the fps object.
+	m_Fps = new FpsClass;
+	if(!m_Fps)
+	{
+		return false;
+	}
+
+	// Initialize the fps object.
+	m_Fps-&gt;Initialize();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the CpuClass.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the cpu object.
+	m_Cpu = new CpuClass;
+	if(!m_Cpu)
+	{
+		return false;
+	}
+
+	// Initialize the cpu object.
+	m_Cpu-&gt;Initialize();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Create and initialize the TimerClass.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the timer object.
+	m_Timer = new TimerClass;
+	if(!m_Timer)
+	{
+		return false;
+	}
+
+	// Initialize the timer object.
+	result = m_Timer-&gt;Initialize();
+	if(!result)
+	{
+		MessageBox(m_hwnd, L"Could not initialize the Timer object.", L"Error", MB_OK);
+		return false;
+	}
+
+	return true;
+}
+
+
+void SystemClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Release the three new class objects here in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Release the timer object.
+	if(m_Timer)
+	{
+		delete m_Timer;
+		m_Timer = 0;
+	}
+
+	// Release the cpu object.
+	if(m_Cpu)
+	{
+		m_Cpu-&gt;Shutdown();
+		delete m_Cpu;
+		m_Cpu = 0;
+	}
+
+	// Release the fps object.
+	if(m_Fps)
+	{
+		delete m_Fps;
+		m_Fps = 0;
+	}
+
+	// Release the graphics object.
+	if(m_Graphics)
+	{
+		m_Graphics-&gt;Shutdown();
+		delete m_Graphics;
+		m_Graphics = 0;
+	}
+
+	// Release the input object.
+	if(m_Input)
+	{
+		m_Input-&gt;Shutdown();
+		delete m_Input;
+		m_Input = 0;
+	}
+
+	// Shutdown the window.
+	ShutdownWindows();
+	
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The final change is the the Frame function. 
+Each of the new classes needs to call its own Frame function for each frame of execution the application goes through. 
+Once the Frame for each has been called we can now query for the updated data in each and send it into the GraphicsClass for use. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool SystemClass::Frame()
+{
+	bool result;
+
+
+	// Update the system stats.
+	m_Timer-&gt;Frame();
+	m_Fps-&gt;Frame();
+	m_Cpu-&gt;Frame();
+
+	// Do the input frame processing.
+	result = m_Input-&gt;Frame();
+	if(!result)
+	{
+		return false;
+	}
+
+	// Do the frame processing for the graphics object.
+	result = m_Graphics-&gt;Frame(m_Fps-&gt;GetFps(), m_Cpu-&gt;GetCpuPercentage(), m_Timer-&gt;GetTime());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Finally render the graphics to the screen.
+	result = m_Graphics-&gt;Render();
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We disable vsync for this tutorial so the application will run as fast as possible.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">const bool VSYNC_ENABLED = false;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "textclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame(int, int, float);
+	bool Render();
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	TextClass* m_Text;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will cover just the functions that have changed since the previous font tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Frame function now takes in the fps, cpu, and timer counts.
+The fps and cpu count are set in the TextClass so they can be rendered to the screen.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool GraphicsClass::Frame(int fps, int cpu, float frameTime)
+{
+	bool result;
+
+
+	// Set the frames per second.
+	result = m_Text-&gt;SetFps(fps, m_D3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Set the cpu usage.
+	result = m_Text-&gt;SetCpu(cpu, m_D3D-&gt;GetDeviceContext());
+	if(!result)
+	{
+		return false;
+	}
+
+	// Set the position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Textclass.h</u></font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: textclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _TEXTCLASS_H_
+#define _TEXTCLASS_H_
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "fontclass.h"
+#include "fontshaderclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: TextClass
+////////////////////////////////////////////////////////////////////////////////
+class TextClass
+{
+private:
+	struct SentenceType
+	{
+		ID3D11Buffer *vertexBuffer, *indexBuffer;
+		int vertexCount, indexCount, maxLength;
+		float red, green, blue;
+	};
+
+	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
+	};
+
+public:
+	TextClass();
+	TextClass(const TextClass&amp;);
+	~TextClass();
+
+	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, HWND, int, int, D3DXMATRIX);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now have two new functions for setting the fps count and the cpu usage.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	bool SetFps(int, ID3D11DeviceContext*);
+	bool SetCpu(int, ID3D11DeviceContext*);
+
+private:
+	bool InitializeSentence(SentenceType**, int, ID3D11Device*);
+	bool UpdateSentence(SentenceType*, char*, int, int, float, float, float, ID3D11DeviceContext*);
+	void ReleaseSentence(SentenceType**);
+	bool RenderSentence(ID3D11DeviceContext*, SentenceType*, D3DXMATRIX, D3DXMATRIX);
+
+private:
+	FontClass* m_Font;
+	FontShaderClass* m_FontShader;
+	int m_screenWidth, m_screenHeight;
+	D3DXMATRIX m_baseViewMatrix;
+	SentenceType* m_sentence1;
+	SentenceType* m_sentence2;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Textclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+I will cover just the functions that have changed since the previous font tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">///////////////////////////////////////////////////////////////////////////////
+// Filename: textclass.cpp
+///////////////////////////////////////////////////////////////////////////////
+#include "textclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetFps function takes the fps integer value given to it and then converts it to a string. 
+Once the fps count is in a string format it gets concatenated to another string so it has a prefix indicating that it is the fps speed. 
+After that it is stored in the sentence structure for rendering. 
+The SetFps function also sets the color of the fps string to green if above 60 fps, yellow if below 60 fps, and red if below 30 fps. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool TextClass::SetFps(int fps, ID3D11DeviceContext* deviceContext)
+{
+	char tempString[16];
+	char fpsString[16];
+	float red, green, blue;
+	bool result;
+
+
+	// Truncate the fps to below 10,000.
+	if(fps &gt; 9999)
+	{
+		fps = 9999;
+	}
+
+	// Convert the fps integer to string format.
+	_itoa_s(fps, tempString, 10);
+
+	// Setup the fps string.
+	strcpy_s(fpsString, "Fps: ");
+	strcat_s(fpsString, tempString);
+
+	// If fps is 60 or above set the fps color to green.
+	if(fps &gt;= 60)
+	{
+		red = 0.0f;
+		green = 1.0f;
+		blue = 0.0f;
+	}
+
+	// If fps is below 60 set the fps color to yellow.
+	if(fps &lt; 60)
+	{
+		red = 1.0f;
+		green = 1.0f;
+		blue = 0.0f;
+	}
+
+	// If fps is below 30 set the fps color to red.
+	if(fps &lt; 30)
+	{
+		red = 1.0f;
+		green = 0.0f;
+		blue = 0.0f;
+	}
+
+	// Update the sentence vertex buffer with the new string information.
+	result = UpdateSentence(m_sentence1, fpsString, 20, 20, red, green, blue, deviceContext);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The SetCpu function is similar to the SetFps function.
+It takes the cpu value and converts it to a string which is then stored in the sentence structure and rendered.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool TextClass::SetCpu(int cpu, ID3D11DeviceContext* deviceContext)
+{
+	char tempString[16];
+	char cpuString[16];
+	bool result;
+
+
+	// Convert the cpu integer to string format.
+	_itoa_s(cpu, tempString, 10);
+
+	// Setup the cpu string.
+	strcpy_s(cpuString, "Cpu: ");
+	strcat_s(cpuString, tempString);
+	strcat_s(cpuString, "%");
+
+	// Update the sentence vertex buffer with the new string information.
+	result = UpdateSentence(m_sentence2, cpuString, 20, 40, 0.0f, 1.0f, 0.0f, deviceContext);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+ 
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 15_ FPS, CPU Usage, and Timers_files/pic0040.gif" width="128" height="128"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now we can see the FPS and CPU usage while rendering our scenes. 
+As well we now have precision timers which we use to ensure translation and rotation of objects is consistent 
+regardless of the frame speed the application is running at.
+</font></p>
+ 
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the code and ensure you can see the fps and cpu values. Press escape to quit. 
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Turn on the vsync in the graphicsclass.h file to see what refresh speed your video card/monitor locks the application to.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2008 Project: <a href="http://www.rastertek.com/dx11tut15.zip">dx11tut15.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src15.zip">dx11src15.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe15.zip">dx11exe15.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 15_ FPS, CPU Usage, and Timers_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 15_ FPS, CPU Usage, and Timers_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

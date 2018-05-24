@@ -1,0 +1,761 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut08.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 8: Loading Maya 2011 Models</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 8: Loading Maya 2011 Models
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 8_ Loading Maya 2011 Models_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This tutorial will cover how to import static 3D models from Maya 2011.
+Note that this tutorial will be focused on Maya but it also applies to pretty much any other 3D modeling software package with some slight changes.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the previous tutorials we have already created our own model format and rendered 3D models using that format.  
+The goal now is to convert Maya 2011 models into our format and render them.
+I won't go into how to model 3D objects in Maya as there are hundreds of tutorials on the net already dedicated to that, 
+we will instead start at the point where you have a textured and triangulated 3D model ready for export.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+For the Maya export format we will use the .OBJ format as it is easily readable and good for beginners to start with.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To export your model in the .obj format you must first enable the .OBJ exporter in Maya.
+Click "Window", then "Settings/Preferences", then "Plug-in Manager".
+Scroll down to objExport.mll and select both "Loaded" and "Auto load".
+Now to export your model in this format click on "File", then "Export All".  Now at the bottom select "Files of type:" and scroll down and select "OBJexport".
+Give it a file name and hit "Export All" and it will export it to a text file with a .obj extension.
+To look at the file you can right click and select Open With and choose WordPad to read the file.  
+You will then see something that looks like the following:
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Cube.obj</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2"># This file uses centimeters as units for non-parametric coordinates.
+
+mtllib cube.mtl
+g default
+v -0.500000 -0.500000 0.500000
+v 0.500000 -0.500000 0.500000
+v -0.500000 0.500000 0.500000
+v 0.500000 0.500000 0.500000
+v -0.500000 0.500000 -0.500000
+v 0.500000 0.500000 -0.500000
+v -0.500000 -0.500000 -0.500000
+v 0.500000 -0.500000 -0.500000
+vt 0.001992 0.001992
+vt 0.998008 0.001992
+vt 0.001992 0.998008
+vt 0.998008 0.998008
+vt 0.001992 0.001992
+vt 0.998008 0.001992
+vt 0.001992 0.998008
+vt 0.998008 0.998008
+vt 0.001992 0.001992
+vt 0.998008 0.001992
+vt 0.001992 0.998008
+vt 0.998008 0.998008
+vt 0.001992 0.001992
+vt 0.998008 0.001992
+vt 0.001992 0.998008
+vt 0.998008 0.998008
+vt 0.001992 0.001992
+vt 0.998008 0.001992
+vt 0.001992 0.998008
+vt 0.998008 0.998008
+vt 0.998008 0.998008
+vt 0.001992 0.998008
+vt 0.998008 0.001992
+vt 0.001992 0.001992
+vn 0.000000 0.000000 1.000000
+vn 0.000000 0.000000 1.000000
+vn 0.000000 0.000000 1.000000
+vn 0.000000 0.000000 1.000000
+vn 0.000000 1.000000 0.000000
+vn 0.000000 1.000000 0.000000
+vn 0.000000 1.000000 0.000000
+vn 0.000000 1.000000 0.000000
+vn 0.000000 0.000000 -1.000000
+vn 0.000000 0.000000 -1.000000
+vn 0.000000 0.000000 -1.000000
+vn 0.000000 0.000000 -1.000000
+vn 0.000000 -1.000000 0.000000
+vn 0.000000 -1.000000 0.000000
+vn 0.000000 -1.000000 0.000000
+vn 0.000000 -1.000000 0.000000
+vn 1.000000 0.000000 0.000000
+vn 1.000000 0.000000 0.000000
+vn 1.000000 0.000000 0.000000
+vn 1.000000 0.000000 0.000000
+vn -1.000000 0.000000 0.000000
+vn -1.000000 0.000000 0.000000
+vn -1.000000 0.000000 0.000000
+vn -1.000000 0.000000 0.000000
+s 1
+g pCube1
+usemtl file1SG
+f 1/1/1 2/2/2 3/3/3
+f 3/3/3 2/2/2 4/4/4
+s 2
+f 3/13/5 4/14/6 5/15/7
+f 5/15/7 4/14/6 6/16/8
+s 3
+f 5/21/9 6/22/10 7/23/11
+f 7/23/11 6/22/10 8/24/12
+s 4
+f 7/17/13 8/18/14 1/19/15
+f 1/19/15 8/18/14 2/20/16
+s 5
+f 2/5/17 8/6/18 4/7/19
+f 4/7/19 8/6/18 6/8/20
+s 6
+f 7/9/21 1/10/22 5/11/23
+f 5/11/23 1/10/22 3/12/24
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This particular .OBJ model file represents a 3D cube.
+It has 8 vertices, 24 texture coordinates and normal vectors, and 6 sides made up of 12 faces in total.
+When examining the file you can ignore every line unless it starts with a "V", "VT", "VN", or "F".  
+The extra information in the file will not be needed for converting .obj to our file format.
+Lets look at what each of the important lines means:
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. The "V" lines are for the vertices.  The cube is made up of 8 vertices for the eight corners of the cube.  Each is listed in X, Y, Z float format.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. The "VT" lines are for the texture coordinates.  The cube is has 24 texture coordinates and most of them are duplicated since it records them for 
+every vertex in every triangle in the cube model.  They are listed in TU, TV float format.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. The "VN" lines are for the normal vectors.  The cube is has 24 normal vectors and most of them are duplicated again since it records them for 
+every vertex in every triangle in the cube model.  They are listed in NX, NY, NZ float format.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. The "F" lines are for each triangle (face) in the cube model.  
+The values listed are indexes into the vertices, texture coordinates, and normal vectors.
+The format of each face is:
+</font></p>
+
+<pre><font face="arial" color="#ffffff" size="2">f Vertex1/Texture1/Normal1 Vertex2/Texture2/Normal2 Vertex3/Texture3/Normal3
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+So a line that says "f 3/13/5 4/14/6 5/15/7" then translates to "Vertex3/Texture13/Normal5 Vertex4/Texture14/Normal6 Vertex5/Texture15/Normal7".
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The order the data is listed in the .obj file is very important.  For example the first vertex in the file corresponds to Vertex1 in the face list.
+This is the same for texture coordinates and normals as well.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Looking at the face lines in the .obj file notice that the three index groups per line make an individual triangle.
+And in the case of this cube model the 12 total faces make up the 6 sides of the cube that has 2 triangles per side.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Right hand to Left hand conversion</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+By default Maya 2011 is a right handed coordinate system and exports the .obj file data in right hand coordinates.
+To convert that data into a left handed system which DirectX 11 is by default you have to do the following:
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Invert the Z coordinate vertices.  In the code you will see it do this: vertices[vertexIndex].z = vertices[vertexIndex].z * -1.0f;
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Invert the TV texture coordinate.  In the code you will see it do this: texcoords[texcoordIndex].y = 1.0f - texcoords[texcoordIndex].y;
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Invert the NZ normal vertex.  In the code you will see it do this: normals[normalIndex].z = normals[normalIndex].z * -1.0f;
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Convert the drawing order from counter clockwise to clockwise.  
+In the code I simply read in the indexes in reverse order instead of re-organizing it after the fact:
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">fin &gt;&gt; faces[faceIndex].vIndex3 &gt;&gt; input2 &gt;&gt; faces[faceIndex].tIndex3 &gt;&gt; input2 &gt;&gt; faces[faceIndex].nIndex3;
+fin &gt;&gt; faces[faceIndex].vIndex2 &gt;&gt; input2 &gt;&gt; faces[faceIndex].tIndex2 &gt;&gt; input2 &gt;&gt; faces[faceIndex].nIndex2;
+fin &gt;&gt; faces[faceIndex].vIndex1 &gt;&gt; input2 &gt;&gt; faces[faceIndex].tIndex1 &gt;&gt; input2 &gt;&gt; faces[faceIndex].nIndex1;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With those four steps complete the model data will be ready for DirectX 11 to render correctly.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Main.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The program to convert the Maya 2011 .obj files into our DirectX 11 format is fairly simple and is a single program file called main.cpp.
+It opens a command prompt and asks for the name of the .obj file to convert.
+Once the user types in the name it will attempt to open the file and read in the data counts and build the structures required to read the data into.
+After that it reads the data into those structures and converts it to a left hand system.
+Once that is done it then writes the data out to a model.txt file.
+That file can then be renamed and used for rendering in DirectX 11 using the 3D model render project from the previous tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: main.cpp
+////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+
+//////////////
+// TYPEDEFS //
+//////////////
+typedef struct
+{
+	float x, y, z;
+}VertexType;
+
+typedef struct
+{
+	int vIndex1, vIndex2, vIndex3;
+	int tIndex1, tIndex2, tIndex3;
+	int nIndex1, nIndex2, nIndex3;
+}FaceType;
+
+
+/////////////////////////
+// FUNCTION PROTOTYPES //
+/////////////////////////
+void GetModelFilename(char*);
+bool ReadFileCounts(char*, int&amp;, int&amp;, int&amp;, int&amp;);
+bool LoadDataStructures(char*, int, int, int, int);
+
+
+//////////////////
+// MAIN PROGRAM //
+//////////////////
+int main()
+{
+	bool result;
+	char filename[256];
+	int vertexCount, textureCount, normalCount, faceCount;
+	char garbage;
+
+
+	// Read in the name of the model file.
+	GetModelFilename(filename);
+
+	// Read in the number of vertices, tex coords, normals, and faces so that the data structures can be initialized with the exact sizes needed.
+	result = ReadFileCounts(filename, vertexCount, textureCount, normalCount, faceCount);
+	if(!result)
+	{
+		return -1;
+	}
+
+	// Display the counts to the screen for information purposes.
+	cout &lt;&lt; endl;
+	cout &lt;&lt; "Vertices: " &lt;&lt; vertexCount &lt;&lt; endl;
+	cout &lt;&lt; "UVs:      " &lt;&lt; textureCount &lt;&lt; endl;
+	cout &lt;&lt; "Normals:  " &lt;&lt; normalCount &lt;&lt; endl;
+	cout &lt;&lt; "Faces:    " &lt;&lt; faceCount &lt;&lt; endl;
+
+	// Now read the data from the file into the data structures and then output it in our model format.
+	result = LoadDataStructures(filename, vertexCount, textureCount, normalCount, faceCount);
+	if(!result)
+	{
+		return -1;
+	}
+
+	// Notify the user the model has been converted.
+	cout &lt;&lt; "\nFile has been converted." &lt;&lt; endl;
+	cout &lt;&lt; "\nDo you wish to exit (y/n)? ";
+	cin &gt;&gt; garbage;
+
+	return 0;
+}
+
+
+void GetModelFilename(char* filename)
+{
+	bool done;
+	ifstream fin;
+
+
+	// Loop until we have a file name.
+	done = false;
+	while(!done)
+	{
+		// Ask the user for the filename.
+		cout &lt;&lt; "Enter model filename: ";
+
+		// Read in the filename.
+		cin &gt;&gt; filename;
+
+		// Attempt to open the file.
+		fin.open(filename);
+
+		if(fin.good())
+		{
+			// If the file exists and there are no problems then exit since we have the file name.
+			done = true;
+		}
+		else
+		{
+			// If the file does not exist or there was an issue opening it then notify the user and repeat the process.
+			fin.clear();
+			cout &lt;&lt; endl;
+			cout &lt;&lt; "File " &lt;&lt; filename &lt;&lt; " could not be opened." &lt;&lt; endl &lt;&lt; endl;
+		}
+	}
+
+	return;
+}
+
+
+bool ReadFileCounts(char* filename, int&amp; vertexCount, int&amp; textureCount, int&amp; normalCount, int&amp; faceCount)
+{
+	ifstream fin;
+	char input;
+
+
+	// Initialize the counts.
+	vertexCount = 0;
+	textureCount = 0;
+	normalCount = 0;
+	faceCount = 0;
+
+	// Open the file.
+	fin.open(filename);
+
+	// Check if it was successful in opening the file.
+	if(fin.fail() == true)
+	{
+		return false;
+	}
+
+	// Read from the file and continue to read until the end of the file is reached.
+	fin.get(input);
+	while(!fin.eof())
+	{
+		// If the line starts with 'v' then count either the vertex, the texture coordinates, or the normal vector.
+		if(input == 'v')
+		{
+			fin.get(input);
+			if(input == ' ') { vertexCount++; }
+			if(input == 't') { textureCount++; }
+			if(input == 'n') { normalCount++; }
+		}
+
+		// If the line starts with 'f' then increment the face count.
+		if(input == 'f')
+		{
+			fin.get(input);
+			if(input == ' ') { faceCount++; }
+		}
+		
+		// Otherwise read in the remainder of the line.
+		while(input != '\n')
+		{
+			fin.get(input);
+		}
+
+		// Start reading the beginning of the next line.
+		fin.get(input);
+	}
+
+	// Close the file.
+	fin.close();
+
+	return true;
+}
+
+
+bool LoadDataStructures(char* filename, int vertexCount, int textureCount, int normalCount, int faceCount)
+{
+	VertexType *vertices, *texcoords, *normals;
+	FaceType *faces;
+	ifstream fin;
+	int vertexIndex, texcoordIndex, normalIndex, faceIndex, vIndex, tIndex, nIndex;
+	char input, input2;
+	ofstream fout;
+
+
+	// Initialize the four data structures.
+	vertices = new VertexType[vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	texcoords = new VertexType[textureCount];
+	if(!texcoords)
+	{
+		return false;
+	}
+
+	normals = new VertexType[normalCount];
+	if(!normals)
+	{
+		return false;
+	}
+
+	faces = new FaceType[faceCount];
+	if(!faces)
+	{
+		return false;
+	}
+
+	// Initialize the indexes.
+	vertexIndex = 0;
+	texcoordIndex = 0;
+	normalIndex = 0;
+	faceIndex = 0;
+
+	// Open the file.
+	fin.open(filename);
+
+	// Check if it was successful in opening the file.
+	if(fin.fail() == true)
+	{
+		return false;
+	}
+
+	// Read in the vertices, texture coordinates, and normals into the data structures.
+	// Important: Also convert to left hand coordinate system since Maya uses right hand coordinate system.
+	fin.get(input);
+	while(!fin.eof())
+	{
+		if(input == 'v')
+		{
+			fin.get(input);
+
+			// Read in the vertices.
+			if(input == ' ') 
+			{ 
+				fin &gt;&gt; vertices[vertexIndex].x &gt;&gt; vertices[vertexIndex].y &gt;&gt; vertices[vertexIndex].z;
+
+				// Invert the Z vertex to change to left hand system.
+				vertices[vertexIndex].z = vertices[vertexIndex].z * -1.0f;
+				vertexIndex++; 
+			}
+
+			// Read in the texture uv coordinates.
+			if(input == 't') 
+			{ 
+				fin &gt;&gt; texcoords[texcoordIndex].x &gt;&gt; texcoords[texcoordIndex].y;
+
+				// Invert the V texture coordinates to left hand system.
+				texcoords[texcoordIndex].y = 1.0f - texcoords[texcoordIndex].y;
+				texcoordIndex++; 
+			}
+
+			// Read in the normals.
+			if(input == 'n') 
+			{ 
+				fin &gt;&gt; normals[normalIndex].x &gt;&gt; normals[normalIndex].y &gt;&gt; normals[normalIndex].z;
+
+				// Invert the Z normal to change to left hand system.
+				normals[normalIndex].z = normals[normalIndex].z * -1.0f;
+				normalIndex++; 
+			}
+		}
+
+		// Read in the faces.
+		if(input == 'f') 
+		{
+			fin.get(input);
+			if(input == ' ')
+			{
+				// Read the face data in backwards to convert it to a left hand system from right hand system.
+				fin &gt;&gt; faces[faceIndex].vIndex3 &gt;&gt; input2 &gt;&gt; faces[faceIndex].tIndex3 &gt;&gt; input2 &gt;&gt; faces[faceIndex].nIndex3
+				    &gt;&gt; faces[faceIndex].vIndex2 &gt;&gt; input2 &gt;&gt; faces[faceIndex].tIndex2 &gt;&gt; input2 &gt;&gt; faces[faceIndex].nIndex2
+				    &gt;&gt; faces[faceIndex].vIndex1 &gt;&gt; input2 &gt;&gt; faces[faceIndex].tIndex1 &gt;&gt; input2 &gt;&gt; faces[faceIndex].nIndex1;
+				faceIndex++;
+			}
+		}
+
+		// Read in the remainder of the line.
+		while(input != '\n')
+		{
+			fin.get(input);
+		}
+
+		// Start reading the beginning of the next line.
+		fin.get(input);
+	}
+
+	// Close the file.
+	fin.close();
+
+	// Open the output file.
+	fout.open("model.txt");
+	
+	// Write out the file header that our model format uses.
+	fout &lt;&lt; "Vertex Count: " &lt;&lt; (faceCount * 3) &lt;&lt; endl;
+	fout &lt;&lt; endl;
+	fout &lt;&lt; "Data:" &lt;&lt; endl;
+	fout &lt;&lt; endl;
+
+	// Now loop through all the faces and output the three vertices for each face.
+	for(int i=0; i&lt;faceIndex; i++)
+	{
+		vIndex = faces[i].vIndex1 - 1;
+		tIndex = faces[i].tIndex1 - 1;
+		nIndex = faces[i].nIndex1 - 1;
+
+		fout &lt;&lt; vertices[vIndex].x &lt;&lt; ' ' &lt;&lt; vertices[vIndex].y &lt;&lt; ' ' &lt;&lt; vertices[vIndex].z &lt;&lt; ' '
+		     &lt;&lt; texcoords[tIndex].x &lt;&lt; ' ' &lt;&lt; texcoords[tIndex].y &lt;&lt; ' '
+		     &lt;&lt; normals[nIndex].x &lt;&lt; ' ' &lt;&lt; normals[nIndex].y &lt;&lt; ' ' &lt;&lt; normals[nIndex].z &lt;&lt; endl;
+
+		vIndex = faces[i].vIndex2 - 1;
+		tIndex = faces[i].tIndex2 - 1;
+		nIndex = faces[i].nIndex2 - 1;
+
+		fout &lt;&lt; vertices[vIndex].x &lt;&lt; ' ' &lt;&lt; vertices[vIndex].y &lt;&lt; ' ' &lt;&lt; vertices[vIndex].z &lt;&lt; ' '
+		     &lt;&lt; texcoords[tIndex].x &lt;&lt; ' ' &lt;&lt; texcoords[tIndex].y &lt;&lt; ' '
+		     &lt;&lt; normals[nIndex].x &lt;&lt; ' ' &lt;&lt; normals[nIndex].y &lt;&lt; ' ' &lt;&lt; normals[nIndex].z &lt;&lt; endl;
+
+		vIndex = faces[i].vIndex3 - 1;
+		tIndex = faces[i].tIndex3 - 1;
+		nIndex = faces[i].nIndex3 - 1;
+
+		fout &lt;&lt; vertices[vIndex].x &lt;&lt; ' ' &lt;&lt; vertices[vIndex].y &lt;&lt; ' ' &lt;&lt; vertices[vIndex].z &lt;&lt; ' '
+		     &lt;&lt; texcoords[tIndex].x &lt;&lt; ' ' &lt;&lt; texcoords[tIndex].y &lt;&lt; ' '
+		     &lt;&lt; normals[nIndex].x &lt;&lt; ' ' &lt;&lt; normals[nIndex].y &lt;&lt; ' ' &lt;&lt; normals[nIndex].z &lt;&lt; endl;
+	}
+
+	// Close the output file.
+	fout.close();
+
+	// Release the four data structures.
+	if(vertices)
+	{
+		delete [] vertices;
+		vertices = 0;
+	}
+	if(texcoords)
+	{
+		delete [] texcoords;
+		texcoords = 0;
+	}
+	if(normals)
+	{
+		delete [] normals;
+		normals = 0;
+	}
+	if(faces)
+	{
+		delete [] faces;
+		faces = 0;
+	}
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We can now convert Maya 2011 .obj files into our simple model format.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 8_ Loading Maya 2011 Models_files/pic0022.gif" width="436" height="337"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the program and run it with the supplied .obj model file.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Create (or have someone else make for you) a Maya 2011 model and export it in .obj format and run this program to convert it.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Convert this code to read in and export a different model format that you might prefer.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2010 Project: <a href="http://www.rastertek.com/dx11tut08.zip">dx11tut08.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src08.zip">dx11src08.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe08.zip">dx11exe08.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 8_ Loading Maya 2011 Models_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 8_ Loading Maya 2011 Models_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

@@ -1,0 +1,1839 @@
+
+<!-- saved from url=(0039)http://www.rastertek.com/dx11tut11.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 11: 2D Rendering</title><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"></head>
+<body text="#FFFFFF" bgcolor="#000000">
+
+<p align="left"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 11: 2D Rendering
+</b></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 11_ 2D Rendering_files/pic1001.gif" width="800" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Being able to render 2D images to the screen is very useful. 
+For example most user interfaces, sprite systems, and text engines are made up of 2D images. 
+DirectX 11 allows you to render 2D images by mapping them to polygons and then rendering using an orthographic projection matrix. 
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>2D Screen Coordinates</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To render 2D images to the screen you will need to calculate the screen X and Y coordinates.
+For DirectX the middle of the screen is 0,0.
+From there the left side of the screen and the bottom side of the screen go in the negative direction.
+The right side of the screen and the top of the screen go in the positive direction.
+As an example take a screen that is 1024x768 resolution, the coordinates for the borders of the screen would be as follows:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 11_ 2D Rendering_files/pic0031.gif" width="375" height="273"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+So keep in mind that all your 2D rendering will need to work with these screen coordinate calculations and that 
+you will also need the size of the user's window/screen for correct placement of 2D images. 
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Disabling Z buffer in DirectX 11</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To draw in 2D you should be disabling the Z buffer.  When the Z buffer is turned off it will write the 2D data
+over top of whatever is in that pixel location.  Make sure to use the painter's algorithm and draw from the back to the front
+to ensure you get your expected rendering output.  
+Once you are done drawing 2D graphics re-enable the Z buffer again so you can render 3D objects properly again.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+To turn the Z buffer on and off you will need to create a second depth stencil state the same as your 3D one except with 
+DepthEnable set to false.  Then just use OMSetDepthStencilState to switch between the two states to turn the Z buffer on and off.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Dynamic Vertex Buffers</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Another new concept that will be introduced is dynamic vertex buffers.
+So far we have used static vertex buffers in the previous tutorials.
+The issue with static vertex buffers is that you can't change the data inside the buffer ever.
+Dynamic vertex buffers on the other hand allow us to manipulate the information inside the vertex buffer each frame if we need to.
+These buffers are much slower than static vertex buffers but that is the trade off for the extra functionality.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The reason we use dynamic vertex buffers with 2D rendering is because we often want to move the 2D image around the screen to different locations.
+A good example is a mouse pointer, it gets moved often so the vertex data that represents its position on the screen needs to change often as well.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Two extra things to note.  Don't use dynamic vertex buffers unless they are absolutely called for, they are quite a bit slower than static buffers.
+Secondly never destroy and recreate a static vertex buffer each frame, this can completely lock the video card (which I have seen on ATI but not on Nvidia) 
+and is far worse in overall performance when compared to using dynamic vertex buffers.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Orthographic Projection in DirectX 11</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The final new concept required to render in 2D is to use an orthographic projection matrix in place of the regular 3D projection matrix.
+This will allow you to render to 2D screen coordinates.  Remember that we already did create this matrix in the Direct3D initialization code:
+</font></p>
+ 
+<pre><font face="arial" color="#aaffaa" size="2">	// Create an orthographic projection matrix for 2D rendering.
+	D3DXMatrixOrthoLH(&amp;m_orthoMatrix, (float)screenWidth, (float)screenHeight, screenNear, screenDepth);
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Framework</u></font></p>
+ 
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The code in this tutorial is based on the previous tutorials.
+The major difference in this tutorial is that ModelClass has been replaced with BitmapClass and that we are using the TextureShaderClass again 
+instead of the LightShaderClass.
+The framework will look like the following:
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 11_ 2D Rendering_files/pic0032.gif" width="390" height="199"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Bitmapclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+BitmapClass will be used to represent an individual 2D image that needs to be rendered to the screen.
+For every 2D image you have you will need a new BitmapClass for each.
+Note that this class is just the ModelClass re-written to handle 2D images instead of 3D objects.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: bitmapclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _BITMAPCLASS_H_
+#define _BITMAPCLASS_H_
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "textureclass.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: BitmapClass
+////////////////////////////////////////////////////////////////////////////////
+class BitmapClass
+{
+private:
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Each bitmap image is still a polygon object that gets rendered similar to 3D objects.
+For 2D images we just need a position vector and texture coordinates.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	struct VertexType
+	{
+		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
+	};
+
+public:
+	BitmapClass();
+	BitmapClass(const BitmapClass&amp;);
+	~BitmapClass();
+
+	bool Initialize(ID3D11Device*, int, int, WCHAR*, int, int);
+	void Shutdown();
+	bool Render(ID3D11DeviceContext*, int, int);
+
+	int GetIndexCount();
+	ID3D11ShaderResourceView* GetTexture();
+
+private:
+	bool InitializeBuffers(ID3D11Device*);
+	void ShutdownBuffers();
+	bool UpdateBuffers(ID3D11DeviceContext*, int, int);
+	void RenderBuffers(ID3D11DeviceContext*);
+
+	bool LoadTexture(ID3D11Device*, WCHAR*);
+	void ReleaseTexture();
+
+private:
+	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
+	int m_vertexCount, m_indexCount;
+	TextureClass* m_Texture;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The BitmapClass will need to maintain some extra information that a 3D model wouldn't such as the screen size, the bitmap size, and the last place it was rendered.
+We have added extra private variables here to track that extra information. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	int m_screenWidth, m_screenHeight;
+	int m_bitmapWidth, m_bitmapHeight;
+	int m_previousPosX, m_previousPosY;
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Bitmapclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: bitmapclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "bitmapclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The class constructor initializes all the private pointers in the class.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">BitmapClass::BitmapClass()
+{
+	m_vertexBuffer = 0;
+	m_indexBuffer = 0;
+	m_Texture = 0;
+}
+
+
+BitmapClass::BitmapClass(const BitmapClass&amp; other)
+{
+}
+
+
+BitmapClass::~BitmapClass()
+{
+}
+
+
+bool BitmapClass::Initialize(ID3D11Device* device, int screenWidth, int screenHeight, WCHAR* textureFilename, int bitmapWidth, int bitmapHeight)
+{
+	bool result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In the Initialize function both the screen size and image size are stored. 
+These will be required for generating exact vertex locations during rendering. 
+Note that the pixels of the image do not need to be exactly the same as the texture that is used, 
+you can set this to any size and use any size texture you want also. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Store the screen size.
+	m_screenWidth = screenWidth;
+	m_screenHeight = screenHeight;
+
+	// Store the size in pixels that this bitmap should be rendered at.
+	m_bitmapWidth = bitmapWidth;
+	m_bitmapHeight = bitmapHeight;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The previous rendering location is first initialized to negative one.
+This will be an important variable that will locate where it last drew this image. 
+If the image location hasn't changed since last frame then it won't modify the dynamic vertex buffer which will save us some cycles.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the previous rendering position to negative one.
+	m_previousPosX = -1;
+	m_previousPosY = -1;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The buffers are then created and the texture for this bitmap image is also loaded in.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Initialize the vertex and index buffers.
+	result = InitializeBuffers(device);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Load the texture for this model.
+	result = LoadTexture(device, textureFilename);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Shutdown function will release the vertex and index buffers as well as the texture that was used for the bitmap image.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void BitmapClass::Shutdown()
+{
+	// Release the model texture.
+	ReleaseTexture();
+
+	// Shutdown the vertex and index buffers.
+	ShutdownBuffers();
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Render puts the buffers of the 2D image on the video card. 
+As input it takes the position of where to render the image on the screen. 
+The UpdateBuffers function is called with the position parameters. 
+If the position has changed since the last frame it will then update the location of the vertices in the dynamic vertex buffer to the new location. 
+If not it will skip the UpdateBuffers function. 
+After that the RenderBuffers function will prepare the final vertices/indices for rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool BitmapClass::Render(ID3D11DeviceContext* deviceContext, int positionX, int positionY)
+{
+	bool result;
+
+
+	// Re-build the dynamic vertex buffer for rendering to possibly a different location on the screen.
+	result = UpdateBuffers(deviceContext, positionX, positionY);
+	if(!result)
+	{
+		return false;
+	}
+
+	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	RenderBuffers(deviceContext);
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+GetIndexCount returns the number of indexes for the 2D image. 
+This will pretty much always be six. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">int BitmapClass::GetIndexCount()
+{
+	return m_indexCount;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The GetTexture function returns a pointer to the texture resource for this 2D image.
+The shader will call this function so it has access to the image when drawing the buffers.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">ID3D11ShaderResourceView* BitmapClass::GetTexture()
+{
+	return m_Texture-&gt;GetTexture();
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+InitializeBuffers is the function that is used to build the vertex and index buffer that will be used to draw the 2D image.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool BitmapClass::InitializeBuffers(ID3D11Device* device)
+{
+	VertexType* vertices;
+	unsigned long* indices;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	HRESULT result;
+	int i;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We set the vertices to six since we are making a square out of two triangles, so six points are needed. 
+The indices will be the same.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set the number of vertices in the vertex array.
+	m_vertexCount = 6;
+
+	// Set the number of indices in the index array.
+	m_indexCount = m_vertexCount;
+
+	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Create the index array.
+	indices = new unsigned long[m_indexCount];
+	if(!indices)
+	{
+		return false;
+	}
+
+	// Initialize vertex array to zeros at first.
+	memset(vertices, 0, (sizeof(VertexType) * m_vertexCount));
+
+	// Load the index array with data.
+	for(i=0; i&lt;m_indexCount; i++)
+	{
+		indices[i] = i;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is the big change in comparison to the ModelClass.
+We are now creating a dynamic vertex buffer so we can modify the data inside the vertex buffer each frame if we need to.
+To make it dynamic we set Usage to D3D11_USAGE_DYNAMIC and CPUAccessFlags to D3D11_CPU_ACCESS_WRITE in the description. 
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	result = device-&gt;CreateBuffer(&amp;vertexBufferDesc, &amp;vertexData, &amp;m_vertexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We don't need to make the index buffer dynamic since the six indices will always point to the same six vertices even though the coordinates of the vertex may change.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device-&gt;CreateBuffer(&amp;indexBufferDesc, &amp;indexData, &amp;m_indexBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete [] vertices;
+	vertices = 0;
+
+	delete [] indices;
+	indices = 0;
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+ShutdownBuffers releases the vertex and index buffers.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void BitmapClass::ShutdownBuffers()
+{
+	// Release the index buffer.
+	if(m_indexBuffer)
+	{
+		m_indexBuffer-&gt;Release();
+		m_indexBuffer = 0;
+	}
+
+	// Release the vertex buffer.
+	if(m_vertexBuffer)
+	{
+		m_vertexBuffer-&gt;Release();
+		m_vertexBuffer = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The UpdateBuffers function is called each frame to update the contents of the dynamic vertex buffer to re-position the 2D bitmap image on the screen if need be.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool BitmapClass::UpdateBuffers(ID3D11DeviceContext* deviceContext, int positionX, int positionY)
+{
+	float left, right, top, bottom;
+	VertexType* vertices;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	VertexType* verticesPtr;
+	HRESULT result;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We check if the position to render this image has changed. 
+If it hasn't changed then we just exit since the vertex buffer doesn't need any changes for this frame. 
+This check can save us a lot of processing.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// If the position we are rendering this bitmap to has not changed then don't update the vertex buffer since it
+	// currently has the correct parameters.
+	if((positionX == m_previousPosX) &amp;&amp; (positionY == m_previousPosY))
+	{
+		return true;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+If the position to render this image has changed then we record the new location for the next time we come through this function.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// If it has changed then update the position it is being rendered to.
+	m_previousPosX = positionX;
+	m_previousPosY = positionY;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The four sides of the image need to be calculated. See the diagram at the top of the tutorial for a complete explaination.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Calculate the screen coordinates of the left side of the bitmap.
+	left = (float)((m_screenWidth / 2) * -1) + (float)positionX;
+
+	// Calculate the screen coordinates of the right side of the bitmap.
+	right = left + (float)m_bitmapWidth;
+
+	// Calculate the screen coordinates of the top of the bitmap.
+	top = (float)(m_screenHeight / 2) - (float)positionY;
+
+	// Calculate the screen coordinates of the bottom of the bitmap.
+	bottom = top - (float)m_bitmapHeight;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now that the coordinates are calculated create a temporary vertex array and fill it with the new six vertex points.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Create the vertex array.
+	vertices = new VertexType[m_vertexCount];
+	if(!vertices)
+	{
+		return false;
+	}
+
+	// Load the vertex array with data.
+	// First triangle.
+	vertices[0].position = D3DXVECTOR3(left, top, 0.0f);  // Top left.
+	vertices[0].texture = D3DXVECTOR2(0.0f, 0.0f);
+
+	vertices[1].position = D3DXVECTOR3(right, bottom, 0.0f);  // Bottom right.
+	vertices[1].texture = D3DXVECTOR2(1.0f, 1.0f);
+
+	vertices[2].position = D3DXVECTOR3(left, bottom, 0.0f);  // Bottom left.
+	vertices[2].texture = D3DXVECTOR2(0.0f, 1.0f);
+
+	// Second triangle.
+	vertices[3].position = D3DXVECTOR3(left, top, 0.0f);  // Top left.
+	vertices[3].texture = D3DXVECTOR2(0.0f, 0.0f);
+
+	vertices[4].position = D3DXVECTOR3(right, top, 0.0f);  // Top right.
+	vertices[4].texture = D3DXVECTOR2(1.0f, 0.0f);
+
+	vertices[5].position = D3DXVECTOR3(right, bottom, 0.0f);  // Bottom right.
+	vertices[5].texture = D3DXVECTOR2(1.0f, 1.0f);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now copy the contents of the vertex array into the vertex buffer using the Map and memcpy functions.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">	// Lock the vertex buffer so it can be written to.
+	result = deviceContext-&gt;Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &amp;mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the vertex buffer.
+	verticesPtr = (VertexType*)mappedResource.pData;
+
+	// Copy the data into the vertex buffer.
+	memcpy(verticesPtr, (void*)vertices, (sizeof(VertexType) * m_vertexCount));
+
+	// Unlock the vertex buffer.
+	deviceContext-&gt;Unmap(m_vertexBuffer, 0);
+
+	// Release the vertex array as it is no longer needed.
+	delete [] vertices;
+	vertices = 0;
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The RenderBuffers function sets up the vertex and index buffers on the gpu to be drawn by the shader.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void BitmapClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+{
+	unsigned int stride;
+	unsigned int offset;
+
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexType); 
+	offset = 0;
+    
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetVertexBuffers(0, 1, &amp;m_vertexBuffer, &amp;stride, &amp;offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext-&gt;IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext-&gt;IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The following function loads the texture that will be used for drawing the 2D image.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">bool BitmapClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
+{
+	bool result;
+
+
+	// Create the texture object.
+	m_Texture = new TextureClass;
+	if(!m_Texture)
+	{
+		return false;
+	}
+
+	// Initialize the texture object.
+	result = m_Texture-&gt;Initialize(device, filename);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+This ReleaseTexture function releases the texture that was loaded.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">void BitmapClass::ReleaseTexture()
+{
+	// Release the texture object.
+	if(m_Texture)
+	{
+		m_Texture-&gt;Shutdown();
+		delete m_Texture;
+		m_Texture = 0;
+	}
+
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>D3dclass.h</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The D3DClass has been modified to handle enabling and disabling the Z buffer.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: d3dclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _D3DCLASS_H_
+#define _D3DCLASS_H_
+
+
+/////////////
+// LINKING //
+/////////////
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dx11.lib")
+#pragma comment(lib, "d3dx10.lib")
+
+
+//////////////
+// INCLUDES //
+//////////////
+#include &lt;dxgi.h&gt;
+#include &lt;d3dcommon.h&gt;
+#include &lt;d3d11.h&gt;
+#include &lt;d3dx10math.h&gt;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: D3DClass
+////////////////////////////////////////////////////////////////////////////////
+class D3DClass
+{
+public:
+	D3DClass();
+	D3DClass(const D3DClass&amp;);
+	~D3DClass();
+
+	bool Initialize(int, int, bool, HWND, bool, float, float);
+	void Shutdown();
+	
+	void BeginScene(float, float, float, float);
+	void EndScene();
+
+	ID3D11Device* GetDevice();
+	ID3D11DeviceContext* GetDeviceContext();
+
+	void GetProjectionMatrix(D3DXMATRIX&amp;);
+	void GetWorldMatrix(D3DXMATRIX&amp;);
+	void GetOrthoMatrix(D3DXMATRIX&amp;);
+
+	void GetVideoCardInfo(char*, int&amp;);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now have two new function in the D3DClass for turning the Z buffer on and off when rendering 2D images.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	void TurnZBufferOn();
+	void TurnZBufferOff();</font><font face="arial" color="#aaffaa" size="2">
+
+private:
+	bool m_vsync_enabled;
+	int m_videoCardMemory;
+	char m_videoCardDescription[128];
+	IDXGISwapChain* m_swapChain;
+	ID3D11Device* m_device;
+	ID3D11DeviceContext* m_deviceContext;
+	ID3D11RenderTargetView* m_renderTargetView;
+	ID3D11Texture2D* m_depthStencilBuffer;
+	ID3D11DepthStencilState* m_depthStencilState;
+	ID3D11DepthStencilView* m_depthStencilView;
+	ID3D11RasterizerState* m_rasterState;
+	D3DXMATRIX m_projectionMatrix;
+	D3DXMATRIX m_worldMatrix;
+	D3DXMATRIX m_orthoMatrix;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+There is also a new depth stencil state for 2D drawing.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	ID3D11DepthStencilState* m_depthDisabledStencilState;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>D3dclass.cpp</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We will just cover the functions that have changed in this class since the texturing tutorial.
+</font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: d3dclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "d3dclass.h"
+
+
+D3DClass::D3DClass()
+{
+	m_swapChain = 0;
+	m_device = 0;
+	m_deviceContext = 0;
+	m_renderTargetView = 0;
+	m_depthStencilBuffer = 0;
+	m_depthStencilState = 0;
+	m_depthStencilView = 0;
+	m_rasterState = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Initialize the new depth stencil state to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_depthDisabledStencilState = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+D3DClass::D3DClass(const D3DClass&amp; other)
+{
+}
+
+
+D3DClass::~D3DClass()
+{
+}
+
+
+bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, float screenDepth, float screenNear)
+{
+	HRESULT result;
+	IDXGIFactory* factory;
+	IDXGIAdapter* adapter;
+	IDXGIOutput* adapterOutput;
+	unsigned int numModes, i, numerator, denominator, stringLength;
+	DXGI_MODE_DESC* displayModeList;
+	DXGI_ADAPTER_DESC adapterDesc;
+	int error;
+	DXGI_SWAP_CHAIN_DESC swapChainDesc;
+	D3D_FEATURE_LEVEL featureLevel;
+	ID3D11Texture2D* backBufferPtr;
+	D3D11_TEXTURE2D_DESC depthBufferDesc;
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	D3D11_RASTERIZER_DESC rasterDesc;
+	D3D11_VIEWPORT viewport;
+	float fieldOfView, screenAspect;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We have a new depth stencil description variable for setting up the new depth stencil.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	D3D11_DEPTH_STENCIL_DESC depthDisabledStencilDesc;</font><font face="arial" color="#aaffaa" size="2">
+
+
+	// Store the vsync setting.
+	m_vsync_enabled = vsync;
+
+	// Create a DirectX graphics interface factory.
+	result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&amp;factory);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Use the factory to create an adapter for the primary graphics interface (video card).
+	result = factory-&gt;EnumAdapters(0, &amp;adapter);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Enumerate the primary adapter output (monitor).
+	result = adapter-&gt;EnumOutputs(0, &amp;adapterOutput);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM display format for the adapter output (monitor).
+	result = adapterOutput-&gt;GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &amp;numModes, NULL);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create a list to hold all the possible display modes for this monitor/video card combination.
+	displayModeList = new DXGI_MODE_DESC[numModes];
+	if(!displayModeList)
+	{
+		return false;
+	}
+
+	// Now fill the display mode list structures.
+	result = adapterOutput-&gt;GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &amp;numModes, displayModeList);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Now go through all the display modes and find the one that matches the screen width and height.
+	// When a match is found store the numerator and denominator of the refresh rate for that monitor.
+	for(i=0; i&lt;numModes; i++)
+	{
+		if(displayModeList[i].Width == (unsigned int)screenWidth)
+		{
+			if(displayModeList[i].Height == (unsigned int)screenHeight)
+			{
+				numerator = displayModeList[i].RefreshRate.Numerator;
+				denominator = displayModeList[i].RefreshRate.Denominator;
+			}
+		}
+	}
+
+	// Get the adapter (video card) description.
+	result = adapter-&gt;GetDesc(&amp;adapterDesc);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Store the dedicated video card memory in megabytes.
+	m_videoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
+
+	// Convert the name of the video card to a character array and store it.
+	error = wcstombs_s(&amp;stringLength, m_videoCardDescription, 128, adapterDesc.Description, 128);
+	if(error != 0)
+	{
+		return false;
+	}
+
+	// Release the display mode list.
+	delete [] displayModeList;
+	displayModeList = 0;
+
+	// Release the adapter output.
+	adapterOutput-&gt;Release();
+	adapterOutput = 0;
+
+	// Release the adapter.
+	adapter-&gt;Release();
+	adapter = 0;
+
+	// Release the factory.
+	factory-&gt;Release();
+	factory = 0;
+
+	// Initialize the swap chain description.
+	ZeroMemory(&amp;swapChainDesc, sizeof(swapChainDesc));
+
+	// Set to a single back buffer.
+	swapChainDesc.BufferCount = 1;
+
+	// Set the width and height of the back buffer.
+	swapChainDesc.BufferDesc.Width = screenWidth;
+	swapChainDesc.BufferDesc.Height = screenHeight;
+
+	// Set regular 32-bit surface for the back buffer.
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+	// Set the refresh rate of the back buffer.
+	if(m_vsync_enabled)
+	{
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = numerator;
+		swapChainDesc.BufferDesc.RefreshRate.Denominator = denominator;
+	}
+	else
+	{
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
+		swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+	}
+
+	// Set the usage of the back buffer.
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
+	// Set the handle for the window to render to.
+	swapChainDesc.OutputWindow = hwnd;
+
+	// Turn multisampling off.
+	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SampleDesc.Quality = 0;
+
+	// Set to full screen or windowed mode.
+	if(fullscreen)
+	{
+		swapChainDesc.Windowed = false;
+	}
+	else
+	{
+		swapChainDesc.Windowed = true;
+	}
+
+	// Set the scan line ordering and scaling to unspecified.
+	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+
+	// Discard the back buffer contents after presenting.
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+	// Don't set the advanced flags.
+	swapChainDesc.Flags = 0;
+
+	// Set the feature level to DirectX 11.
+	featureLevel = D3D_FEATURE_LEVEL_11_0;
+
+	// Create the swap chain, Direct3D device, and Direct3D device context.
+	result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &amp;featureLevel, 1, D3D11_SDK_VERSION, &amp;swapChainDesc, &amp;m_swapChain, 
+					       &amp;m_device, NULL, &amp;m_deviceContext);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get the pointer to the back buffer.
+	result = m_swapChain-&gt;GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&amp;backBufferPtr);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Create the render target view with the back buffer pointer.
+	result = m_device-&gt;CreateRenderTargetView(backBufferPtr, NULL, &amp;m_renderTargetView);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Release pointer to the back buffer as we no longer need it.
+	backBufferPtr-&gt;Release();
+	backBufferPtr = 0;
+
+	// Initialize the description of the depth buffer.
+	ZeroMemory(&amp;depthBufferDesc, sizeof(depthBufferDesc));
+
+	// Set up the description of the depth buffer.
+	depthBufferDesc.Width = screenWidth;
+	depthBufferDesc.Height = screenHeight;
+	depthBufferDesc.MipLevels = 1;
+	depthBufferDesc.ArraySize = 1;
+	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBufferDesc.SampleDesc.Count = 1;
+	depthBufferDesc.SampleDesc.Quality = 0;
+	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBufferDesc.CPUAccessFlags = 0;
+	depthBufferDesc.MiscFlags = 0;
+
+	// Create the texture for the depth buffer using the filled out description.
+	result = m_device-&gt;CreateTexture2D(&amp;depthBufferDesc, NULL, &amp;m_depthStencilBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Initialize the description of the stencil state.
+	ZeroMemory(&amp;depthStencilDesc, sizeof(depthStencilDesc));
+
+	// Set up the description of the stencil state.
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing.
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing.
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Create the depth stencil state.
+	result = m_device-&gt;CreateDepthStencilState(&amp;depthStencilDesc, &amp;m_depthStencilState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Set the depth stencil state.
+	m_deviceContext-&gt;OMSetDepthStencilState(m_depthStencilState, 1);
+
+	// Initialize the depth stencil view.
+	ZeroMemory(&amp;depthStencilViewDesc, sizeof(depthStencilViewDesc));
+
+	// Set up the depth stencil view description.
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	// Create the depth stencil view.
+	result = m_device-&gt;CreateDepthStencilView(m_depthStencilBuffer, &amp;depthStencilViewDesc, &amp;m_depthStencilView);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Bind the render target view and depth stencil buffer to the output render pipeline.
+	m_deviceContext-&gt;OMSetRenderTargets(1, &amp;m_renderTargetView, m_depthStencilView);
+
+	// Setup the raster description which will determine how and what polygons will be drawn.
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = false;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	// Create the rasterizer state from the description we just filled out.
+	result = m_device-&gt;CreateRasterizerState(&amp;rasterDesc, &amp;m_rasterState);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Now set the rasterizer state.
+	m_deviceContext-&gt;RSSetState(m_rasterState);
+	
+	// Setup the viewport for rendering.
+	viewport.Width = (float)screenWidth;
+	viewport.Height = (float)screenHeight;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+
+	// Create the viewport.
+	m_deviceContext-&gt;RSSetViewports(1, &amp;viewport);
+
+	// Setup the projection matrix.
+	fieldOfView = (float)D3DX_PI / 4.0f;
+	screenAspect = (float)screenWidth / (float)screenHeight;
+
+	// Create the projection matrix for 3D rendering.
+	D3DXMatrixPerspectiveFovLH(&amp;m_projectionMatrix, fieldOfView, screenAspect, screenNear, screenDepth);
+
+	// Initialize the world matrix to the identity matrix.
+	D3DXMatrixIdentity(&amp;m_worldMatrix);
+
+	// Create an orthographic projection matrix for 2D rendering.
+	D3DXMatrixOrthoLH(&amp;m_orthoMatrix, (float)screenWidth, (float)screenHeight, screenNear, screenDepth);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we setup the description of the depth stencil.
+Notice the only difference between this new depth stencil and the old one is the DepthEnable is set to false here for 2D drawing.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Clear the second depth stencil state before setting the parameters.
+	ZeroMemory(&amp;depthDisabledStencilDesc, sizeof(depthDisabledStencilDesc));
+
+	// Now create a second depth stencil state which turns off the Z buffer for 2D rendering.  The only difference is 
+	// that DepthEnable is set to false, all other parameters are the same as the other depth stencil state.
+	depthDisabledStencilDesc.DepthEnable = false;
+	depthDisabledStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthDisabledStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthDisabledStencilDesc.StencilEnable = true;
+	depthDisabledStencilDesc.StencilReadMask = 0xFF;
+	depthDisabledStencilDesc.StencilWriteMask = 0xFF;
+	depthDisabledStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthDisabledStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	depthDisabledStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthDisabledStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthDisabledStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Now create the new depth stencil.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the state using the device.
+	result = m_device-&gt;CreateDepthStencilState(&amp;depthDisabledStencilDesc, &amp;m_depthDisabledStencilState);
+	if(FAILED(result))
+	{
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void D3DClass::Shutdown()
+{
+	// Before shutting down set to windowed mode or when you release the swap chain it will throw an exception.
+	if(m_swapChain)
+	{
+		m_swapChain-&gt;SetFullscreenState(false, NULL);
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we release the new depth stencil during the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	if(m_depthDisabledStencilState)
+	{
+		m_depthDisabledStencilState-&gt;Release();
+		m_depthDisabledStencilState = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	if(m_rasterState)
+	{
+		m_rasterState-&gt;Release();
+		m_rasterState = 0;
+	}
+
+	if(m_depthStencilView)
+	{
+		m_depthStencilView-&gt;Release();
+		m_depthStencilView = 0;
+	}
+
+	if(m_depthStencilState)
+	{
+		m_depthStencilState-&gt;Release();
+		m_depthStencilState = 0;
+	}
+
+	if(m_depthStencilBuffer)
+	{
+		m_depthStencilBuffer-&gt;Release();
+		m_depthStencilBuffer = 0;
+	}
+
+	if(m_renderTargetView)
+	{
+		m_renderTargetView-&gt;Release();
+		m_renderTargetView = 0;
+	}
+
+	if(m_deviceContext)
+	{
+		m_deviceContext-&gt;Release();
+		m_deviceContext = 0;
+	}
+
+	if(m_device)
+	{
+		m_device-&gt;Release();
+		m_device = 0;
+	}
+
+	if(m_swapChain)
+	{
+		m_swapChain-&gt;Release();
+		m_swapChain = 0;
+	}
+
+	return;
+}
+
+
+void D3DClass::BeginScene(float red, float green, float blue, float alpha)
+{
+	float color[4];
+
+
+	// Setup the color to clear the buffer to.
+	color[0] = red;
+	color[1] = green;
+	color[2] = blue;
+	color[3] = alpha;
+
+	// Clear the back buffer.
+	m_deviceContext-&gt;ClearRenderTargetView(m_renderTargetView, color);
+    
+	// Clear the depth buffer.
+	m_deviceContext-&gt;ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	return;
+}
+
+
+void D3DClass::EndScene()
+{
+	// Present the back buffer to the screen since rendering is complete.
+	if(m_vsync_enabled)
+	{
+		// Lock to screen refresh rate.
+		m_swapChain-&gt;Present(1, 0);
+	}
+	else
+	{
+		// Present as fast as possible.
+		m_swapChain-&gt;Present(0, 0);
+	}
+
+	return;
+}
+
+
+ID3D11Device* D3DClass::GetDevice()
+{
+	return m_device;
+}
+
+
+ID3D11DeviceContext* D3DClass::GetDeviceContext()
+{
+	return m_deviceContext;
+}
+
+
+void D3DClass::GetProjectionMatrix(D3DXMATRIX&amp; projectionMatrix)
+{
+	projectionMatrix = m_projectionMatrix;
+	return;
+}
+
+
+void D3DClass::GetWorldMatrix(D3DXMATRIX&amp; worldMatrix)
+{
+	worldMatrix = m_worldMatrix;
+	return;
+}
+
+
+void D3DClass::GetOrthoMatrix(D3DXMATRIX&amp; orthoMatrix)
+{
+	orthoMatrix = m_orthoMatrix;
+	return;
+}
+
+
+void D3DClass::GetVideoCardInfo(char* cardName, int&amp; memory)
+{
+	strcpy_s(cardName, 128, m_videoCardDescription);
+	memory = m_videoCardMemory;
+	return;
+}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+These are the new functions for enabling and disabling the Z buffer.
+To turn Z buffering on we set the original depth stencil.
+To turn Z buffering off we set the new depth stencil that has depthEnable set to false.
+Generally the best way to use these functions is first do all your 3D rendering, then turn the Z buffer off and do your 2D rendering,
+and then turn the Z buffer on again.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">void D3DClass::TurnZBufferOn()
+{
+	m_deviceContext-&gt;OMSetDepthStencilState(m_depthStencilState, 1);
+	return;
+}
+
+
+void D3DClass::TurnZBufferOff()
+{
+	m_deviceContext-&gt;OMSetDepthStencilState(m_depthDisabledStencilState, 1);
+	return;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.h</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef _GRAPHICSCLASS_H_
+#define _GRAPHICSCLASS_H_
+
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "d3dclass.h"
+#include "cameraclass.h"
+#include "textureshaderclass.h"
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here we include the new BitmapClass header file.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">#include "bitmapclass.h"</font><font face="arial" color="#aaffaa" size="2">
+
+
+/////////////
+// GLOBALS //
+/////////////
+const bool FULL_SCREEN = true;
+const bool VSYNC_ENABLED = true;
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.1f;
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: GraphicsClass
+////////////////////////////////////////////////////////////////////////////////
+class GraphicsClass
+{
+public:
+	GraphicsClass();
+	GraphicsClass(const GraphicsClass&amp;);
+	~GraphicsClass();
+
+	bool Initialize(int, int, HWND);
+	void Shutdown();
+	bool Frame();
+
+private:
+	bool Render(float);
+
+private:
+	D3DClass* m_D3D;
+	CameraClass* m_Camera;
+	TextureShaderClass* m_TextureShader;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We create a new private BitmapClass object here.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	BitmapClass* m_Bitmap;</font><font face="arial" color="#aaffaa" size="2">
+};
+
+#endif
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Graphicsclass.cpp</u></font></p>
+
+<pre><font face="arial" color="#aaffaa" size="2">////////////////////////////////////////////////////////////////////////////////
+// Filename: graphicsclass.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "graphicsclass.h"
+
+
+GraphicsClass::GraphicsClass()
+{
+	m_D3D = 0;
+	m_Camera = 0;
+	m_TextureShader = 0;
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We initialize the new bitmap object to null in the class constructor.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_Bitmap = 0;</font><font face="arial" color="#aaffaa" size="2">
+}
+
+
+GraphicsClass::GraphicsClass(const GraphicsClass&amp; other)
+{
+}
+
+
+GraphicsClass::~GraphicsClass()
+{
+}
+
+
+bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
+{
+	bool result;
+
+
+	// Create the Direct3D object.
+	m_D3D = new D3DClass;
+	if(!m_D3D)
+	{
+		return false;
+	}
+
+	// Initialize the Direct3D object.
+	result = m_D3D-&gt;Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
+		return false;
+	}
+
+	// Create the camera object.
+	m_Camera = new CameraClass;
+	if(!m_Camera)
+	{
+		return false;
+	}
+
+	// Set the initial position of the camera.
+	m_Camera-&gt;SetPosition(0.0f, 0.0f, -10.0f);
+	
+	// Create the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+	if(!m_TextureShader)
+	{
+		return false;
+	}
+
+	// Initialize the texture shader object.
+	result = m_TextureShader-&gt;Initialize(m_D3D-&gt;GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Here is where we create and initialize the new BitmapClass object.
+It uses the seafloor.dds as the texture and I set the size to 256x256.
+You can change this size to whatever you like as it does not need to reflect the exact size of the texture.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Create the bitmap object.
+	m_Bitmap = new BitmapClass;
+	if(!m_Bitmap)
+	{
+		return false;
+	}
+
+	// Initialize the bitmap object.
+	result = m_Bitmap-&gt;Initialize(m_D3D-&gt;GetDevice(), screenWidth, screenHeight, L"../Engine/data/seafloor.dds", 256, 256);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the bitmap object.", L"Error", MB_OK);
+		return false;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	return true;
+}
+
+
+void GraphicsClass::Shutdown()
+{
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The BitmapClass object is released in the Shutdown function.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Release the bitmap object.
+	if(m_Bitmap)
+	{
+		m_Bitmap-&gt;Shutdown();
+		delete m_Bitmap;
+		m_Bitmap = 0;
+	}</font><font face="arial" color="#aaffaa" size="2">
+
+	// Release the texture shader object.
+	if(m_TextureShader)
+	{
+		m_TextureShader-&gt;Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
+	}
+
+	// Release the camera object.
+	if(m_Camera)
+	{
+		delete m_Camera;
+		m_Camera = 0;
+	}
+
+	// Release the D3D object.
+	if(m_D3D)
+	{
+		m_D3D-&gt;Shutdown();
+		delete m_D3D;
+		m_D3D = 0;
+	}
+
+	return;
+}
+
+
+bool GraphicsClass::Frame()
+{
+	bool result;
+	static float rotation = 0.0f;
+
+
+	// Update the rotation variable each frame.
+	rotation += (float)D3DX_PI * 0.005f;
+	if(rotation &gt; 360.0f)
+	{
+		rotation -= 360.0f;
+	}
+	
+	// Render the graphics scene.
+	result = Render(rotation);
+	if(!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+
+bool GraphicsClass::Render(float rotation)
+{</font><font face="arial" color="#aaaaff" size="2">
+	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;</font><font face="arial" color="#aaffaa" size="2">
+	bool result;
+
+
+	// Clear the buffers to begin the scene.
+	m_D3D-&gt;BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Generate the view matrix based on the camera's position.
+	m_Camera-&gt;Render();
+
+	// Get the world, view, projection, and ortho matrices from the camera and d3d objects.
+	m_Camera-&gt;GetViewMatrix(viewMatrix);
+	m_D3D-&gt;GetWorldMatrix(worldMatrix);
+	m_D3D-&gt;GetProjectionMatrix(projectionMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We now also get the ortho matrix from the D3DClass for 2D rendering.
+We will pass this in instead of the projection matrix.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	m_D3D-&gt;GetOrthoMatrix(orthoMatrix);
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The Z buffer is turned off before we do any 2D rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Turn off the Z buffer to begin all 2D rendering.
+	m_D3D-&gt;TurnZBufferOff();
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+We then render the bitmap to the 100, 100 location on the screen.
+You can change this to wherever you want it rendered.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Put the bitmap vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	result = m_Bitmap-&gt;Render(m_D3D-&gt;GetDeviceContext(), 100, 100);
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Once the vertex/index buffers are prepared we draw them using the texture shader.
+Notice we send in the orthoMatrix instead of the projectionMatrix for rendering 2D.
+Due note also that if your view matrix is changing you will need to create a default one for 2D rendering and use it instead of the regular view matrix.
+In this tutorial using the regular view matrix is fine as the camera in this tutorial is stationary.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Render the bitmap with the texture shader.
+	result = m_TextureShader-&gt;Render(m_D3D-&gt;GetDeviceContext(), m_Bitmap-&gt;GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_Bitmap-&gt;GetTexture());
+	if(!result)
+	{
+		return false;
+	}
+</font></pre>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+After all the 2D rendering is done we turn the Z buffer back on for the next round of 3D rendering.
+</font></p>
+
+<pre><font face="arial" color="#aaaaff" size="2">	// Turn the Z buffer back on now that all 2D rendering has completed.
+	m_D3D-&gt;TurnZBufferOn();</font><font face="arial" color="#aaffaa" size="2">
+
+	// Present the rendered scene to the screen.
+	m_D3D-&gt;EndScene();
+
+	return true;
+}
+</font></pre>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+With these new concepts we can now render 2D images onto the screen.  This opens the door for rendering user interfaces and font systems.
+</font></p>
+
+<p align="left"><img border="0" src="./Tutorial 11_ 2D Rendering_files/pic0033.gif" width="275" height="275"></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Recompile the code and ensure you get a 2D image drawn to the 100, 100 location on your screen.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+2. Change the location on the screen where the image is drawn to.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+3. Change the size of the image in the m_Bitmap-&gt;Initialize function call in the GraphicsClass.
+</font></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+4. Change the texture that is used for the 2D image.
+</font></p>
+
+<br>
+<p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Source Code</u></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Visual Studio 2010 Project: <a href="http://www.rastertek.com/dx11tut11.zip">dx11tut11.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Source Only: <a href="http://www.rastertek.com/dx11src11.zip">dx11src11.zip</a></font></p>
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">Executable Only: <a href="http://www.rastertek.com/dx11exe11.zip">dx11exe11.zip</a></font></p>
+
+<p align="left"><img border="0" src="./Tutorial 11_ 2D Rendering_files/pic1002.gif" width="800" height="1"></p>
+<p align="left"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutindex.html">Back to Tutorial Index</a></font></p>
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 11_ 2D Rendering_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

@@ -1,0 +1,43 @@
+# Blender MTL File: 'TheCargoBay.blend'
+# Material Count: 4
+
+newmtl MAT_Core_Door_1
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Ka Engine/data/textures/MAT_MediumDoor_1_Base_Color.tga
+newmtl MAT_Core_Door_2
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Ka Engine/data/textures/MAT_MediumDoor_2_Base_Color.tga
+newmtl MAT_Core_Door_3
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Ka Engine/data/textures/MAT_MediumDoor_3_Base_Color.tga
+newmtl MAT_Core_Door_4
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Ka Engine/data/textures/MAT_MediumDoor_Hologram_Base_Color.tga

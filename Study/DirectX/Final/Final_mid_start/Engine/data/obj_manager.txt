@@ -1,0 +1,18 @@
+Engine/data/objfile/Thuja_01.obj
+1:506.0 22.0 398.0/0.0 0.0 0.0/0.0 10.0 0.0/0.05 0.05 0.05
+Engine/data/objfile/house.obj
+2:654.0 9.0 388.0/0.0 0.0 0.0/0.0 0.0 0.0/0.05 0.05 0.05
+Engine/data/objfile/door.obj
+3:704.0 9.0 388.0/0.0 0.0 0.0/0.0 0.0 0.0/0.05 0.05 0.05
+Engine/data/objfile/Hologram_Monitors.obj
+4:711.0 11.0 390.0/0.0 0.0 0.0/0.0 0.0 0.0/2.0 2.0 2.0
+Engine/data/objfile/HoverKat.obj
+5:728.0 15.0 412.0/0.0 0.0 0.0/0.0 0.0 90.0/1.0 1.0 1.0
+Engine/data/objfile/folder.obj
+6:719.0 15.0 390.0/0.0 0.0 0.0/500.0 500.0 500.0/0.05 0.05 0.05
+Engine/data/objfile/HazardBarrel_01.obj
+7:705.0 11.0 398.0/0.0 0.0 0.0/0.0 0.0 0.0/1.0 1.0 1.0
+Engine/data/objfile/Door_Medium.obj
+8:731.0 14.0 371.0/0.0 0.0 0.0/0.0 0.0 0.0/1.0 1.0 1.0
+Engine/data/objfile/SM_OldLuggage_01.obj
+9:586.0 8.0 301.0/0.0 0.0 0.0/0.0 -10.0 0.0/1.0 1.0 1.0

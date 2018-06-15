@@ -1,0 +1,6 @@
+1000
+Engine/data/textures/rock01d.tga
+Engine/data/textures/rock01n.tga
+Engine/data/textures/snow01n.tga
+Engine/data/textures/distance01n.tga
+Engine/data/textures/1.tga

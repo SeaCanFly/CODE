@@ -1,0 +1,2 @@
+Engine/data/objfile/Door_Large.obj
+0:604.0 8.0 388.0/0.0 0.0 0.0/0.0 0.0 0.0/1.0 1.0 1.0

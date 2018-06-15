@@ -1,0 +1,234 @@
+
+<!-- saved from url=(0041)http://www.rastertek.com/dx11s2tut01.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Tutorial 1: Setting up DirectX 11 with Visual Studio</title><link type="text/css" rel="stylesheet" href="chrome-extension://pioclpoplcdbaefihamjohnefbikjilc/content.css"><style>#cVim-command-bar, #cVim-command-bar-mode, #cVim-command-bar-input, #cVim-command-bar-search-results,
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left,
+.cVim-completion-item .cVim-right {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-command-bar {
+  position: fixed;
+  z-index: 2147483646;
+  background-color: #1b1d1e;
+  color: #bbb;
+  display: none;
+  box-sizing: content-box;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  left: 0;
+  width: 100%;
+  height: 20px;
+}
+
+#cVim-command-bar-mode {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  padding-left: 2px;
+  height: 100%;
+  width: 10px;
+  padding-top: 2px;
+  color: #888;
+}
+
+#cVim-command-bar-input {
+  background-color: #1b1d1e;
+  color: #bbb;
+  height: 100%;
+  right: 0;
+  top: 0;
+  width: calc(100% - 10px);
+  position: absolute;
+}
+
+#cVim-command-bar-search-results {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  z-index: 2147483647;
+  left: 0;
+  box-shadow: 0 3px 3px rgba(0,0,0,0.4);
+  background-color: #1c1c1c;
+}
+
+.cVim-completion-item, .cVim-completion-item .cVim-full, .cVim-completion-item .cVim-left, .cVim-completion-item .cVim-right {
+  text-overflow: ellipsis;
+  padding: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cVim-completion-item:nth-child(even) {
+  background-color: #1f1f1f;
+}
+
+.cVim-completion-item {
+  width: 100%; left: 0;
+  color: #bcbcbc;
+}
+
+.cVim-completion-item[active] {
+  width: 100%; left: 0;
+  color: #1b1d1e;
+  background-color: #f1f1f1;
+}
+
+.cVim-completion-item[active] span {
+  color: #1b1d1e;
+}
+
+.cVim-completion-item .cVim-left {
+  color: #fff;
+  width: 37%;
+}
+
+.cVim-completion-item .cVim-right {
+  font-style: italic;
+  color: #888;
+  width: 57%;
+}
+
+
+#cVim-link-container, .cVim-link-hint,
+#cVim-hud, #cVim-status-bar {
+  font-family: Helvetica, Helvetica Neue, Neue, sans-serif, monospace, Arial;
+  font-size: 10pt !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#cVim-link-container {
+  position: absolute;
+  pointer-events: none;
+  width: 100%; left: 0;
+  height: 100%; top: 0;
+  z-index: 2147483647;
+}
+
+.cVim-link-hint {
+  position: absolute;
+  color: #302505 !important;
+  background-color: #ffd76e !important;
+  border-radius: 2px !important;
+  padding: 2px !important;
+  font-size: 8pt !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  border: 1px solid #ad810c;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  box-shadow: 2px 2px 1px rgba(0,0,0,0.25) !important;
+}
+
+.cVim-link-hint_match {
+  color: #777;
+  text-transform: uppercase !important;
+}
+
+
+#cVim-hud {
+  background-color: rgba(28,28,28,0.9);
+  position: fixed !important;
+  transition: right 0.2s ease-out;
+  z-index: 24724289;
+}
+
+#cVim-hud span {
+  padding: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: #8f8f8f;
+  font-size: 10pt;
+}
+
+#cVim-frames-outline {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 9999999999;
+  box-sizing: border-box;
+  border: 3px solid yellow;
+}
+</style></head>
+<body text="#FFFFFF" bgcolor="#000000" style="width:1000px">
+
+<p align="center"><font face="Arial" size="4" color="#FFFFFF"><b>
+Tutorial 1: Setting up DirectX 11 with Visual Studio
+</b></font></p>
+
+<p align="center"><img border="0" src="./Tutorial 1_ Setting up DirectX 11 with Visual Studio_files/pic3001.gif" width="1024" height="1"></p>
+
+<p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Before writing any graphics code we'll need to have the tools to do so.  The first of these tools is a compiler that is preferably built into a nice IDE.
+The one I use and will be supplying project files for is Visual Studio 2015.  There are several others available and some are free off the net.
+I'll leave that up to you to decide which one you prefer.
+I personally use Visual Studio 2015 Community because it is free and is an excellent IDE.
+You can download Visual Studio 2015 Community from the Visual Studio website.
+When you install Visual Studio 2015 make sure to choose custom and select all so that the Visual C++ components are all installed, otherwise it sets it up primarily for C# development.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+The second tool you will need is the Windows 10 SDK.
+The Windows 10 SDK contains all of the DirectX 11 headers, libraries, DLLs, and so forth that you will need to write DirectX 11 applications.
+If you installed Visual Studio 2015 then the SDK was already installed with it.
+Otherwise you can download the Windows Standalone SDK for Windows 10 from Windows Dev Center (msdn) website.
+After downloading and installing the SDK you will have the files necessary to compile DirectX 11 programs.
+The documentation for the Windows 10 SDK is all on the Windows Dev Center website as well.
+You will find the Direct3D 11 Programming Guide there which has all the DirectX 11 documentation as well as some example code.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Once you have the IDE and the SDK installed you can now setup your IDE to work with the Windows 10 SDK so that you can write DirectX 11 applications. 
+Please note that some IDEs will need to be installed first before installing the Windows 10 SDK.
+</font></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Setting Up Visual Studio 2015</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+In Visual Studio 2015 I used the following steps:
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+First you need to create an empty Win32 project so select File -&gt; New -&gt; Project.
+In the New Project menu select Win32 under Templates -&gt; Visual C++ -&gt; Win32.
+Then select Win32 Project from the choices.  Give the project a name (I called mine Engine) and a location and then click on "Ok".
+Click "Next" and you will be given another menu.  Under "Additional options" put a check mark in the "Empty project" box and unclick the Security Development Lifecycle (SDL) checks.
+Click on "Finish" and you should now have an basic Win32 empty project setup.
+</font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Then on the top bar you will see the value "x86" in the Solution Platforms dropdown, select this and pick "x64" instead.
+This will set your project to 64bit instead of the default 32bit. 
+</font></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>Summary</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+Our DirectX 11 development environment should now be setup and ready for us to start writing DirectX 11 applications.
+</font></p><br><p align="left"><font face="Arial" size="3" color="#FFFFFF"><u>To Do Exercises</u></font></p><p align="left"><font face="Arial" size="2" color="#FFFFFF">
+1. Have a quick look over the DirectX 11 Programming Guide on the Windows Dev Center (msdn) website.
+</font></p><table align="center" border="0" width="1024"><tbody><tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</tr></tbody></table>
+
+<p align="center"><img border="0" src="./Tutorial 1_ Setting up DirectX 11 with Visual Studio_files/pic3002.gif" width="1024" height="1"></p>
+
+<p align="center"><font face="Arial, Helvetica, sans-serif" size="2" color="#CCCCCC"><a href="http://www.rastertek.com/tutdx11s2.html">Back to Tutorial Index</a></font></p>
+
+</body><div id="cVim-status-bar" style="top: 0px;"></div><iframe src="./Tutorial 1_ Setting up DirectX 11 with Visual Studio_files/cmdline_frame.html" id="cVim-command-frame"></iframe></html>

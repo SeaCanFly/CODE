@@ -1,0 +1,9 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+newmtl 02___Default
+	map_Ka Engine/data/textures/0a565e37_D.tga
+newmtl Frame	
+	map_Ka Engine/data/textures/0a565e37_D.tga
+newmtl Glass
+	map_Ka Engine/data/textures/0a565e37_D.tga
+newmtl Metal
+	map_Ka Engine/data/textures/0a565e37_D.tga

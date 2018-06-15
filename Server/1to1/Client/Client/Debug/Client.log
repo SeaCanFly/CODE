@@ -1,0 +1,9 @@
+﻿  client.cpp
+d:\temp\github\code\server\1to1\client\client\client.cpp(42): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(1270): note: see declaration of 'scanf'
+d:\temp\github\code\server\1to1\client\client\client.cpp(72): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(1270): note: see declaration of 'scanf'
+d:\temp\github\code\server\1to1\client\client\client.cpp(73): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1850): note: see declaration of 'inet_addr'
+  Client.vcxproj -> D:\Temp\Github\CODE\Server\1to1\Client\Debug\Client.exe
+  Client.vcxproj -> D:\Temp\Github\CODE\Server\1to1\Client\Debug\Client.pdb (Full PDB)

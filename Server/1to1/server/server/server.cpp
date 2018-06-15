@@ -1,53 +1,63 @@
 #include<windows.h>
 #include<process.h>
 #include<iostream>
+#include<map>
 using namespace std;
 #pragma comment(lib,"WS2_32.LIB")
-struct sock
+struct SocketPack
 {
+	int pos;
 	SOCKET client_socket;
 	sockaddr_in client_addr;
 };
+map<int,SocketPack*>socket_list;
 unsigned int __stdcall recvMsg(LPVOID p)
 {
 	int r_ret;
-	sock* r = (sock*)p;
+	SocketPack* cur_pack = (SocketPack*)p;
 	char recv_buffer[256];
 	while (1)
 	{
-		r_ret = recv(r->client_socket, recv_buffer, sizeof(recv_buffer), 0);
+		r_ret = recv(cur_pack->client_socket, recv_buffer, sizeof(recv_buffer), 0);
 		if (r_ret == 0)continue;
 		if (r_ret == SOCKET_ERROR)
 		{
-			printf("recv from[ip=%s,port=%d] error \n", inet_ntoa(r->client_addr.sin_addr), ntohs(r->client_addr.sin_port));
-			return -1;
+			printf("recv from[ip=%s,port=%d] error \n", inet_ntoa(cur_pack->client_addr.sin_addr), ntohs(cur_pack->client_addr.sin_port));
+			break;
 		}
 		recv_buffer[r_ret] = '\0';
 		if (strcmp(recv_buffer, "quit") == 0)
 		{
-			send(r->client_socket, "quit", 4, 0);
-			printf("\n[ip=%s,port=%d] disconnected\n[me:]", inet_ntoa(r->client_addr.sin_addr), ntohs(r->client_addr.sin_port));			
-			return 0;
+			send(cur_pack->client_socket, "quit", 4, 0);
+			printf("\n[ip=%s,port=%d] disconnected\n[me:]", inet_ntoa(cur_pack->client_addr.sin_addr), ntohs(cur_pack->client_addr.sin_port));			
+			break;
 		}
 		printf("\n[client:]%s", recv_buffer);
-		printf("[ip=%s,port=%d]\n[me:]>", inet_ntoa(r->client_addr.sin_addr), ntohs(r->client_addr.sin_port));
+		printf("[ip=%s,port=%d]\n[me:]>", inet_ntoa(cur_pack->client_addr.sin_addr), ntohs(cur_pack->client_addr.sin_port));
 	}
+	socket_list.erase(cur_pack->pos);
+	closesocket(cur_pack->client_socket);
 	return 0;
 }
 unsigned int __stdcall sendMsg(LPVOID p)
 {
 	int s_ret=0;
-	sock* sen = (sock*)p;
 	char send_buffer[256] = { 0 };
 	while (1)
 	{
 		printf("[me:]>");
 		scanf("%s", send_buffer);
-		s_ret = send(sen->client_socket, send_buffer, strlen(send_buffer), 0);
-		if (s_ret == SOCKET_ERROR)
+		map<int, SocketPack*>::iterator it;
+		it = socket_list.begin();
+		while(it!=socket_list.end())
 		{
-			printf("send error %d\n",WSAGetLastError());
-			return -1;
+			s_ret = send(it->second->client_socket, send_buffer, strlen(send_buffer), 0);
+			if (s_ret == SOCKET_ERROR)
+			{
+				printf("send error %d\n", WSAGetLastError());
+				continue;
+			}
+			it++;
 		}
 	}
 }
@@ -55,13 +65,15 @@ int main()
 {
 	WSADATA wsa;
 	SOCKET listen_socket;
+	SOCKET client_socket;
 	sockaddr_in server_addr;
-	sock s;
+	sockaddr_in client_addr;
+	SocketPack cur_socket[100];
 	int client_addr_len;
 	int listen_port = 7777;
 	int ret = -1;
 	int i = 0;
-	client_addr_len= sizeof(s.client_addr);
+	client_addr_len= sizeof(client_addr);
 	ret = WSAStartup(MAKEWORD(2, 2), &wsa);
 	if (ret != 0)
 	{
@@ -94,29 +106,47 @@ int main()
 		return -1;
 	}
 	printf("listening on port=%d\n", listen_port);
+
 	while (1)
 	{
-		s.client_socket = accept(listen_socket, (sockaddr*)&s.client_addr, &client_addr_len);
+		client_socket = accept(listen_socket, (sockaddr*)&client_addr, &client_addr_len);
 		
-		if (s.client_socket == INVALID_SOCKET)
+		if (client_socket == INVALID_SOCKET)
 		{
 			printf("received an invalid socket\n");
 			closesocket(listen_socket);
-			WSACleanup();
-			return -1;
+			continue;
 		}
-		printf("connecting...[ip=%s,port=%d]\n", inet_ntoa(s.client_addr.sin_addr), s.client_addr.sin_port);
-		ret = send(s.client_socket, "welcome", 7, 0);
+		printf("connecting...[ip=%s,port=%d]\n", inet_ntoa(client_addr.sin_addr), client_addr.sin_port);
+		ret = send(client_socket, "welcome", 7, 0);
 		if (ret == SOCKET_ERROR)
 		{
 			printf("client connection error\n");
-			closesocket(s.client_socket);
+			closesocket(client_socket);
 			continue;
 		}
-		HANDLE re = (HANDLE)_beginthreadex(0, 0, recvMsg, (LPVOID)&s, 0, 0);
-		HANDLE se = (HANDLE)_beginthreadex(0, 0, sendMsg, (LPVOID)&s, 0, 0);
-		CloseHandle(re);
-		CloseHandle(se);
+		cur_socket[i].pos = i;
+		cur_socket[i].client_socket = client_socket;
+		cur_socket[i].client_addr = client_addr;
+		socket_list.insert(pair<int,SocketPack*>(i, &cur_socket[i]));
+		HANDLE re = (HANDLE)_beginthreadex(0, 0, recvMsg, (LPVOID)&cur_socket[i], 0, 0);
+		HANDLE se = (HANDLE)_beginthreadex(0, 0, sendMsg, 0, 0, 0);
+		if (re)CloseHandle(re);
+		else
+		{
+			socket_list.erase(i);
+			closesocket(client_socket);
+			printf("create recvMsg thread failed\n");
+			continue;
+		}
+		if (se) CloseHandle(se);
+		else
+		{
+			closesocket(client_socket);
+			printf("create sendMsg thread failed\n");
+			continue;
+		}
+		i++;
 	}
 
 	closesocket(listen_socket);

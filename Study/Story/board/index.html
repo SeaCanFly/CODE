@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <title>Idea Card</title>
+    <style>
+        body,ul,li,p,h1,a,div,label input{
+            margin:0;
+            padding:0;
+            text-align:center;
+            list-style:none;
+            text-decoration:none;
+        }
+        p{
+            margin:10px;
+            text-align:justify;
+        }
+        textarea{
+            overflow-x:hidden;
+            overflow-y:auto;
+        }
+        h1{
+            clear:both;
+        }
+        h2{
+            text-align:left;
+            text-indent:0.5em;
+        }
+        input{
+            display:none;
+        }
+        #button{
+            background-color: #ffffff;
+            border:1px solid black;
+        }
+        #button:visited{
+            background-color:orange;
+        }
+        #button:hover{
+            background-color: #ffcc4b;
+        }
+        #button:active{
+            background-color:yellow;
+        }
+        button{
+            float:right;
+            font-size:25px;
+            background-color:white;
+            border:1px solid black;
+        }
+        button:visited{
+            background-color:orange;
+        }
+        button:hover{
+            background-color:red;
+        }
+        button:active{
+            background-color:yellow;
+        }
+        .lab{
+            font-size:15px;
+            background-color:white;
+            color:black;
+            margin:2px 0 2px 1px;
+            padding:20px 0;
+            border:1px solid black;
+            display:block;
+        }
+        .lab:visited{
+            background-color: rgba(255, 0, 0, 0.69);
+        }
+        .lab:hover{
+            background-color: #73ee6d;
+            color:white;
+        }
+        .lab:active{
+            background-color: rgba(255, 0, 0, 0.74);
+            color:white;
+        }
+        .home_label{
+            border:1px solid black;
+            background-color: #ffb655;
+        }
+        .add_mem .warning{
+            visibility: hidden;
+            border:1px solid black;
+            width: 120px;
+            background-color: red;
+            color: #fff;
+            text-align: center;
+            padding: 2px 0;
+
+            position: absolute;
+            z-index: 3;
+        }
+        #header{
+            margin:0 auto;
+            width:980px;
+            height:80px;
+            line-height:80px;
+            font-size:40px;
+            background-color: #ffffff;
+        }
+        #box{
+            width: 980px;
+            height:642px;
+            margin: 0 auto;
+        }
+        #div_memlist{
+            width:170px;
+            height:642px;
+            border-width: 1px;
+            border-top-style:solid;
+            border-right-style:none;
+            border-bottom-style:solid;
+            border-left-style:solid;
+            background-color: #ffffff;
+            position: relative;
+            float:left;
+        }
+        #list{
+            margin:2px auto;
+            padding:20px;
+            border:2px solid ;
+            background-color: antiquewhite;
+            font-size:30px;
+        }
+        .tab-content{
+            z-index: 2;
+            display: none;
+            overflow:auto;
+            font-size: 17px;
+            line-height: 25px;
+            width:810px;
+            height:642px;
+            border-width:1px;
+            border-top-style:solid;
+            border-right-style:solid;
+            border-bottom-style:solid;
+            border-left-style:none;
+            background-color: #73ee6d;
+            position: absolute;
+            top:0;
+            left:170px;
+        }
+        [id^="tab"]:checked + label {
+            border-color:black;
+            border-top-style:solid;
+            border-right-style:none;
+            border-bottom-style:solid;
+            border-left-style:solid;
+            border-width:2px;
+            background: #73ee6d;
+        }
+        [id^="tab"]:checked ~.tab-content/*[id^="tab-content"]*/ {
+            display: block;
+        }
+        #tab-content1{
+            /*display: flex;
+            align-items: center;
+            justify-content:center;*/
+            font-size:25px;
+        }
+        #welcome{
+            font-size:50px;
+        }
+        form input{
+            display:inline-block;
+            border:1px;
+            width:200px;
+            height:30px;
+        }
+        #footer{
+            border:1px dotted black;
+            margin:0 auto;
+            width:980px;
+            height:80px;
+            background-color: #edebec;
+            clear:both;
+        }
+    </style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="jquery-3.1.1.js"></script>
+	<script>
+        $(document).ready(function(){
+            var i=9;
+            $("#button").on("click", function () {
+                var n=$("#mem_name").val();
+                var c=$("#gcontent").val();
+                c=c.replace('\n','<br />');
+                n=$.trim(n);
+                c=$.trim(c);
+                if(n==""||n==null){$(".add_mem .warning").css("visibility","visible");return false;}
+                if(c==""||c==null){$(".add_mem .warning").css("visibility","visible");return false;}
+                else
+                {
+                    $(".add_mem .warning").css("visibility","hidden");
+                    i++;
+                    var t1 = $("<li id='li"+i+"'>" +
+                        "<input type='radio' name='listtabs' id='tab"+i+"'/>" +
+                        "<label for='tab"+i+"' class='lab'>" +
+                        n +
+                        "</label>" +
+                        "<div id='tab-content"+i+"' class='tab-content'>" +
+                        "<button id="+i+">"+"Delete"+"</button>"+
+                        "<br/>" +
+                        "<h1>" +
+                        n +
+                        "</h1>" +
+                        "<br/>" +
+                        "<section>" +
+                        "<article>" +
+                        "<pre>"+
+                        c +
+                        "</pre>"+
+                        "</article>" +
+                        "</section>" +
+                        "</div>" +
+                        "</li>");
+                    $("#mem_list").append(t1);
+                    if($("#mem_list").height()>549)
+                    {
+                        $("#div_memlist").height($("#div_memlist").height() + 62);
+                        $(".tab-content").height($(".tab-content").height() + 62);
+                    }
+                }
+            });
+            $(document).on("click","button",function(){
+                var num= $(this).attr("id");
+                $("#li"+num+"").remove();
+                $("#tab1").attr("checked",true);
+                $("#tab-content1").css("display","block");
+                if($(".tab-content").height()>644)
+                {
+                    $("#div_memlist").height($("#div_memlist").height() - 62);
+                    $(".tab-content").height($(".tab-content").height() - 62);
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<header id="header">
+    Idea Card
+</header>
+<div id="box">
+    <div id="div_memlist">
+        <div id="list">My List</div>
+        <ul id="mem_list">
+            <li>
+                <input type="radio" name="listtabs" id="tab1" checked="checked"/>
+                <label for="tab1" class="lab">Home</label>
+                <div id="tab-content1" class="tab-content">
+ 
+                    <form>
+                        <fieldset>
+                            <legend>Add One</legend>
+                            <P><label for="mem_name" class="home_label">Title:</label></P>
+                            <p><input type="text" id="mem_name" maxlength="20"></p>
+
+                            <P><label for="gcontent" class="home_label">Content:</label></P>
+                            <P>
+                                <textarea id="gcontent"  rows="30" cols="100"></textarea>
+                            </P>
+                            <div class="add_mem">
+                                <input type="button" id="button" value="Add">
+                                <span class="warning">No Data</span>
+                            </div>
+
+                        </fieldset>
+                    </form>
+
+                </div>
+            </li>
+            <li id="li2">
+                <input type="radio" name="listtabs" id="tab2"/>
+                <label for="tab2" class="lab">Coding</label>
+                <div id="tab-content2" class="tab-content">
+			
+                  <button id="2">Delete</button> 
+					
+                    <br/>
+                    <h1>Coding</h1>
+                    <br/>
+                    <section>
+                        <article>
+                            <br/>
+								<p>Idea 1:xxx</p>
+                            <p>Idea 2:***</p>
+                        </article>
+                    </section>
+                
+				</div>
+            </li>
+            <li id="li3">
+                <input type="radio" name="listtabs" id="tab3"/>
+                <label for="tab3" class="lab">Game</label>
+                <div id="tab-content3" class="tab-content">
+                    <button id="3">Delete</button>
+                    <br/>
+                    <h1>My Game List</h1>
+                    <br/>
+                    <section>
+                        <article>
+                            <p>1:StarCraft</p>
+                            <p>2:Warcraft </p>
+                            <p>3:MineCraft</p>
+                        </article>
+                    </section>
+                </div>
+            </li>
+            <li id="li4">
+                <input type="radio" name="listtabs" id="tab4"/>
+                <label for="tab4" class="lab">Movie</label>
+                <div id="tab-content4" class="tab-content">
+                    <button id="4">Delete</button>
+                    <br/>
+                    <h1>Movie List</h1>
+                    <br/>
+                    <section>
+                        <article>
+                            <p>1:Inception               </p>
+                            <p>2:Interstellar          </p>
+                            <p>3:cube                </p>
+                            <p>4:Triangle             </p>
+                        </article>
+                    </section>
+                </div>
+            </li>
+            <li id="li5">
+                <input type="radio" name="listtabs" id="tab5"/>
+                <label for="tab5" class="lab">Music</label>
+                <div id="tab-content5" class="tab-content">
+                    <button id="5">Delete</button>
+                    <br/>
+                    <h1>Music List</h1>
+                    <br/>
+                    <section>
+                        <article>
+                            <p>1:xxxx.wav</p>
+                            <p>2:*****.wav                            </p>
+                            <p>3:$$$$.wav                            </p>
+                        </article>
+                    </section>
+                </div>
+            </li>
+            <li id="li6">
+                <input type="radio" name="listtabs" id="tab6"/>
+                <label for="tab6" class="lab">Book</label>
+                <div id="tab-content6" class="tab-content">
+                    <button id="6">Delete</button>
+                    <br/>
+                    <h1>Book List</h1>
+                    <br/>
+                    <section>
+                        <article>
+                            <p>1:Three body problem</p>
+                            <p>2:The c programming language                           </p>
+                            <p>3:How to create an operating system                            </p>
+                        </article>
+                    </section>
+                </div>
+            </li>
+            <li id="li7">
+                <input type="radio" name="listtabs" id="tab7"/>
+                <label for="tab7" class="lab">Mark</label>
+                <div id="tab-content7" class="tab-content">
+                    <button id="7">Delete</button>
+                    <br/>
+                    <h1>Mark</h1>
+                    <br/>
+                    <section>
+                        <article>
+                        
+                            <p>1:www.xxxxx.com                            </p>
+                            <p>2:wwfwef                            </p>
+                            <p>3:xxmmv                            </p>
+                        </article>
+                    </section>
+                </div>
+            </li>
+            <li id="li8">
+                <input type="radio" name="listtabs" id="tab8"/>
+                <label for="tab8" class="lab">Notepad</label>
+                <div id="tab-content8" class="tab-content">
+                    <button id="8">Delete</button>
+                    <br/>
+                    <h1>Notepad</h1>
+                    <br/>
+                    <section>
+                        <article>
+                            <p>1:HomeWork                            </p>
+                            <p>2:shopping                            </p>
+                        </article>
+                    </section>
+                </div>
+            </li>
+            <li id="li9">
+                <input type="radio" name="listtabs" id="tab9"/>
+                <label for="tab9" class="lab">Diary</label>
+                <div id="tab-content9" class="tab-content">
+                    <button id="9">Delete</button>
+                    <br/>
+                    <h1>Diary</h1>
+                    <br/>
+                    <section>
+                        <article>
+
+                            <p>2017/7/7</p>
+                            <p>I'm very happy                            </p>
+                        </article>
+                    </section>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+<footer id="footer">
+    Wang YiSen
+    <div id="time">
+        <script>
+            document.getElementById('time').innerHTML=new Date().toLocaleString();
+            setInterval("document.getElementById('time').innerHTML=new Date().toLocaleString();",1000);
+        </script>
+    </div>
+</footer>
+</body>
+</html>
+
+

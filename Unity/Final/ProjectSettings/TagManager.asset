@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - node
+  - boom
+  - delnode
+  - boost
+  - step
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - PanelText
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Back
+    uniqueID: 2867504399
+    locked: 0
+  - name: SubBack
+    uniqueID: 683937391
+    locked: 0
+  - name: Button
+    uniqueID: 181734037
+    locked: 0
+  - name: Text
+    uniqueID: 998177733
+    locked: 0
+  - name: Panel
+    uniqueID: 1023030765
+    locked: 0
+  - name: PanelBack
+    uniqueID: 3313848933
+    locked: 0
+  - name: PanelSubBack
+    uniqueID: 290756439
+    locked: 0
+  - name: PanelButton
+    uniqueID: 2354129
+    locked: 0
+  - name: PaenlText
+    uniqueID: 2465527897
+    locked: 0

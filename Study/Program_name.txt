@@ -1,0 +1,36 @@
+var: only lower case and '_'			joqwxyz(r) ABDEFGHIJKLMNOPQRUVWXYZ
+/*0*/
+namespace	n_
+
+/*1*/
+static var	t_	(static class member:tm_)
+global var	g_
+const		k_
+
+/*2*/
+class member	m_	
+protect member	_m_
+point		p_	(function point:fp_)
+reference	r_      (or non)
+
+/*3*/
+bool		b_
+char 		c_
+short  		h_
+int 		i_
+unsigned	u_
+long 		l_	(longlong:ll_)
+float 		f_
+double 		d_
+[]		a_
+string		s_
+enum		e_
+virtual  	v_
+
+not var:have capital and no '_'
+struct		T/S		TMySchool/SMySchool
+class		none/C		MySchool/CMySchool	(studen,enemy,player:non pre, is a class var)			
+function	get/set/do/f	getValue(fErase)(doErase)
+static function			tgetValue
+virtual function		vgetValue
+#define				MAXSIZE

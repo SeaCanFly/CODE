@@ -1,0 +1,7 @@
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Release\) contains files shared from another project (IOCP_SERVER.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  main.cpp
+  Generating code
+  All 171 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  IOCP_SERVER.vcxproj -> D:\Code\Visual Studio 2015\IOCP_SERVER_ACCEPTEX\Release\IOCP_SERVER_ACCEPTEX.exe
+  IOCP_SERVER.vcxproj -> D:\Code\Visual Studio 2015\IOCP_SERVER_ACCEPTEX\Release\IOCP_SERVER_ACCEPTEX.pdb (Full PDB)

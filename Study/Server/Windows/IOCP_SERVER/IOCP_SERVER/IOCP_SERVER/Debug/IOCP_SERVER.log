@@ -1,0 +1,7 @@
+﻿  main.cpp
+d:\code\visual studio 2015\iocp_server\iocp_server\fun_header.h(145): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'HANDLE'
+d:\code\visual studio 2015\iocp_server\iocp_server\fun_header.h(242): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(1769): note: see declaration of 'sprintf'
+d:\code\visual studio 2015\iocp_server\iocp_server\fun_header.h(248): warning C4715: 'toParser': not all control paths return a value
+  IOCP_SERVER.vcxproj -> D:\Code\Visual Studio 2015\IOCP_SERVER\Debug\IOCP_SERVER.exe
+  IOCP_SERVER.vcxproj -> D:\Code\Visual Studio 2015\IOCP_SERVER\Debug\IOCP_SERVER.pdb (Full PDB)

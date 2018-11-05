@@ -1,5 +1,6 @@
 #pragma once
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <SDKDDKVer.h>
 #include <stdio.h>
 #include <tchar.h>
@@ -68,7 +69,7 @@ bool initIOCPServer(int i_server_port)
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 		return false;
 	completion_port = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-	printf("Completion Port:%d\n", (int)completion_port);
+	printf("Completion Port:%p\n", completion_port);
 
 	if (completion_port == 0)
 	{
@@ -102,7 +103,7 @@ bool startIOThread()
 	for (int i = 0; i < thread_count; ++i)
 	{
 		unsigned long dwThreadId;
-		HANDLE threadHandle = (HANDLE)_beginthreadex(NULL, 0, workerThread, (LPVOID)i, 0, (unsigned int*)&dwThreadId);
+		HANDLE threadHandle = (HANDLE)_beginthreadex(NULL, 0, workerThread, (LPVOID)&i, 0, (unsigned int*)&dwThreadId);
 		if (threadHandle == INVALID_HANDLE_VALUE)
 		{
 			printf("Create Thread Fail!\n");
@@ -142,13 +143,13 @@ bool accept()
 }
 unsigned int __stdcall workerThread(LPVOID lpParam)
 {
-	printf("thread [Completion Port:%d] started\n",completion_port);
+	printf("thread [Completion Port:%p] started\n",completion_port);
 	while (true)
 	{
 		unsigned long dwTransferred;
 		OverlappedSock* OvSock = nullptr;
 		Client* Client = nullptr;
-		int ret = GetQueuedCompletionStatus(completion_port, &dwTransferred, (unsigned long*)&Client,(LPOVERLAPPED*)&OvSock, -1);
+		int ret = GetQueuedCompletionStatus(completion_port, &dwTransferred, (PULONG_PTR)&Client,(LPOVERLAPPED*)&OvSock, -1);
 		if (ret == 0 && GetLastError() == WAIT_TIMEOUT)
 		{
 			printf("Thread Time Out\n");
@@ -244,7 +245,7 @@ bool toParser(Client* client, OverlappedSock* ovsock, unsigned long dwTransferre
 		memcpy(ovsock->buffer, str,strlen(str));
 	}
 
-	
+	return true;
 }
 bool receiveCompletion(Client* client, OverlappedSock* ovsock, unsigned long dwTransferred)
 {

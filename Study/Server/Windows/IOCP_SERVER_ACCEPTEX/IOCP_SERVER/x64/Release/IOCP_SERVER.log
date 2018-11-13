@@ -1,8 +1,6 @@
 ﻿  main.cpp
   Generating code
-  0 of 171 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+  All 177 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
-  IOCP_SERVER.vcxproj -> D:\Code\Visual Studio 2015\IOCP_SERVER_ACCEPTEX\x64\Release\IOCP_SERVER_ACCEPTEX.exe
-  IOCP_SERVER.vcxproj -> D:\Code\Visual Studio 2015\IOCP_SERVER_ACCEPTEX\x64\Release\IOCP_SERVER_ACCEPTEX.pdb (Full PDB)
+  IOCP_SERVER.vcxproj -> D:\homework_TEST\WANGYISEN\IOCP_SERVER\x64\Release\IOCP_SERVER_ACCEPTEX.exe
+  IOCP_SERVER.vcxproj -> D:\homework_TEST\WANGYISEN\IOCP_SERVER\x64\Release\IOCP_SERVER_ACCEPTEX.pdb (Full PDB)

@@ -9,17 +9,20 @@
 #include <WinSock2.h>
 #include <map>
 #include <mswsock.h>
+#include <time.h>
 #pragma comment(lib,"ws2_32")
 LPFN_ACCEPTEX lpfnAcceptEx = 0;					
 LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExSockaddrs;
 #define BUFSIZE sizeof(Pack)
 #define DATASIZE 4096
 #define PRE_WSA_SOCKET_COUNT 2000
+time_t now;
 int thread_count = 0;
 HANDLE completion_port = 0;
 SOCKET listen_socket = 0;
 CRITICAL_SECTION cs;
 bool iocp_running = 0;
+int thread_exit_count[64] = { 0 };
 enum IOType
 {
 	ACCEPT,
@@ -36,7 +39,7 @@ struct CompletionKey
 {
 	SOCKET client_socket;
 	SOCKADDR_IN client_addr;
-	char   ip[30];		
+	char   ip[30] = { 0 };
 	bool is_connected = 0;
 };
 struct ClientManager
@@ -50,7 +53,7 @@ struct OverlappedSock
 	SOCKET			client_socket;
 	IOType			io_type;
 	WSABUF			wsa_buffer;
-	char			buffer[BUFSIZE];
+	char			buffer[BUFSIZE] = { 0 };
 };
 bool processIO(OverlappedSock* i_os, CompletionKey* i_ck, unsigned long dwTransferred);
 void disconnect(CompletionKey* i_client);
@@ -63,6 +66,13 @@ CompletionKey* createClient(OverlappedSock* i_os,CompletionKey* i_ck);
 bool sendCompletion(CompletionKey* client, OverlappedSock* ovsock, unsigned long dwTransferred);
 bool receiveCompletion(CompletionKey* client, OverlappedSock* ovsock, unsigned long dwTransferred);
 unsigned int __stdcall workerThread(LPVOID lpParam);
+unsigned int __stdcall cmd(LPVOID lpParam);
+bool createWsaSocket(SOCKET i_listen_socket);
+bool initIOCPServer(int i_server_port);
+bool acceptex();
+bool createThreads();
+bool toParser(CompletionKey* client, OverlappedSock* ovsock, unsigned long dwTransferred);
+void closeIOCPServer();
 bool createWsaSocket(SOCKET i_listen_socket)
 {	
 	DWORD dwBytes;
@@ -156,13 +166,32 @@ bool acceptex()
 	}
 	return true;
 }
-bool startIOThread()
+unsigned int __stdcall cmd(LPVOID ipParam)
+{
+	while (iocp_running)
+	{
+		char cmd[512] = { 0 };
+		scanf("%s", &cmd);
+		if (strcmp(cmd, "quit") == 0)
+		{
+			CloseHandle(completion_port);
+			break;
+		}
+		else if (strcmp(cmd, "count") == 0)
+		{
+			printf("[connected client count:]%d\n", client_manager.client_count);
+			continue;
+		}
+	}
+	return true;
+}
+bool createThreads()
 {
 	printf("Start to create work thread..\n");
 	for (int i = 0; i < thread_count; ++i)
 	{
 		unsigned long dwThreadId;
-		HANDLE threadHandle = (HANDLE)_beginthreadex(NULL, 0, workerThread, (LPVOID)&i, 0, (unsigned int*)&dwThreadId);
+		HANDLE threadHandle = (HANDLE)_beginthreadex(NULL, 0, workerThread, (LPVOID)&thread_exit_count[i], 0, (unsigned int*)&dwThreadId);
 		if (threadHandle == INVALID_HANDLE_VALUE)
 		{
 			printf("Create Thread Fail!\n");
@@ -171,11 +200,15 @@ bool startIOThread()
 		printf("Thread No.%d Created\n", i);
 		CloseHandle(threadHandle);
 	}	
+	unsigned long dwThreadId;
+	HANDLE threadHandle = (HANDLE)_beginthreadex(NULL, 0, cmd, 0, 0, (unsigned int*)&dwThreadId);
+	CloseHandle(threadHandle);
 	return true;
 }
 unsigned int __stdcall workerThread(LPVOID lpParam)
 {
-		printf("thread [Completion Port:%p] started\n",completion_port);
+		int* i = (int*)lpParam;
+		printf("thread %d[Completion Port:%p] started\n",GetCurrentThreadId(),completion_port);
 		while (iocp_running)
 		{
 			unsigned long dwTransferred=-1;
@@ -196,9 +229,10 @@ unsigned int __stdcall workerThread(LPVOID lpParam)
 					disconnect(ck);				
 					deleteClient(ck);
 				}
-				else
+				else if(ERROR_INVALID_HANDLE==dwIOError)
 				{
-					iocp_running = false;
+					//iocp_running = false;
+					*i = 1;
 					break;
 				}
 			}
@@ -227,6 +261,7 @@ unsigned int __stdcall workerThread(LPVOID lpParam)
 			}
 		
 		}
+	printf("work thread %d exit\n",GetCurrentThreadId());
 	return 0;
 }
 bool processIO(OverlappedSock* i_os, CompletionKey* i_ck,unsigned long dwTransferred)
@@ -267,8 +302,9 @@ bool toParser(CompletionKey* client, OverlappedSock* ovsock, unsigned long dwTra
 	{
 		memset(ovsock->buffer, 0, DATASIZE);
 		memcpy(ovsock->buffer, "q", 1);
+		return true;
 	}
-	if (*temp == 't')
+	else if (*temp == 't')
 	{
 		temp++;
 		char* str = temp;
@@ -276,7 +312,8 @@ bool toParser(CompletionKey* client, OverlappedSock* ovsock, unsigned long dwTra
 		{
 			printf("%c",*temp++);
 		}	
-		memcpy(ovsock->buffer, str,temp-str);
+		memcpy(ovsock->buffer, str,temp-str+1);
+		return true;
 	}
 	else if (*temp == 'u')
 	{
@@ -424,6 +461,11 @@ CompletionKey* createClient(OverlappedSock* i_os,CompletionKey* i_ck)
 		printf(client_ck->ip );
 		CreateIoCompletionPort( (HANDLE)client_ck->client_socket, completion_port, (ULONG_PTR)client_ck, 0 );
 	client_manager.client_map.insert(std::pair<SOCKET, CompletionKey*>(i_ck->client_socket,client_ck));
+	char on[256] = { 0 };
+	time(&now);
+	ctime_s(on, sizeof(on), &now);
+	printf(",online:%s", on);
+	send(client_ck, on, sizeof(on));
 	printf("create Client\n");
 	increaseClientCount();
 	recv(client_ck);
@@ -470,7 +512,7 @@ void disconnect(CompletionKey* i_client)
 void closeIOCPServer()
 {
 	closesocket(listen_socket);
-	CloseHandle(completion_port);
+	//CloseHandle(completion_port);
 	DeleteCriticalSection(&cs);
 	WSACleanup();
 	printf("IOCP Server closed\n");
